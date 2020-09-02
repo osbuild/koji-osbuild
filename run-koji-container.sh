@@ -2,6 +2,7 @@
 set -eu
 
 SHARE_DIR=/tmp/osbuild-composer-koji-test
+DATA_DIR=/var/tmp/osbuild-koji-data
 
 koji_stop () {
   echo "Shutting down containers, please wait..."
@@ -78,8 +79,12 @@ koji_start() {
   kdc_exec kadmin.local -r LOCAL ktadd -k /share/client.keytab osbuild-krb@LOCAL
   kdc_exec chmod 644 /share/client.keytab
 
+  # koji data
+  mkdir -p ${DATA_DIR}/koji/{packages,repos,work,scratch,repos-dist}
+
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.koji --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
+    -v "${DATA_DIR}:/mnt:z" \
     -p 80:80 \
     -p 443:443 \
     -e POSTGRES_USER=koji \
