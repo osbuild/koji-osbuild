@@ -4,6 +4,8 @@ set -eu
 SHARE_DIR=/tmp/osbuild-composer-koji-test
 DATA_DIR=/var/tmp/osbuild-koji-data
 
+KOJI_HUB_IMAGE=quay.io/osbuild/koji:v1
+
 koji_stop () {
   echo "Shutting down containers, please wait..."
 
@@ -91,7 +93,7 @@ koji_start() {
     -e POSTGRES_PASSWORD=kojipass \
     -e POSTGRES_DB=koji \
     -e POSTGRES_HOST=org.osbuild.koji.postgres \
-    quay.io/osbuild/koji:v1
+    ${KOJI_HUB_IMAGE}
 
   # TODO: we need to wait for the database to be initialized here. A better method should be used.
   sleep 2
