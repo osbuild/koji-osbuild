@@ -59,12 +59,14 @@ koji_start() {
   ${CONTAINER_RUNTIME} network create org.osbuild.koji
 
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.postgres --network org.osbuild.koji \
+    --hostname org.osbuild.koji.koji \
     -e POSTGRES_USER=koji \
     -e POSTGRES_PASSWORD=kojipass \
     -e POSTGRES_DB=koji \
     docker.io/library/postgres:12-alpine
 
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.kdc \
+    --hostname org.osbuild.koji.kdc \
     --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
     -p 88:88/udp \
