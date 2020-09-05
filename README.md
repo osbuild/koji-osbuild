@@ -45,4 +45,8 @@ sudo podman exec -it org.osbuild.koji.kdc /bin/bash
 sudo podman exec -it org.osbuild.koji.kojid /bin/bash
 ```
 
-koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
+## Creating a compose
+The `compose.py` client can be used to create a compose via the koji plugins:
+```
+./compose.py --plain fedora 32 f32-candidate x86_64 --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os/'
+```
