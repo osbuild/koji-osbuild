@@ -4,7 +4,7 @@ set -eu
 SHARE_DIR=/tmp/osbuild-composer-koji-test
 DATA_DIR=/var/tmp/osbuild-koji-data
 
-KOJI_HUB_IMAGE=quay.io/osbuild/koji:v1
+KOJI_HUB_IMAGE=koji.hub
 
 koji_stop () {
   echo "Shutting down containers, please wait..."
