@@ -1,6 +1,17 @@
 #!/bin/bash
 set -eux
 
+# Set DB credentials
+sed -i  -e "s/.*DBHost =.*/DBHost = ${POSTGRES_HOST}/" \
+        -e "s/.*DBUser =.*/DBUser = ${POSTGRES_USER}/" \
+        -e "s/.*DBPass =.*/DBPass = ${POSTGRES_PASSWORD}/" \
+        -e "s/.*DBName =.*/DBName = ${POSTGRES_DB}/" \
+        -e "s|.*AuthPrincipal =.*|AuthPrincipal = host/kojihub@LOCAL|" \
+        -e "s|.*AuthKeytab =.*|AuthKeytab = /share/koji.keytab|" \
+        -e "s|.*KojiDebug =.*|KojiDebug = On|" \
+        -e "s|.*LogLevel =.*|LogLevel = DEBUG|" \
+        /etc/koji-hub/hub.conf
+
 sed -i -e "s|LogLevel warn|LogLevel debug|" /etc/httpd/conf/httpd.conf
 
 tee -a /etc/httpd/conf.d/kojihub.conf <<END
@@ -36,18 +47,11 @@ psql_cmd() {
 
 # initialize the database if it isn't initialized already
 if ! psql_cmd -c "select * from users" &>/dev/null; then
-    psql_cmd -f /usr/share/doc/koji/docs/schema.sql >/dev/null
-
-    psql_cmd -c "insert into users (name, password, status, usertype) values ('kojiadmin', 'kojipass', 0, 0)" >/dev/null
-    psql_cmd -c "insert into user_perms (user_id, perm_id, creator_id) values (1, 1, 1)" >/dev/null
-    psql_cmd -c "insert into users (name, password, status, usertype) values ('osbuild', 'osbuildpass', 0, 0)" >/dev/null
-
-    # create content generator osbuild, give osbuild users access to it
-    psql_cmd -c "insert into content_generator (name) values ('osbuild')" >/dev/null
-    psql_cmd -c "insert into cg_users (cg_id, user_id, creator_id, active) values (1, 2, 1, true)" >/dev/null
+  psql_cmd -f /usr/share/doc/koji/docs/schema.sql >/dev/null
 fi
 
-mkdir -p /mnt/koji/{packages,repos,work,scratch,repos-dist}
+# ensure /mnt/koji is owned by apache
+chown -R apache:apache /mnt/koji
 
 # run apache
 httpd -DFOREGROUND

@@ -1,4 +1,4 @@
-FROM quay.io/osbuild/koji:latest
+FROM quay.io/osbuild/koji:v1
 
 COPY container/hub/hub.conf /etc/koji-hub/hub.conf
 COPY plugins/hub/osbuild.py /usr/lib/koji-hub-plugins/
