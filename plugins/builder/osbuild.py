@@ -168,7 +168,7 @@ class OSBuildImage(BaseTaskHandler):
             raise koji.BuildError("Missing arches for tag '%{name}'")
         return set(koji.canonArch(a) for a in archstr.split())
 
-    def make_repo_for_target(self, target_info):
+    def make_repos_for_target(self, target_info):
         repo_info = self.getRepo(target_info['build_tag'])
         if not repo_info:
             return None
@@ -176,7 +176,12 @@ class OSBuildImage(BaseTaskHandler):
         path_info = koji.PathInfo(topdir=self.options.topurl)
         repourl = path_info.repo(repo_info['id'], target_info['build_tag_name'])
         self.logger.debug("repo url: %s", repourl)
-        return Repository(repourl + "/$arch")
+        return [Repository(repourl + "/$arch")]
+
+    def make_repos_for_user(self, repos):
+        urls = repos.split(',')
+        self.logger.debug("user repo override: %s", urls)
+        return [Repository(u.strip()) for u in urls]
 
     def handler(self, name, version, arches, target, opts):
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
@@ -199,13 +204,16 @@ class OSBuildImage(BaseTaskHandler):
             koji.BuildError("Unsupported architecture(s): " + str(diff))
 
         # Repositories
-        repo = self.make_repo_for_target(target_info)
+        repo_urls = opts.get("repo")
+        if repo_urls:
+            repos = self.make_repos_for_user(repo_urls)
+        else:
+            repos = self.make_repos_for_target(target_info)
 
         client = self.client
 
         distro = f"{name}-{version}"
         formats = ["qcow2"]
-        repos = [repo]
         images = []
         for fmt in formats:
             for arch in arches:
