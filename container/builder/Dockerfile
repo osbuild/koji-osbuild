@@ -7,6 +7,7 @@ RUN dnf -y upgrade \
             install \
 	koji-builder \
 	koji-utils \
+	createrepo_c \
 	postgresql \
 	python3-koji \
 	&& dnf clean all
