@@ -55,3 +55,13 @@ The `compose.py` client can be used to create a compose via the koji plugins:
 ```
 ./compose.py --plain fedora 32 f32-candidate x86_64 --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os/'
 ```
+
+## Development
+
+### Useful links
+
+- [koji source](https://pagure.io/koji/tree/master)
+- [koji plugin howto](https://docs.pagure.org/koji/writing_a_plugin/)
+- [koji server howto](https://docs.pagure.org/koji/server_howto/)
+- [koji server bootstrap](https://docs.pagure.org/koji/server_bootstrap/)
+- [osbs koji plugin](https://github.com/containerbuildsystem/koji-containerbuild/)
