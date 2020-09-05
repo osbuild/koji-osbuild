@@ -16,20 +16,14 @@ sed -i -e "s|LogLevel warn|LogLevel debug|" /etc/httpd/conf/httpd.conf
 
 tee -a /etc/httpd/conf.d/kojihub.conf <<END
 <Location /kojihub/ssllogin>
-         SSLVerifyClient require
-         SSLVerifyDepth  10
-         SSLOptions +StdEnvVars
+        AuthType GSSAPI
+        GssapiSSLonly Off
+        GssapiLocalName Off
+        AuthName "GSSAPI Single Sign On Login"
+        GssapiCredStore keytab:/share/koji.keytab
+        Require valid-user
 </Location>
 END
-
-sed -i  -e "s|^SSLCertificateFile.*|SSLCertificateFile /etc/pki/koji/certs/kojihub.crt|" \
-        -e "s|^SSLCertificateKeyFile.*|SSLCertificateKeyFile /etc/pki/koji/private/kojihub.key|" \
-        -e "s|^#SSLCertificateChainFile.*|SSLCertificateChainFile /etc/pki/koji/koji_ca_cert.crt|" \
-        -e "s|^#SSLCACertificateFile.*|SSLCACertificateFile /etc/pki/koji/koji_ca_cert.crt|" \
-	-e "s|^#SSLVerifyDepth.*|SSLVerifyDepth 1|" \
-        -e "s|LogLevel warn|LogLevel debug|" \
-        -e "s|^#ServerName.*|ServerName localhost|" \
-        /etc/httpd/conf.d/ssl.conf
 
 sed -i  -e "s|^#ServerName.*|ServerName localhost|" \
         /etc/httpd/conf/httpd.conf
