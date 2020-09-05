@@ -14,5 +14,6 @@ RUN dnf -y upgrade \
 COPY container/builder/kojid.conf /etc/kojid/kojid.conf
 COPY plugins/builder/osbuild.py /usr/lib/koji-builder-plugins/
 COPY container/builder/run-kojid.sh /app/run-kojid.sh
+COPY container/builder/osbuild.krb5.conf /etc/krb5.conf.d/
 
 ENTRYPOINT /app/run-kojid.sh
