@@ -160,22 +160,41 @@ class OSBuildImage(BaseTaskHandler):
         self.koji_url = "https://localhost/kojihub"
         self.client = Client(self.composer_url)
 
+    @staticmethod
+    def arches_for_config(buildconfig: Dict):
+        archstr = buildconfig["arches"]
+        if not archstr:
+            name = buildconfig["name"]
+            raise koji.BuildError("Missing arches for tag '%{name}'")
+        return set(koji.canonArch(a) for a in archstr.split())
+
     def handler(self, name, version, arches, target, opts):
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
 
         #self.logger.debug("Event id: %s", str(self.event_id))
 
-        #target_info = self.session.getBuildTarget(target, strict=True)
-        #build_tag = target_info['build_tag']
-        #repo_info = self.getRepo(build_tag)
-        #buildconfig = self.session.getBuildConfig(build_tag)
+        target_info = self.session.getBuildTarget(target, strict=True)
+        if not target_info:
+            koji.BuildError(f"Target '{target}' not found")
 
-        #if repo_info:
-        #    self.logger.debug("repo info: %s", str(repo_info))
+        build_tag = target_info['build_tag']
+        buildconfig = self.session.getBuildConfig(build_tag)
 
-        #if buildconfig:
-        #    self.logger.debug("build-config: %s", str(buildconfig))
+        # Architectures
+        tag_arches = self.arches_for_config(buildconfig)
+        arches = set(arches)
+        diff = tag_arches - arches
+        if diff:
+            koji.BuildError("Unsupported architecture(s): " + str(diff))
+
+        # Repositories
+#       repo_info = self.getRepo(build_tag)
+#       if repo_info:
+#           self.logger.debug("repo info: %s", str(repo_info))
+
+        if buildconfig:
+            self.logger.debug("build-config: %s", str(buildconfig))
 
         client = self.client
 
