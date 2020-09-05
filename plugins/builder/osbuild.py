@@ -211,3 +211,100 @@ class OSBuildImage(BaseTaskHandler):
         }
 
 
+# #####
+import argparse
+
+RESET = "\033[0m"
+GREEN = "\033[32m"
+BOLD = "\033[1m"
+RED = "\033[31m"
+
+
+def show_compose(cs):
+    print(f"status: {BOLD}{cs.status}{RESET}")
+    print("koji task: " + str(cs.koji_task_id))
+    print("images: ")
+    for image in cs.images:
+        print("  " + str(image))
+
+
+def compose_cmd(client: Client, args):
+    images = []
+    formats = args.format or ["qcow2"]
+    repos = [Repository(url) for url in args.repo]
+    for fmt in formats:
+        for arch in args.arch:
+            ireq = ImageRequest(arch, fmt, repos)
+            images.append(ireq)
+    cid = client.compose_create(args.distro, images, args.koji)
+
+    print(f"Compose: {cid}")
+    while True:
+        status = client.compose_status(cid)
+        print(f"status: {status.status: <10}\r", end="")
+        if status.is_finished:
+            break
+
+        time.sleep(2)
+    show_compose(status)
+
+
+def status_cmd(client: Client, args):
+    cs = client.compose_status(args.id)
+    show_compose(cs)
+
+
+def wait_cmd(client: Client, args):
+    cs = client.wait_for_compose(args.id)
+    show_compose(cs)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="osbuild composer koji API client")
+    parser.add_argument("--url", metavar="URL", type=str,
+                        default="http://localhost:8701/",
+                        help="The URL of the osbuild composer koji API endpoint")
+    parser.set_defaults(cmd=None)
+    sp = parser.add_subparsers(help='commands')
+
+    subpar = sp.add_parser("compose", help='create a new compose')
+    subpar.add_argument("distro", metavar="NAME", help='The distribution')
+    subpar.add_argument("repo", metavar="REPO", help='The repository to use',
+                         type=str, action="append", default=[])
+    subpar.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
+                         type=str, nargs="+")
+    subpar.add_argument("--koji", metavar="URL", help='The koji url',
+                        default="https://localhost/kojihub")
+    subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [qcow2]',
+                        action="append", type=str, default=[])
+    subpar.set_defaults(cmd='compose')
+
+    subpar = sp.add_parser("status", help='status of a compose')
+    subpar.add_argument("id", metavar="COMPOSE_ID", help='compose id')
+    subpar.set_defaults(cmd='status')
+
+    subpar = sp.add_parser("wait", help='wait for a compose')
+    subpar.add_argument("id", metavar="COMPOSE_ID", help='compose id')
+    subpar.set_defaults(cmd='wait')
+
+    args = parser.parse_args()
+
+    if not args.cmd:
+        print(f"{RED}Error{RESET}: Need command\n")
+        parser.print_help(sys.stderr)
+        return 1
+
+    client = Client(args.url)
+
+    if args.cmd == "compose":
+        return compose_cmd(client, args)
+    if args.cmd == "status":
+        return status_cmd(client, args)
+    if args.cmd == "wait":
+        return wait_cmd(client, args)
+    return 1
+
+
+
+if __name__ == "__main__":
+    sys.exit(main())
