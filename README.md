@@ -21,6 +21,11 @@ Run the koji builder:
 sudo ./run-builder.sh
 ```
 
+Create the tag infrastructure:
+```
+./make-tags.sh
+```
+
 ## Verify installation
 
 Try connecting to koji hub locally via the `koji` command line client:
