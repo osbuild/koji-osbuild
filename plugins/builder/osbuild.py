@@ -168,6 +168,16 @@ class OSBuildImage(BaseTaskHandler):
             raise koji.BuildError("Missing arches for tag '%{name}'")
         return set(koji.canonArch(a) for a in archstr.split())
 
+    def make_repo_for_target(self, target_info):
+        repo_info = self.getRepo(target_info['build_tag'])
+        if not repo_info:
+            return None
+        self.logger.debug("repo info: %s", str(repo_info))
+        path_info = koji.PathInfo(topdir=self.options.topurl)
+        repourl = path_info.repo(repo_info['id'], target_info['build_tag_name'])
+        self.logger.debug("repo url: %s", repourl)
+        return Repository(repourl + "/$arch")
+
     def handler(self, name, version, arches, target, opts):
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
@@ -189,20 +199,14 @@ class OSBuildImage(BaseTaskHandler):
             koji.BuildError("Unsupported architecture(s): " + str(diff))
 
         # Repositories
-#       repo_info = self.getRepo(build_tag)
-#       if repo_info:
-#           self.logger.debug("repo info: %s", str(repo_info))
-
-        if buildconfig:
-            self.logger.debug("build-config: %s", str(buildconfig))
+        repo = self.make_repo_for_target(target_info)
 
         client = self.client
 
         distro = f"{name}-{version}"
-        images = []
         formats = ["qcow2"]
-        repo_url = "http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os/"
-        repos = [Repository(repo_url)]
+        repos = [repo]
+        images = []
         for fmt in formats:
             for arch in arches:
                 ireq = ImageRequest(arch, fmt, repos)
