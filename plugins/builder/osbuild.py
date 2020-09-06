@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import configparser
 import enum
 import json
 import sys
@@ -156,8 +157,19 @@ class OSBuildImage(BaseTaskHandler):
     def __init__(self, task_id, method, params, session, options):
         super().__init__(task_id, method, params, session, options)
 
-        self.composer_url = "http://composer:8701/"
-        self.koji_url = "https://localhost/kojihub"
+        cfg = configparser.ConfigParser()
+        cfg.read_dict({
+            "composer": {"url": "http://localhost:8701/"},
+            "koji": {"url": "https://localhost/kojihub"}
+        })
+
+        cfg.read([
+            "/usr/share/osbuild-composer/koji.conf",
+            "/etc/osbuild-composer/koji.conf"
+        ])
+
+        self.composer_url = cfg["composer"]["url"]
+        self.koji_url = cfg["koji"]["url"]
         self.client = Client(self.composer_url)
 
     @staticmethod
