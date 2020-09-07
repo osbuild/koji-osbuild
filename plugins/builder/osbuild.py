@@ -135,18 +135,24 @@ class Client:
     def __init__(self, url):
         self.url = url
 
-    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], koji: str):
+    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojiurl: str):
         url = urllib.parse.urljoin(self.url, f"/compose")
         req = urllib.request.Request(url)
-        cro = ComposeRequest(nvr, distro, images, koji)
+        cro = ComposeRequest(nvr, distro, images, kojiurl)
         dat = json.dumps(cro.as_dict())
         raw = dat.encode('utf-8')
         req = urllib.request.Request(url, raw)
         req.add_header('Content-Type', 'application/json')
         req.add_header('Content-Length', len(raw))
 
-        with urllib.request.urlopen(req, raw) as res:
-            payload = res.read().decode('utf-8')
+        try:
+            with urllib.request.urlopen(req, raw) as res:
+                payload = res.read().decode('utf-8')
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8').strip()
+            msg = f"Failed to create the compose request: {body}"
+            raise koji.GenericError(msg) from None
+
         ps = json.loads(payload)
         compose_id, koji_build_id = ps["id"], ps["koji_build_id"]
         return compose_id, koji_build_id
