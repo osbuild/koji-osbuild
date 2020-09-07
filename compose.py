@@ -13,6 +13,7 @@ def main():
                         help="The URL koji hub API endpoint")
     parser.add_argument("--repo", metavar="REPO", help='The repository to use',
                         type=str, action="append", default=[])
+    parser.add_argument("--release", metavar="RELEASE", help='The distribution release')
     parser.add_argument("--user", metavar="USER", default="kojiadmin")
     parser.add_argument("--password", metavar="PASSWORD", default="kojipass")
     parser.add_argument("--principal", metavar="USER", default="osbuild-krb@LOCAL")
@@ -42,6 +43,9 @@ def main():
     opts = {
         "distro": args.distro,
     }
+
+    if args.release:
+        opts["release"] = args.release
 
     if args.repo:
         opts["repo"] = ",".join(args.repo)
