@@ -316,6 +316,7 @@ def compose_cmd(client: Client, args):
             break
 
         time.sleep(2)
+
     show_compose(status)
 
 
@@ -376,7 +377,6 @@ def main():
     if args.cmd == "wait":
         return wait_cmd(client, args)
     return 1
-
 
 
 if __name__ == "__main__":
