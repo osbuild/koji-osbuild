@@ -243,7 +243,11 @@ class OSBuildImage(BaseTaskHandler):
 
         client = self.client
 
+        # Version and names
         nvr = NVR(name, version, opts.get("release"))
+        if not nvr.release:
+            nvr.release = self.session.getNextRelease(nvr.as_dict())
+
         distro = opts.get("distro", f"{name}-{version}")
         formats = ["qcow2"]
         images = []
