@@ -183,8 +183,8 @@ class OSBuildImage(BaseTaskHandler):
         })
 
         cfg.read([
-            "/usr/share/osbuild-composer/koji.conf",
-            "/etc/osbuild-composer/koji.conf"
+            "/usr/share/koji-osbuild/builder.conf",
+            "/etc/koji-osbuild/builder.conf"
         ])
 
         self.composer_url = cfg["composer"]["url"]
