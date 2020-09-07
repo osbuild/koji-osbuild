@@ -57,7 +57,7 @@ def main():
     if opts:
         pprint(opts)
 
-    session.osbuildImageTest(name, version, arch, target, opts=opts)
+    session.osbuildImage(name, version, arch, target, opts=opts)
 
 
 if __name__ == "__main__":

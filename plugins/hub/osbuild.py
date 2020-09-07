@@ -9,7 +9,7 @@ import kojihub
 
 
 @koji.plugin.export
-def osbuildImageTest(name, version, arches, target, opts=None, priority=None):
+def osbuildImage(name, version, arches, target, opts=None, priority=None):
     """Create an image via osbuild"""
     context.session.assertPerm("image")
     args = [name, version, arches, target, opts]
