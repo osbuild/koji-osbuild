@@ -1,6 +1,6 @@
-%global         forgeurl https://github.com/gicmo/koji-osbuild-plugin
+%global         forgeurl https://github.com/gicmo/koji-osbuild
 
-Name:           koji-osbuild-plugin
+Name:           koji-osbuild
 Version:        1
 Release:        1%{?dist}
 Summary:        Koji integration for osbuild composer
