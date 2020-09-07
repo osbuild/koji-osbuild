@@ -24,6 +24,7 @@ def main():
                         default=False, action="store_true")
     parser.add_argument("name", metavar="NAME", help='The distribution name')
     parser.add_argument("version", metavar="VERSION", help='The distribution version')
+    parser.add_argument("distro", metavar="DISTRO", help='The distribution')
     parser.add_argument("target", metavar="TARGET", help='The build target')
     parser.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
                         type=str, nargs="+")
@@ -38,7 +39,10 @@ def main():
 
     name, version, arch, target = args.name, args.version, args.arch, args.target
 
-    opts = {}
+    opts = {
+        "distro": args.distro,
+    }
+
     if args.repo:
         opts["repo"] = ",".join(args.repo)
 
