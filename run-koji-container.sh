@@ -85,6 +85,11 @@ koji_start() {
   kdc_exec kadmin.local -r LOCAL add_principal -randkey HTTP/localhost@LOCAL
   kdc_exec kadmin.local -r LOCAL ktadd -k /share/koji.keytab HTTP/localhost@LOCAL
 
+  # for koji web
+  kdc_exec kadmin.local -r LOCAL add_principal -randkey HTTP/org.osbuild.koji.web@LOCAL
+  kdc_exec kadmin.local -r LOCAL ktadd -k /share/kojiweb.keytab HTTP/org.osbuild.koji.web@LOCAL
+  kdc_exec chmod 644 /share/kojiweb.keytab
+
   # compile/org.osbuild.koji.kojid@LOCAL for koji builder
   kdc_exec kadmin.local -r LOCAL add_principal -randkey compile/org.osbuild.koji.kojid@LOCAL
   kdc_exec kadmin.local -r LOCAL ktadd -k /share/kojid.keytab compile/org.osbuild.koji.kojid@LOCAL
