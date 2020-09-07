@@ -45,14 +45,33 @@ class ImageRequest:
         }
 
 
+class NVR:
+    def __init__(self, name: str, version: str, release: str):
+        self.name = name
+        self.version = version
+        self.release = release
+
+    def as_dict(self):
+        return {
+            "name": self.name,
+            "version": self.version,
+            "release": self.release
+        }
+
+    def __str__(self):
+        return f"nvr: {self.name}, {self.version}, {self.release}"
+
+
 class ComposeRequest:
-    def __init__(self, distro: str, images: ImageRequest, koji: str):
+    def __init__(self, nvr: NVR, distro: str, images: ImageRequest, koji: str):
+        self.nvr = nvr
         self.distribution = distro
         self.image_requests = images
         self.koji = koji
 
     def as_dict(self):
         return {
+            **self.nvr.as_dict(),
             "distribution": self.distribution,
             "koji": {
                 "server": str(self.koji)
@@ -116,10 +135,10 @@ class Client:
     def __init__(self, url):
         self.url = url
 
-    def compose_create(self, distro: str, images: List[ImageRequest], koji: str):
+    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], koji: str):
         url = urllib.parse.urljoin(self.url, f"/compose")
         req = urllib.request.Request(url)
-        cro = ComposeRequest(distro, images, koji)
+        cro = ComposeRequest(nvr, distro, images, koji)
         dat = json.dumps(cro.as_dict())
         raw = dat.encode('utf-8')
         req = urllib.request.Request(url, raw)
@@ -129,8 +148,8 @@ class Client:
         with urllib.request.urlopen(req, raw) as res:
             payload = res.read().decode('utf-8')
         ps = json.loads(payload)
-        compose_id = ps["id"]
-        return compose_id
+        compose_id, koji_build_id = ps["id"], ps["koji_build_id"]
+        return compose_id, koji_build_id
 
     def compose_status(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"/compose/{compose_id}")
@@ -224,7 +243,8 @@ class OSBuildImage(BaseTaskHandler):
 
         client = self.client
 
-        distro = f"{name}-{version}"
+        nvr = NVR(name, version, opts.get("release"))
+        distro = opts.get("distro", f"{name}-{version}")
         formats = ["qcow2"]
         images = []
         for fmt in formats:
@@ -232,11 +252,11 @@ class OSBuildImage(BaseTaskHandler):
                 ireq = ImageRequest(arch, fmt, repos)
                 images.append(ireq)
 
-        self.logger.debug("Creating compose: %s\n  koji: %s\n  images: %s",
-                          distro, self.koji_url,
+        self.logger.debug("Creating compose: %s (%s)\n  koji: %s\n  images: %s",
+                          nvr, distro, self.koji_url,
                           str([i.as_dict() for i in images]))
 
-        cid = client.compose_create(distro, images, self.koji_url)
+        cid, bid = client.compose_create(nvr, distro, images, self.koji_url)
         self.logger.info("Compose id: %s", cid)
 
         self.logger.debug("Waiting for comose to finish")
@@ -249,8 +269,9 @@ class OSBuildImage(BaseTaskHandler):
             }
 
         return {
-            'koji_builds': [],
-            'build': f'{cid}-1-1',
+            'koji_builds': [bid],
+            'composer_id': cid,
+            'build': bid,
         }
 
 
@@ -272,6 +293,7 @@ def show_compose(cs):
 
 
 def compose_cmd(client: Client, args):
+    nvr = NVR(args.name, args.version, args.release)
     images = []
     formats = args.format or ["qcow2"]
     repos = [Repository(url) for url in args.repo]
@@ -279,9 +301,10 @@ def compose_cmd(client: Client, args):
         for arch in args.arch:
             ireq = ImageRequest(arch, fmt, repos)
             images.append(ireq)
-    cid = client.compose_create(args.distro, images, args.koji)
 
-    print(f"Compose: {cid}")
+    cid, bid = client.compose_create(nvr, args.distro, images, args.koji)
+
+    print(f"Compose: {cid} [koji build id: {bid}]")
     while True:
         status = client.compose_status(cid)
         print(f"status: {status.status: <10}\r", end="")
@@ -311,15 +334,18 @@ def main():
     sp = parser.add_subparsers(help='commands')
 
     subpar = sp.add_parser("compose", help='create a new compose')
+    subpar.add_argument("name", metavar="NAME", help='The name')
+    subpar.add_argument("version", metavar="NAME", help='The version')
+    subpar.add_argument("release", metavar="RELEASE", help='The release')
     subpar.add_argument("distro", metavar="NAME", help='The distribution')
     subpar.add_argument("repo", metavar="REPO", help='The repository to use',
                          type=str, action="append", default=[])
     subpar.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
                          type=str, nargs="+")
-    subpar.add_argument("--koji", metavar="URL", help='The koji url',
-                        default="https://localhost/kojihub")
     subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [qcow2]',
                         action="append", type=str, default=[])
+    subpar.add_argument("--koji", metavar="URL", help='The koji url',
+                        default="https://localhost/kojihub")
     subpar.set_defaults(cmd='compose')
 
     subpar = sp.add_parser("status", help='status of a compose')
