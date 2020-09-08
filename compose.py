@@ -29,6 +29,9 @@ def main():
     parser.add_argument("target", metavar="TARGET", help='The build target')
     parser.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
                         type=str, nargs="+")
+    parser.add_argument("--image-type", metavar="TYPE",
+                        help='Request an image-type [default: qcow2]',
+                        type=str, action="append", default=[])
     args = parser.parse_args()
 
     opts = {"user": args.user, "password": args.password, "serverca": args.serverca}
@@ -39,10 +42,12 @@ def main():
         session.gssapi_login(principal=args.principal, keytab=args.keytab)
 
     name, version, arch, target = args.name, args.version, args.arch, args.target
+    distro, image_types = args.distro, args.image_type
 
-    opts = {
-        "distro": args.distro,
-    }
+    if not image_types:
+        image_types = ["qcow2"]
+
+    opts = {}
 
     if args.release:
         opts["release"] = args.release
@@ -52,12 +57,14 @@ def main():
 
     print("name:", name)
     print("version:", version)
+    print("distro:", distro)
     print("arches:", ", ".join(arch))
     print("target:", target)
+    print("image types ", str(image_types))
     if opts:
         pprint(opts)
 
-    session.osbuildImage(name, version, arch, target, opts=opts)
+    session.osbuildImage(name, version, distro, image_types, target, arch, opts=opts)
 
 
 if __name__ == "__main__":

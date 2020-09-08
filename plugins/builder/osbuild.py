@@ -220,7 +220,8 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("user repo override: %s", urls)
         return [Repository(u.strip()) for u in urls]
 
-    def handler(self, name, version, arches, target, opts):
+    def handler(self, name, version, distro, image_types, target, arches, opts):
+        """Main entry point for the task"""
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
 
@@ -254,19 +255,14 @@ class OSBuildImage(BaseTaskHandler):
         if not nvr.release:
             nvr.release = self.session.getNextRelease(nvr.as_dict())
 
-        distro = opts.get("distro", f"{name}-{version}")
-        formats = ["qcow2"]
-        images = []
-        for fmt in formats:
-            for arch in arches:
-                ireq = ImageRequest(arch, fmt, repos)
-                images.append(ireq)
-
+        # Arches and image types
+        ireqs = [ImageRequest(a, i, repos) for a in arches for i in image_types]
         self.logger.debug("Creating compose: %s (%s)\n  koji: %s\n  images: %s",
                           nvr, distro, self.koji_url,
-                          str([i.as_dict() for i in images]))
+                          str([i.as_dict() for i in ireqs]))
 
-        cid, bid = client.compose_create(nvr, distro, images, self.koji_url)
+        # Setup down, talk to composer to create the compose
+        cid, bid = client.compose_create(nvr, distro, ireqs, self.koji_url)
         self.logger.info("Compose id: %s", cid)
 
         self.logger.debug("Waiting for comose to finish")

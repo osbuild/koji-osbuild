@@ -9,10 +9,10 @@ import kojihub
 
 
 @koji.plugin.export
-def osbuildImage(name, version, arches, target, opts=None, priority=None):
+def osbuildImage(name, version, distro, image_types, target, arches, opts=None, priority=None):
     """Create an image via osbuild"""
     context.session.assertPerm("image")
-    args = [name, version, arches, target, opts]
+    args = [name, version, distro, image_types, target, arches, opts]
     task = {"channel": "image"}
 
     if priority and priority < 0 and not context.session.hasPerm('admin'):
