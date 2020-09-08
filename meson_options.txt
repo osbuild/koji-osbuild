@@ -1,0 +1,4 @@
+option('hub-plugins-path', type: 'string', value: '/usr/lib/koji-hub-plugins',
+       description: 'Path for koji hub plugins')
+option('builder-plugins-path', type: 'string', value: '/usr/lib/koji-builder-plugins',
+       description: 'Path for koji builder plugins')
