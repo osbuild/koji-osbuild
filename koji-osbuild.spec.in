@@ -35,6 +35,13 @@ Requires:       koji-builder
 %description    builder
 Koji builder plugin for osbuild composer integration.
 
+%package        cli
+Summary:        Koji client plugin for osbuild composer integration
+Requires:       %{name} = %{version}-%{release}
+Requires:       koji-builder
+
+%description    cli
+Koji client plugin for osbuild composer integration.
 
 %prep
 %forgesetup
@@ -51,6 +58,10 @@ install -d %{buildroot}/%{_prefix}/lib/koji-builder-plugins
 install -p -m 0755 plugins/builder/osbuild.py %{buildroot}/%{_prefix}/lib/koji-builder-plugins/
 %py_byte_compile %{__python3} %{buildroot}/%{_prefix}/lib/koji-builder-plugins/osbuild.py
 
+install -d %{buildroot}%{python3_sitelib}/koji_cli_plugins
+install -p -m 0644 plugins/cli/osbuild.py %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
+%py_byte_compile %{__python3} %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
+
 %files
 %license LICENSE
 %doc README.md
@@ -58,9 +69,11 @@ install -p -m 0755 plugins/builder/osbuild.py %{buildroot}/%{_prefix}/lib/koji-b
 %files hub
 %pycached %{_prefix}/lib/koji-hub-plugins/osbuild.py
 
-
 %files builder
 %pycached %{_prefix}/lib/koji-builder-plugins/osbuild.py
+
+%files cli
+%pycached %{python3_sitelib}/koji_cli_plugins/osbuild.py
 
 
 %changelog
