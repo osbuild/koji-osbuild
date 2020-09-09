@@ -67,13 +67,16 @@ install -p -m 0644 plugins/cli/osbuild.py %{buildroot}%{python3_sitelib}/koji_cl
 %doc README.md
 
 %files hub
-%pycached %{_prefix}/lib/koji-hub-plugins/osbuild.py
+%{_prefix}/lib/koji-hub-plugins/osbuild.py
+%{_prefix}/lib/koji-hub-plugins/__pycache__/osbuild.*
 
 %files builder
-%pycached %{_prefix}/lib/koji-builder-plugins/osbuild.py
+%{_prefix}/lib/koji-builder-plugins/osbuild.py
+%{_prefix}/lib/koji-builder-plugins/__pycache__/osbuild.*
 
 %files cli
-%pycached %{python3_sitelib}/koji_cli_plugins/osbuild.py
+%{python3_sitelib}/koji_cli_plugins/osbuild.py
+%{python3_sitelib}/koji_cli_plugins/__pycache__/osbuild.*
 
 
 %changelog
