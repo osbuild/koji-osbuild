@@ -19,10 +19,13 @@ else
   exit 2
 fi
 
+GATEWAY_IP=$(podman network inspect org.osbuild.koji --format '{{ (index (index (index .plugins 0).ipam.ranges 0) 0).gateway }}')
+echo "Gateway IP is $GATEWAY_IP"
+
 ${CONTAINER_RUNTIME} run --rm -i -t --name org.osbuild.koji.builder --network org.osbuild.koji \
   -v "${SHARE_DIR}:/share:z" \
   -v "${DATA_DIR}:/mnt:z" \
   -v "${PWD}/container/builder/osbuild-koji.conf:/etc/koji-osbuild/builder.conf:z" \
   --hostname org.osbuild.koji.kojid \
-  --add-host=composer:$(ip route show dev cni-podman0 | cut -d\  -f7) \
+  --add-host=composer:${GATEWAY_IP} \
   koji.builder
