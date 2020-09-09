@@ -10,9 +10,11 @@ def parse_args(argv):
 
     parser = kl.OptionParser(usage=kl.get_usage_str(usage))
 
-    parser.add_option("--repo", metavar="REPO", help='The repository to use',
-                      type=str, action="append", default=[])
-    parser.add_option("--release", metavar="RELEASE", help='The distribution release')
+    parser.add_option("--release", help=_("Forcibly set the release field"))
+    parser.add_option("--repo", action="append",
+                      help=_("Specify a repo that will override the repo used to install "
+                             "RPMs in the image. May be used multiple times. The "
+                             "build tag repo associated with the target is the default."))
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: qcow2]',
                       type=str, action="append", default=[])
