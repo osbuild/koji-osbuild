@@ -48,7 +48,7 @@ koji_start() {
   trap koji_clean_up_bad_start EXIT
 
   # create a share directory which is used to share files between the host and containers
-  mkdir "${SHARE_DIR}"
+  mkdir -p "${SHARE_DIR}"
 
   # generate self-signed certificates in the share directory
   openssl req -new -nodes -x509 -days 365 -keyout "${SHARE_DIR}/ca-key.pem" -out "${SHARE_DIR}/ca-crt.pem" -subj "/CN=osbuild.org"
