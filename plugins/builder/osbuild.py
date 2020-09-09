@@ -63,10 +63,15 @@ class NVR:
 
 
 class ComposeRequest:
-    def __init__(self, nvr: NVR, distro: str, images: ImageRequest, koji: str):
+    class Koji:
+        def __init__(self, server: str, task_id: int):
+            self.server = server
+            self.task_id = task_id
+
+    def __init__(self, nvr: NVR, distro: str, ireqs: List[ImageRequest], koji: Koji):
         self.nvr = nvr
         self.distribution = distro
-        self.image_requests = images
+        self.image_requests = ireqs
         self.koji = koji
 
     def as_dict(self):
@@ -74,7 +79,8 @@ class ComposeRequest:
             **self.nvr.as_dict(),
             "distribution": self.distribution,
             "koji": {
-                "server": str(self.koji)
+                "server": str(self.koji.server),
+                "task_id": self.koji.task_id
             },
             "image_requests": [
                 img.as_dict() for img in self.image_requests
@@ -135,10 +141,10 @@ class Client:
     def __init__(self, url):
         self.url = url
 
-    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojiurl: str):
+    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojidata: ComposeRequest.Koji):
         url = urllib.parse.urljoin(self.url, f"/compose")
         req = urllib.request.Request(url)
-        cro = ComposeRequest(nvr, distro, images, kojiurl)
+        cro = ComposeRequest(nvr, distro, images, kojidata)
         dat = json.dumps(cro.as_dict())
         raw = dat.encode('utf-8')
         req = urllib.request.Request(url, raw)
@@ -225,7 +231,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
 
-        #self.logger.debug("Event id: %s", str(self.event_id))
+        self.logger.debug("Task id: %s", str(self.id))
 
         target_info = self.session.getBuildTarget(target, strict=True)
         if not target_info:
@@ -262,7 +268,8 @@ class OSBuildImage(BaseTaskHandler):
                           str([i.as_dict() for i in ireqs]))
 
         # Setup down, talk to composer to create the compose
-        cid, bid = client.compose_create(nvr, distro, ireqs, self.koji_url)
+        kojidata = ComposeRequest.Koji(self.koji_url, self.id)
+        cid, bid = client.compose_create(nvr, distro, ireqs, kojidata)
         self.logger.info("Compose id: %s", cid)
 
         self.logger.debug("Waiting for comose to finish")
@@ -308,7 +315,8 @@ def compose_cmd(client: Client, args):
             ireq = ImageRequest(arch, fmt, repos)
             images.append(ireq)
 
-    cid, bid = client.compose_create(nvr, args.distro, images, args.koji)
+    kojidata = ComposeRequest.Koji(args.koji, 0)
+    cid, bid = client.compose_create(nvr, args.distro, images, kojidata)
 
     print(f"Compose: {cid} [koji build id: {bid}]")
     while True:
