@@ -38,7 +38,7 @@ Koji builder plugin for osbuild composer integration.
 %package        cli
 Summary:        Koji client plugin for osbuild composer integration
 Requires:       %{name} = %{version}-%{release}
-Requires:       koji-builder
+Requires:       koji
 
 %description    cli
 Koji client plugin for osbuild composer integration.
