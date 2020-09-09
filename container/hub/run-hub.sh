@@ -1,6 +1,13 @@
 #!/bin/bash
 set -eux
 
+if ls /share/rpms/*.rpm 1> /dev/null 2>&1; then
+  echo "Using RPMs"
+  rm /usr/lib/koji-hub-plugins/osbuild.py
+  rpm -i /share/rpms/koji-osbuild-?-0.*.rpm \
+         /share/rpms/koji-osbuild-hub-*.rpm
+fi
+
 # Set DB credentials
 sed -i  -e "s/.*DBHost =.*/DBHost = ${POSTGRES_HOST}/" \
         -e "s/.*DBUser =.*/DBUser = ${POSTGRES_USER}/" \
