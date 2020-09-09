@@ -1,4 +1,5 @@
 """osbild koji command line client integration"""
+import koji
 import koji_cli.lib as kl
 from koji.plugin import export_cli
 from koji_cli.lib import _
@@ -36,6 +37,19 @@ def parse_args(argv):
     return opts
 
 
+def check_target(session, name: str):
+    """Check the target with name exists and has a destination tag"""
+
+    target = session.getBuildTarget(name)
+    if not target:
+        raise koji.GenericError(_("Unknown build target: %s" % name))
+
+    tag = session.getTag(target['dest_tag'])
+    if not tag:
+        raise koji.GenericError(_("Unknown destination tag: %s" %
+                                  target['dest_tag_name']))
+
+
 @export_cli
 def handle_osbuild_image(options, session, argv):
     "[build] Build images via osbuild"
@@ -54,6 +68,9 @@ def handle_osbuild_image(options, session, argv):
 
     if args.repo:
         opts["repo"] = ",".join(args.repo)
+
+    # Do some early checks to be able to give quick feedback
+    check_target(session, target)
 
     if not options.quiet:
         print("name:", name)
