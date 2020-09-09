@@ -55,19 +55,21 @@ def handle_osbuild_image(options, session, argv):
     if args.repo:
         opts["repo"] = ",".join(args.repo)
 
-    print("name:", name)
-    print("version:", version)
-    print("distro:", distro)
-    print("arches:", ", ".join(arch))
-    print("target:", target)
-    print("image types ", str(image_types))
+    if not options.quiet:
+        print("name:", name)
+        print("version:", version)
+        print("distro:", distro)
+        print("arches:", ", ".join(arch))
+        print("target:", target)
+        print("image types ", str(image_types))
 
     kl.activate_session(session, options)
 
     task_id = session.osbuildImage(name, version, distro, image_types, target, arch, opts=opts)
 
-    print("Created task: %s" % task_id)
-    print("Task info: %s/taskinfo?taskID=%s" % (options.weburl, task_id))
+    if not options.quiet:
+        print("Created task: %s" % task_id)
+        print("Task info: %s/taskinfo?taskID=%s" % (options.weburl, task_id))
 
     if (args.wait is None and kl._running_in_bg()) or args.wait is False:
         # either running in the background or must not wait by user's
@@ -75,7 +77,7 @@ def handle_osbuild_image(options, session, argv):
         return
 
     session.logout()
-    res = kl.watch_tasks(session, [task_id], quiet=False)
+    res = kl.watch_tasks(session, [task_id], quiet=options.quiet)
 
     if res == 0:
         result = session.getTaskResult(task_id)
