@@ -73,6 +73,18 @@ rpmdirs_target = custom_target(
 
 rpmbuild = find_program('rpmbuild', required: false)
 
+srpm_target = custom_target(
+  'srpm',
+  command: [
+    rpmbuild, '-bs',
+    spec_file,
+    '--define', '_sourcedir ' + meson.build_root(),
+    '--define', '_topdir ' + rpmdirs_target.full_path()
+  ],
+  output: 'srpms',
+  depends: [archive]
+)
+
 rpm_target = custom_target(
   'rpm',
   command: [

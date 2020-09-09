@@ -1,0 +1,7 @@
+[osbuild-mock]
+name=osbuild mock osbuild/osbuild-composer/PR-952-98cb0e5 rhel82
+baseurl=http://osbuild-composer-repos.s3-website.us-east-2.amazonaws.com/osbuild/osbuild-composer/PR-952/98cb0e5/rhel82_x86_64
+enabled=1
+gpgcheck=0
+# Default dnf repo priority is 99. Lower number means higher priority.
+priority=5
