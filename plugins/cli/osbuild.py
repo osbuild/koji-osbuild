@@ -1,26 +1,33 @@
 """osbild koji command line client integration"""
-import argparse
 import koji_cli.lib as kl
 from koji.plugin import export_cli
 from koji_cli.lib import _
 
 
 def parse_args(argv):
-    parser = argparse.ArgumentParser(description="osbuild koji client")
-    parser.add_argument("--repo", metavar="REPO", help='The repository to use',
-                        type=str, action="append", default=[])
-    parser.add_argument("--release", metavar="RELEASE", help='The distribution release')
-    parser.add_argument("name", metavar="NAME", help='The distribution name')
-    parser.add_argument("version", metavar="VERSION", help='The distribution version')
-    parser.add_argument("distro", metavar="DISTRO", help='The distribution')
-    parser.add_argument("target", metavar="TARGET", help='The build target')
-    parser.add_argument("arch", metavar="ARCH", help='Request the architecture',
-                        type=str, nargs="+")
-    parser.add_argument("--image-type", metavar="TYPE",
-                        help='Request an image-type [default: qcow2]',
-                        type=str, action="append", default=[])
-    args = parser.parse_args(argv)
-    return args
+    usage = _("usage: %prog osbuild-image [options] <name> <version> "
+              "<distro> <target> <arch> [<arch> ...]")
+
+    parser = kl.OptionParser(usage=kl.get_usage_str(usage))
+
+    parser.add_option("--repo", metavar="REPO", help='The repository to use',
+                      type=str, action="append", default=[])
+    parser.add_option("--release", metavar="RELEASE", help='The distribution release')
+    parser.add_option("--image-type", metavar="TYPE",
+                      help='Request an image-type [default: qcow2]',
+                      type=str, action="append", default=[])
+
+    opts, args = parser.parse_args(argv)
+    if len(args) < 5:
+        parser.error(_("At least five arguments are required: a name, "
+                       "a version, a distribution, a build target, "
+                       "and 1 or more architectures."))
+
+    for i, arg in enumerate(("name", "version", "distro", "target")):
+        setattr(opts, arg, args[i])
+    setattr(opts, "arch", args[4:])
+
+    return opts
 
 
 @export_cli
