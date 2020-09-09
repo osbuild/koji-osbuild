@@ -6,6 +6,7 @@ RUN dnf -y upgrade \
             --setopt=install_weak_deps=False \
             install \
 	koji-web \
+	python3-jsonschema \
 	&& dnf clean all
 
 COPY container/hub/hub.conf /etc/koji-hub/hub.conf
