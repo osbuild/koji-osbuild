@@ -10,6 +10,8 @@ def parse_args(argv):
 
     parser = kl.OptionParser(usage=kl.get_usage_str(usage))
 
+    parser.add_option("--nowait", action="store_false", dest="wait",
+                      help=_("Don't wait on image creation"))
     parser.add_option("--release", help=_("Forcibly set the release field"))
     parser.add_option("--repo", action="append",
                       help=_("Specify a repo that will override the repo used to install "
@@ -18,6 +20,8 @@ def parse_args(argv):
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: qcow2]',
                       type=str, action="append", default=[])
+    parser.add_option("--wait", action="store_true",
+                      help=_("Wait on the image creation, even if running in the background"))
 
     opts, args = parser.parse_args(argv)
     if len(args) < 5:
@@ -65,6 +69,12 @@ def handle_osbuild_image(options, session, argv):
     print("Created task: %s" % task_id)
     print("Task info: %s/taskinfo?taskID=%s" % (options.weburl, task_id))
 
+    if (args.wait is None and kl._running_in_bg()) or args.wait is False:
+        # either running in the background or must not wait by user's
+        # request. All done.
+        return
+
+    session.logout()
     res = kl.watch_tasks(session, [task_id], quiet=False)
 
     if res == 0:
