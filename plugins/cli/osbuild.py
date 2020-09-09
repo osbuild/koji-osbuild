@@ -1,4 +1,7 @@
 """osbild koji command line client integration"""
+
+from pprint import pprint
+
 import koji
 import koji_cli.lib as kl
 from koji.plugin import export_cli
@@ -79,6 +82,7 @@ def handle_osbuild_image(options, session, argv):
         print("arches:", ", ".join(arch))
         print("target:", target)
         print("image types ", str(image_types))
+        pprint(opts)
 
     kl.activate_session(session, options)
 
