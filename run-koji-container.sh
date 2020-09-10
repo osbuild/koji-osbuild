@@ -114,8 +114,14 @@ koji_start() {
     -e POSTGRES_HOST=org.osbuild.koji.postgres \
     ${KOJI_HUB_IMAGE}
 
-  # TODO: we need to wait for the database to be initialized here. A better method should be used.
-  sleep 2
+  # We need to wait for the database to be initialized here. The container creates a file to let us know
+  echo "Waiting for DB to be initialized"
+  while true; do
+    if [ -f ${SHARE_DIR}/hub.init ]; then
+      break
+    fi
+    sleep 2
+  done
 
   # create koji users
   # kojiadmin/kojipass    - admin
