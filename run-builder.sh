@@ -37,6 +37,18 @@ builder_stop() {
   ${CONTAINER_RUNTIME} stop org.osbuild.koji.builder || true
 }
 
+# check arguments
+if [[ $# -ne 1 || ( "$1" != "start" && "$1" != "stop" && "$1" != "fg") ]]; then
+  cat <<DOC
+usage: $0 start|stop|fg
+
+start - starts the builder container (background)
+fg    - start the builder container in the foreground
+stop  - stops and removes the builder container
+DOC
+  exit 3
+fi
+
 # default to running in the background
 CONTAINER_FLAGS=-d
 
