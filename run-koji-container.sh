@@ -121,6 +121,9 @@ koji_start() {
       break
     fi
     sleep 2
+
+    # in case something is stuck, print the logs
+    podman logs org.osbuild.koji.koji
   done
 
   # create koji users
@@ -136,6 +139,9 @@ koji_start() {
   # create content generator osbuild, give osbuild and osbuild-krb users access to it
   psql_cmd -c "insert into content_generator (name) values ('osbuild')" >/dev/null
   psql_cmd -c "insert into cg_users (cg_id, user_id, creator_id, active) values (1, 2, 1, true), (1, 3, 1, true)" >/dev/null
+
+  # print all the running containers
+  podman ps
 
   echo "Containers are running, to stop them use:"
   echo "$0 stop"
