@@ -9,9 +9,6 @@ function greenprint {
 source /etc/os-release
 ARCH=$(uname -m)
 
-greenprint "Disable SELinux"
-sudo setenforce 0
-
 if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     greenprint "📦 Setting up EPEL repository"
     curl -Ls --retry 5 --output /tmp/epel.rpm \
@@ -21,6 +18,7 @@ fi
 
 greenprint "Installing required packages"
 sudo dnf -y install \
+    container-selinux \
     dnsmasq \
     jq \
     krb5-workstation \
