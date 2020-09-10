@@ -54,5 +54,8 @@ fi
 # ensure /mnt/koji is owned by apache
 chown -R apache:apache /mnt/koji
 
+# signal we are ready via a file
+touch /share/hub.init
+
 # run apache
 httpd -DFOREGROUND
