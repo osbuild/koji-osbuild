@@ -20,7 +20,7 @@ else
 fi
 
 builder_start() {
-  GATEWAY_IP=$(podman network inspect org.osbuild.koji --format '{{ (index (index (index .plugins 0).ipam.ranges 0) 0).gateway }}')
+  GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].plugins[0].ipam.ranges[0][0].gateway")
   echo "Gateway IP is $GATEWAY_IP"
 
   ${CONTAINER_RUNTIME} run --rm ${CONTAINER_FLAGS} \
