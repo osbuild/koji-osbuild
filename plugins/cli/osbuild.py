@@ -103,3 +103,4 @@ def handle_osbuild_image(options, session, argv):
     if res == 0:
         result = session.getTaskResult(task_id)
         print(result)
+    return res
