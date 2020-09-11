@@ -1,4 +1,20 @@
 #!/usr/bin/python3
+"""Koji osbuild integration - builder plugin
+
+This koji builder plugin provides a handler for 'osbuildImage' tasks,
+which will create compose requests via osbuild composer's koji API.
+
+Included is a basic pure-python client for composers koji API based
+on the corresponding OpenAPI. Although manually crafted it follows
+its terminology closely.
+This client is used in the `OSBuildImage`, which provides the actual
+koji integration to talk to composer.
+
+This file can also be used as an executable where it acts as a stand
+alone client for composer's API.
+"""
+
+
 import configparser
 import enum
 import json
@@ -13,6 +29,10 @@ import koji
 
 from koji.tasks import BaseTaskHandler
 
+
+# The following classes are a implementation of osbuild composer's
+# koji API. It is based on the corresponding OpenAPI specification
+# version '1' and should model it closely.
 
 class Repository:
     def __init__(self, baseurl: str, gpgkey: str = None):
@@ -288,7 +308,7 @@ class OSBuildImage(BaseTaskHandler):
         }
 
 
-# #####
+# Stand alone osbuild composer API client executable
 import argparse
 
 RESET = "\033[0m"
