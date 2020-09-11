@@ -101,7 +101,7 @@ def handle_osbuild_image(options, session, argv):
     if (args.wait is None and kl._running_in_bg()) or args.wait is False:
         # either running in the background or must not wait by user's
         # request. All done.
-        return
+        return None
 
     session.logout()
     res = kl.watch_tasks(session, [task_id], quiet=options.quiet)
