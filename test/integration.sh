@@ -83,13 +83,8 @@ sudo ./run-builder.sh start
 greenprint "Creating Koji tag infrastructure"
 ./make-tags.sh
 
-greenprint "Creating a compose"
-koji --server=http://localhost/kojihub \
-     --user=kojiadmin \
-     --password=kojipass \
-     --authtype=password \
-     osbuild-image Fedora-Cloud 32 fedora-32 f32-candidate x86_64 \
-     --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os/'
+greenprint "Running integration tests"
+python3 -m unittest discover -v test/integration/
 
 greenprint "Stopping koji builder"
 sudo ./run-builder.sh stop
