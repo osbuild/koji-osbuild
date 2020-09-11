@@ -1,14 +1,12 @@
 """Koji osbuild integration for Koji Hub"""
 import sys
-
 import jsonschema
 
-import logging
 import koji
 from koji.context import context
 
 sys.path.insert(0, "/usr/share/koji-hub/")
-import kojihub
+import kojihub  # pylint: disable=import-error, wrong-import-position
 
 
 OSBUILD_IMAGE_SCHMEA = {
