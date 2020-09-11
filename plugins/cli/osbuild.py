@@ -1,4 +1,10 @@
-"""osbild koji command line client integration"""
+"""Koji osbuild integration - koji client plugin
+
+This koji plugin provides a new 'osbuild-image' command for the koji
+command line tool. It uses the 'osbuildImage' XMLRPC endpoint, that
+is provided by the koji osbuild plugin for the koji hub.
+"""
+
 
 from pprint import pprint
 
