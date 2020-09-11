@@ -98,6 +98,7 @@ def handle_osbuild_image(options, session, argv):
         print("Created task: %s" % task_id)
         print("Task info: %s/taskinfo?taskID=%s" % (options.weburl, task_id))
 
+    # pylint: disable=protected-access
     if (args.wait is None and kl._running_in_bg()) or args.wait is False:
         # either running in the background or must not wait by user's
         # request. All done.
