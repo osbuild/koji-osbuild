@@ -88,6 +88,7 @@ class ComposeRequest:
             self.server = server
             self.task_id = task_id
 
+    # pylint: disable=redefined-outer-name
     def __init__(self, nvr: NVR, distro: str, ireqs: List[ImageRequest], koji: Koji):
         self.nvr = nvr
         self.distribution = distro
@@ -246,6 +247,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("user repo override: %s", urls)
         return [Repository(u.strip()) for u in urls]
 
+    # pylint: disable=arguments-differ
     def handler(self, name, version, distro, image_types, target, arches, opts):
         """Main entry point for the task"""
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
