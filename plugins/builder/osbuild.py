@@ -309,8 +309,6 @@ class OSBuildImage(BaseTaskHandler):
 
 
 # Stand alone osbuild composer API client executable
-import argparse
-
 RESET = "\033[0m"
 GREEN = "\033[32m"
 BOLD = "\033[1m"
@@ -361,6 +359,8 @@ def wait_cmd(client: Client, args):
 
 
 def main():
+    import argparse  # pylint: disable=import-outside-toplevel
+
     parser = argparse.ArgumentParser(description="osbuild composer koji API client")
     parser.add_argument("--url", metavar="URL", type=str,
                         default="http://localhost:8701/",
