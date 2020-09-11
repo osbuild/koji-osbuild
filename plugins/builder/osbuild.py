@@ -208,7 +208,7 @@ class OSBuildImage(BaseTaskHandler):
         archstr = buildconfig["arches"]
         if not archstr:
             name = buildconfig["name"]
-            raise koji.BuildError("Missing arches for tag '%{name}'")
+            raise koji.BuildError(f"Missing arches for tag '%{name}'")
         return set(koji.canonArch(a) for a in archstr.split())
 
     def make_repos_for_target(self, target_info):
