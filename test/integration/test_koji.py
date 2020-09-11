@@ -60,3 +60,13 @@ class TestIntegration(unittest.TestCase):
                         "x86_64",
                         repo=F32_REPO)
         self.check_res(res)
+
+    def test_unknown_tag_check(self):
+        """Unknown Tag check"""
+        # Check building an unknown tag fails
+        res = self.koji("Fedora-Cloud",
+                        "32",
+                        "fedora-32",
+                        "UNKNOWNTAG",
+                        "x86_64")
+        self.check_fail(res)
