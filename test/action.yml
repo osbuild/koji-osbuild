@@ -1,0 +1,12 @@
+name: 'Koji plugin test environment'
+description: 'Environment prepared for running koji plugin tests'
+inputs:
+  run:
+    description: 'What to run'
+    required: true
+    default: 'echo "Nothing to do"'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.run }}
