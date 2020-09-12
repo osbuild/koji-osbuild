@@ -1,0 +1,16 @@
+name: Tests
+
+on: [pull_request, push]
+
+jobs:
+  pylint:
+    name: Source code liniting
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Run pylint"
+      uses: osbuild/koji-osbuild/test@master
+      with:
+        run: |
+          pylint plugins/**/*.py test/**/*.py
