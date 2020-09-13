@@ -14,3 +14,15 @@ jobs:
       with:
         run: |
           pylint plugins/**/*.py test/**/*.py
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Run unit tests"
+      uses: osbuild/koji-osbuild/test@master
+      with:
+        run: |
+          python3 -m unittest discover -v test/unit/
