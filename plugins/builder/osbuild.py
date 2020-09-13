@@ -257,7 +257,7 @@ class OSBuildImage(BaseTaskHandler):
 
         target_info = self.session.getBuildTarget(target, strict=True)
         if not target_info:
-            koji.BuildError(f"Target '{target}' not found")
+            raise koji.BuildError(f"Target '{target}' not found")
 
         build_tag = target_info['build_tag']
         buildconfig = self.session.getBuildConfig(build_tag)
@@ -267,7 +267,7 @@ class OSBuildImage(BaseTaskHandler):
         arches = set(arches)
         diff = tag_arches - arches
         if diff:
-            koji.BuildError("Unsupported architecture(s): " + str(diff))
+            raise koji.BuildError("Unsupported architecture(s): " + str(diff))
 
         # Repositories
         repo_urls = opts.get("repo")
