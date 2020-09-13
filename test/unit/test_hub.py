@@ -8,6 +8,8 @@ import os
 import imp
 from flexmock import flexmock
 
+import koji
+
 
 class TestHubPlugin(unittest.TestCase):
     def setUp(self):
@@ -61,3 +63,17 @@ class TestHubPlugin(unittest.TestCase):
         setattr(self.plugin, "kojihub", kojihub)
 
         self.plugin.osbuildImage(*args, opts)
+
+    def test_input_validation(self):
+        context = self.mock_koji_context()
+        setattr(self.plugin, "context", context)
+
+        opts = {}
+        args = ["name", "version", "distro",
+                "image_type",  # image type not an array
+                "target",
+                ["arches"],
+                opts]
+
+        with self.assertRaises(koji.ParameterError):
+            self.plugin.osbuildImage(*args, opts)
