@@ -72,7 +72,10 @@ def osbuildImage(name, version, distro, image_types, target, arches, opts=None, 
     args = [name, version, distro, image_types, target, arches, opts]
     task = {"channel": "image"}
 
-    jsonschema.validate(args, OSBUILD_IMAGE_SCHMEA)
+    try:
+        jsonschema.validate(args, OSBUILD_IMAGE_SCHMEA)
+    except jsonschema.exceptions.ValidationError as err:
+        raise koji.ParameterError(str(err)) from None
 
     if priority and priority < 0 and not context.session.hasPerm('admin'):
         raise koji.ActionNotAllowed('only admins may create high-priority tasks')
