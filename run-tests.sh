@@ -10,5 +10,5 @@ pushd test
 podman build -t koji.test -f Dockerfile .
 popd
 
-run_test "python3 -m unittest discover -v test/unit/"
+run_test "pytest -v --cov-report=term --cov=osbuild test/unit/"
 run_test "pylint test/**/*.py"
