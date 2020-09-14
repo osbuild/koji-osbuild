@@ -25,4 +25,4 @@ jobs:
       uses: osbuild/koji-osbuild/test@master
       with:
         run: |
-          python3 -m unittest discover -v test/unit/
+          pytest --cov-report=xml --cov=osbuild test/unit/
