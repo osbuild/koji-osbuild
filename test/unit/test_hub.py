@@ -2,27 +2,14 @@
 # koji hub plugin unit tests
 #
 
-
-import unittest
-import os
-import imp
+import koji
 from flexmock import flexmock
 
-import koji
+from plugintest import PluginTest
 
 
-class TestHubPlugin(unittest.TestCase):
-    def setUp(self):
-        """Loads the plugin to self.plugin"""
-        root = os.getenv("GITHUB_WORKSPACE", os.getcwd())
-
-        haystack = os.path.join(root, "plugins", "hub")
-
-        fp, path, desc = imp.find_module("osbuild", [haystack])
-        try:
-            self.plugin = imp.load_module("osbuild", fp, path, desc)
-        finally:
-            fp.close()
+@PluginTest.load_plugin("hub")
+class TestHubPlugin(PluginTest):
 
     @staticmethod
     def mock_koji_context(*, admin=False):
