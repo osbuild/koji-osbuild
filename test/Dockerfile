@@ -13,6 +13,8 @@ RUN dnf -y upgrade \
 	pylint \
 	python3-flexmock \
 	python3-jsonschema \
+	python3-pytest-cov \
+	python3-pytest \
 	python3-koji \
 	&& dnf clean all
 
