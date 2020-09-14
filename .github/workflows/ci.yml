@@ -26,3 +26,5 @@ jobs:
       with:
         run: |
           pytest --cov-report=xml --cov=osbuild test/unit/
+    - name: Send coverage to codecov.io
+      run: bash <(curl -s https://codecov.io/bash)
