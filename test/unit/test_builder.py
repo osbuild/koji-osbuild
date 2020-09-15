@@ -234,3 +234,26 @@ class TestBuilderPlugin(PluginTest):
         with self.assertRaises(koji.GenericError):
             handler.handler(*args)
 
+    @httpretty.activate
+    def test_compose_success(self):
+        # Simulate a successful compose, check return value
+        session = self.mock_session()
+        options = self.mock_options()
+
+        handler = self.plugin.OSBuildImage(1,
+                                           "osbuildImage",
+                                           "params",
+                                           session,
+                                           options)
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                ["x86_64"],
+                {}]
+
+        composer = MockComposer(architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
