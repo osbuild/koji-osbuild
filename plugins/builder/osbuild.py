@@ -31,6 +31,10 @@ import koji
 from koji.tasks import BaseTaskHandler
 
 
+DEFAULT_COMPOSER_URL = "http://localhost:8701/"
+DEFAULT_KOJIHUB_URL = "https://localhost/kojihub"
+
+
 # The following classes are a implementation of osbuild composer's
 # koji API. It is based on the corresponding OpenAPI specification
 # version '1' and should model it closely.
@@ -209,8 +213,8 @@ class OSBuildImage(BaseTaskHandler):
 
         cfg = configparser.ConfigParser()
         cfg.read_dict({
-            "composer": {"url": "http://localhost:8701/"},
-            "koji": {"url": "https://localhost/kojihub"}
+            "composer": {"url": DEFAULT_COMPOSER_URL},
+            "koji": {"url": DEFAULT_KOJIHUB_URL}
         })
 
         cfg.read([
@@ -363,7 +367,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="osbuild composer koji API client")
     parser.add_argument("--url", metavar="URL", type=str,
-                        default="http://localhost:8701/",
+                        default=DEFAULT_COMPOSER_URL,
                         help="The URL of the osbuild composer koji API endpoint")
     parser.set_defaults(cmd=None)
     sp = parser.add_subparsers(help='commands')
@@ -380,7 +384,7 @@ def main():
     subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [qcow2]',
                         action="append", type=str, default=[])
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
-                        default="https://localhost/kojihub")
+                        default=DEFAULT_KOJIHUB_URL)
     subpar.set_defaults(cmd='compose')
 
     subpar = sp.add_parser("status", help='status of a compose')
