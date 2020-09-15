@@ -11,4 +11,4 @@ podman build -t koji.test -f Dockerfile .
 popd
 
 run_test "pytest -v --cov-report=term --cov=osbuild test/unit/"
-run_test "pylint test/**/*.py"
+run_test "pylint plugins/**/*.py test/**/*.py"
