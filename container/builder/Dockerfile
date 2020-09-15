@@ -10,6 +10,7 @@ RUN dnf -y upgrade \
 	createrepo_c \
 	postgresql \
 	python3-koji \
+	python3-requests \
 	&& dnf clean all
 
 COPY container/builder/kojid.conf /etc/kojid/kojid.conf
