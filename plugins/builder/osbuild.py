@@ -20,8 +20,8 @@ import enum
 import json
 import sys
 import time
+import requests
 import urllib.parse
-import urllib.request
 
 from string import Template
 from typing import Dict, List
@@ -161,37 +161,34 @@ class ComposeStatus:
 class Client:
     def __init__(self, url):
         self.url = url
+        self.http = requests.Session()
 
     def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojidata: ComposeRequest.Koji):
         url = urllib.parse.urljoin(self.url, f"/compose")
-        req = urllib.request.Request(url)
         cro = ComposeRequest(nvr, distro, images, kojidata)
-        dat = json.dumps(cro.as_dict())
-        raw = dat.encode('utf-8')
-        req = urllib.request.Request(url, raw)
-        req.add_header('Content-Type', 'application/json')
-        req.add_header('Content-Length', len(raw))
 
-        try:
-            with urllib.request.urlopen(req, raw) as res:
-                payload = res.read().decode('utf-8')
-        except urllib.error.HTTPError as e:
-            body = e.read().decode('utf-8').strip()
+        res = self.http.post(url, json=cro.as_dict())
+
+        if res.status_code != 201:
+            body = res.content.strip()
             msg = f"Failed to create the compose request: {body}"
             raise koji.GenericError(msg) from None
 
-        ps = json.loads(payload)
+        ps = res.json()
         compose_id, koji_build_id = ps["id"], ps["koji_build_id"]
         return compose_id, koji_build_id
 
     def compose_status(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"/compose/{compose_id}")
-        req = urllib.request.Request(url)
-        with urllib.request.urlopen(req) as res:
-            data = res.read().decode('utf-8')
-        js = json.loads(data)
 
-        return ComposeStatus.from_dict(js)
+        res = self.http.get(url)
+
+        if res.status_code != 200:
+            body = res.content.strip()
+            msg = f"Failed to get the compose status: {body}"
+            raise koji.GenericError(msg) from None
+
+        return ComposeStatus.from_dict(res.json())
 
     def wait_for_compose(self, compose_id: str, *, sleep_time=2):
         while True:
