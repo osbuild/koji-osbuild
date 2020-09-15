@@ -20,11 +20,12 @@ import enum
 import json
 import sys
 import time
-import requests
 import urllib.parse
 
 from string import Template
 from typing import Dict, List
+
+import requests
 import koji
 
 from koji.tasks import BaseTaskHandler
