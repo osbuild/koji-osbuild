@@ -14,7 +14,8 @@ from plugintest import PluginTest
 
 
 class MockComposer:
-    def __init__(self, *, architectures=["x86_64"]):
+    def __init__(self, url, *, architectures=["x86_64"]):
+        self.url = url
         self.architectures = architectures[:]
         self.composes = {}
         self.errors = []
@@ -23,7 +24,7 @@ class MockComposer:
     def httpretty_regsiter(self):
         httpretty.register_uri(
             httpretty.POST,
-            "http://localhost:8701/compose",
+            self.url + "compose",
             body=self.compose_create
         )
 
@@ -62,7 +63,7 @@ class MockComposer:
 
         httpretty.register_uri(
             httpretty.GET,
-            "http://localhost:8701/compose/" + compose_id,
+            self.url + "compose/" + compose_id,
             body=self.compose_status
         )
 
@@ -228,7 +229,8 @@ class TestBuilderPlugin(PluginTest):
                 ["x86_64"],
                 {}]
 
-        composer = MockComposer(architectures=["s390x"])
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["s390x"])
         composer.httpretty_regsiter()
 
         with self.assertRaises(koji.GenericError):
@@ -252,7 +254,8 @@ class TestBuilderPlugin(PluginTest):
                 ["x86_64"],
                 {}]
 
-        composer = MockComposer(architectures=["x86_64"])
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
         composer.httpretty_regsiter()
 
         res = handler.handler(*args)
