@@ -2,9 +2,11 @@
 # koji hub plugin unit tests
 #
 
+import configparser
 import json
 import os
 import sys
+import tempfile
 import uuid
 import unittest.mock
 from flexmock import flexmock
@@ -150,6 +152,43 @@ class TestBuilderPlugin(PluginTest):
         )
         return options
 
+    def test_plugin_config(self):
+        session = flexmock()
+        options = self.mock_options()
+
+        composer_url = "https://image-builder.osbuild.org:2323"
+        koji_url = "https://koji.osbuild.org/kojihub"
+        certs = ["crt", "key"]
+        ssl_cert = ", ".join(certs)
+        ssl_verify = False
+        with tempfile.TemporaryDirectory() as tmp:
+
+            cfg = configparser.ConfigParser()
+            cfg["composer"] = {
+                "url": composer_url,
+                "ssl_cert": ssl_cert,
+                "ssl_verify": ssl_verify
+            }
+            cfg["koji"] = {
+                "url": koji_url
+            }
+
+            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
+            with open(cfgfile, 'w') as f:
+                cfg.write(f)
+
+            self.plugin.DEFAULT_CONFIG_FILES = [cfgfile]
+            handler = self.plugin.OSBuildImage(1,
+                                               "osbuildImage",
+                                               "params",
+                                               session,
+                                               options)
+
+            self.assertEqual(handler.composer_url, composer_url)
+            self.assertEqual(handler.koji_url, koji_url)
+            session = handler.client.http
+            self.assertEqual(session.cert, certs)
+            self.assertEqual(session.verify, ssl_verify)
 
     def test_unknown_build_target(self):
         session = flexmock()
