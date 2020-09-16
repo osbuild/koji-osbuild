@@ -24,7 +24,7 @@ builder_start() {
   GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].plugins[0].ipam.ranges[0][0].gateway")
   echo "Gateway IP is $GATEWAY_IP"
 
-  ${CONTAINER_RUNTIME} run --rm ${CONTAINER_FLAGS} \
+  ${CONTAINER_RUNTIME} run ${CONTAINER_FLAGS} \
     --name org.osbuild.koji.builder --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
     -v "${DATA_DIR}:/mnt:z" \
@@ -36,6 +36,7 @@ builder_start() {
 
 builder_stop() {
   ${CONTAINER_RUNTIME} stop org.osbuild.koji.builder || true
+  ${CONTAINER_RUNTIME} rm org.osbuild.koji.builder || true
 }
 
 # check arguments
@@ -56,7 +57,7 @@ CONTAINER_FLAGS=-d
 if [ $1 == "start" ]; then
   builder_start
 elif [ $1 == "fg" ]; then
-  CONTAINER_FLAGS=-it
+  CONTAINER_FLAGS="-it --rm"
   builder_start
 elif [ $1 == "stop" ]; then
   builder_stop
