@@ -4,7 +4,9 @@
 
 import json
 import os
+import sys
 import uuid
+import unittest.mock
 from flexmock import flexmock
 
 import koji
@@ -260,3 +262,26 @@ class TestBuilderPlugin(PluginTest):
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
+
+    @httpretty.activate
+    def test_cli_compose_success(self):
+        # Check the basic usage of the plugin as a stand-alone client
+        # for the osbuild-composer API
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        args = [
+            "plugins/builder/osbuild.py",
+            "compose",
+            "Fedora-Cloud-Image",
+            "32",
+            "20201015.0",
+            "fedora-32",
+            "http://download.localhost/pub/linux/$arch",
+            "x86_64"
+        ]
+
+        with unittest.mock.patch.object(sys, 'argv', args):
+            res = self.plugin.main()
+            self.assertEqual(res, 0)
