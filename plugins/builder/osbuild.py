@@ -166,6 +166,18 @@ class Client:
         self.url = url
         self.http = requests.Session()
 
+    @staticmethod
+    def parse_certs(string):
+        certs = [s.strip() for s in string.split(',')]
+        count = len(certs)
+        if count == 1:
+            return certs[0]
+        if count > 2:
+            msg = f"Invalid cert string '{string}' ({count} certs)"
+            raise ValueError(msg)
+
+        return certs
+
     def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojidata: ComposeRequest.Koji):
         url = urllib.parse.urljoin(self.url, f"/compose")
         cro = ComposeRequest(nvr, distro, images, kojidata)
@@ -225,7 +237,7 @@ class OSBuildImage(BaseTaskHandler):
 
         if "ssl_cert" in composer:
             data = cfg["composer"]["ssl_cert"]
-            cert = [s.strip() for s in data.split(',')]
+            cert = self.client.parse_certs(data)
             self.client.http.cert = cert
 
         if "ssl_verify" in composer:
@@ -399,7 +411,7 @@ def main():
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
                         default=DEFAULT_KOJIHUB_URL)
     subpar.add_argument("--cert", metavar="cert", help='The client SSL certificates to use',
-                        type=str, action="append", default=[])
+                        type=str)
     subpar.add_argument("--ca", metavar="ca", help='The SSL certificate authority',
                         type=str)
     subpar.set_defaults(cmd='compose')
@@ -423,7 +435,7 @@ def main():
 
     if args.cert:
         print("Using client certificates")
-        client.http.cert = args.cert
+        client.http.cert = client.parse_certs(args.cert)
         client.http.verify = True
 
     if args.ca:
