@@ -58,6 +58,7 @@ class TestIntegration(unittest.TestCase):
                         "fedora-32",
                         "f32-candidate",
                         "x86_64",
+                        "--wait",
                         repo=F32_REPO)
         self.check_res(res)
 
