@@ -190,6 +190,21 @@ class TestBuilderPlugin(PluginTest):
             self.assertEqual(session.cert, certs)
             self.assertEqual(session.verify, ssl_verify)
 
+            # check we can handle a path in ssl_verify
+            ssl_verify = "/a/path/to/a/ca"
+            cfg["composer"]["ssl_verify"] = ssl_verify
+            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
+            with open(cfgfile, 'w') as f:
+                cfg.write(f)
+
+            handler = self.plugin.OSBuildImage(1,
+                                               "osbuildImage",
+                                               "params",
+                                               session,
+                                               options)
+            session = handler.client.http
+            self.assertEqual(session.verify, ssl_verify)
+
     def test_unknown_build_target(self):
         session = flexmock()
 
