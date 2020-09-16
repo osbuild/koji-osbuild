@@ -359,16 +359,19 @@ def compose_cmd(client: Client, args):
         time.sleep(2)
 
     show_compose(status)
+    return 0
 
 
 def status_cmd(client: Client, args):
     cs = client.compose_status(args.id)
     show_compose(cs)
+    return 0
 
 
 def wait_cmd(client: Client, args):
     cs = client.wait_for_compose(args.id)
     show_compose(cs)
+    return 0
 
 
 def main():
