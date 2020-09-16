@@ -9,7 +9,7 @@ sys.path.insert(0, "/usr/share/koji-hub/")
 import kojihub  # pylint: disable=import-error, wrong-import-position
 
 
-OSBUILD_IMAGE_SCHMEA = {
+OSBUILD_IMAGE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "osbuildImage arguments",
     "type": "array",
@@ -73,7 +73,7 @@ def osbuildImage(name, version, distro, image_types, target, arches, opts=None, 
     task = {"channel": "image"}
 
     try:
-        jsonschema.validate(args, OSBUILD_IMAGE_SCHMEA)
+        jsonschema.validate(args, OSBUILD_IMAGE_SCHEMA)
     except jsonschema.exceptions.ValidationError as err:
         raise koji.ParameterError(str(err)) from None
 
