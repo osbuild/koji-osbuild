@@ -10,6 +10,10 @@ import subprocess
 
 F32_REPO = "http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os"
 
+RHEL_REPOS = [
+    "http://download.devel.redhat.com/released/RHEL-8/8.2.0/BaseOS/x86_64/os/",
+    "http://download.devel.redhat.com/released/RHEL-8/8.2.0/AppStream/x86_64/os/",
+]
 
 def koji_command(*args, _input=None, _globals=None, **kwargs):
     args = list(args) + [f'--{k}={v}' for k, v in kwargs.items()]
@@ -21,6 +25,30 @@ def koji_command(*args, _input=None, _globals=None, **kwargs):
                           stderr=subprocess.STDOUT,
                           input=_input,
                           check=False)
+
+
+def parse_os_release():
+    info = {}
+    with open("/etc/os-release") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if line[0] == "#":
+                continue
+            k, v = line.split("=", 1)
+            info[k] = v.strip('"')
+    return info
+
+
+def is_fedora():
+    info = parse_os_release()
+    return info["ID"].lower() == "fedora"
+
+
+def is_rhel():
+    info = parse_os_release()
+    return info["ID"].lower() == "rhel"
 
 
 class TestIntegration(unittest.TestCase):
@@ -49,10 +77,12 @@ class TestIntegration(unittest.TestCase):
                    "\n error: " + res.stdout)
             self.fail(msg)
 
-    def test_compose(self):
-        """Successful compose"""
+    @unittest.skipUnless(is_fedora(), "no cross builds")
+    def test_compose_fedora(self):
+        """Successful Fedora compose"""
         # Simple test of a successful compose of F32
         # Needs the f32-candidate tag be setup properly
+
         res = self.koji("Fedora-Cloud",
                         "32",
                         "fedora-32",
@@ -60,6 +90,24 @@ class TestIntegration(unittest.TestCase):
                         "x86_64",
                         "--wait",
                         repo=F32_REPO)
+        self.check_res(res)
+
+    @unittest.skipUnless(is_rhel(), "no cross builds")
+    def test_compose_rhel(self):
+        """Successful RHEL compose"""
+        # Simple test of a successful compose of RHEL
+
+        repos = []
+        for repo in RHEL_REPOS:
+            repos += ["--repo", repo]
+
+        res = self.koji("RHEL-Cloud",
+                        "8",
+                        "rhel-8",
+                        "f32-candidate",
+                        "x86_64",
+                        "--wait",
+                        *repos)
         self.check_res(res)
 
     def test_unknown_tag_check(self):
