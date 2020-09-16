@@ -205,6 +205,35 @@ class TestBuilderPlugin(PluginTest):
             session = handler.client.http
             self.assertEqual(session.verify, ssl_verify)
 
+            # check we can handle a plain ssl_cert string
+            ssl_cert = "/a/path/to/a/cert"
+            cfg["composer"]["ssl_cert"] = ssl_cert
+            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
+            with open(cfgfile, 'w') as f:
+                cfg.write(f)
+
+            handler = self.plugin.OSBuildImage(1,
+                                               "osbuildImage",
+                                               "params",
+                                               session,
+                                               options)
+            session = handler.client.http
+            self.assertEqual(session.cert, ssl_cert)
+
+            # check we handle detect wrong cert configs, i.e.
+            # three certificate compoments
+            cfg["composer"]["ssl_cert"] = "1, 2, 3"
+            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
+            with open(cfgfile, 'w') as f:
+                cfg.write(f)
+
+            with self.assertRaises(ValueError):
+                handler = self.plugin.OSBuildImage(1,
+                                                   "osbuildImage",
+                                                   "params",
+                                                   session,
+                                                   options)
+
     def test_unknown_build_target(self):
         session = flexmock()
 
