@@ -122,23 +122,17 @@ class ComposeRequest:
 
 class ImageStatus(enum.Enum):
     SUCCESS = "success"
-    FAILED = "failed"
+    FAILURE = "failure"
     PENDING = "pending"
     BUILDING = "building"
     UPLOADING = "uploading"
-    WAITING = "waiting"
-    FINISHED = "finished"
-    RUNNING = "running"
 
 
 class ComposeStatus:
     SUCCESS = "success"
-    FAILED = "failed"
+    FAILURE = "failure"
     PENDING = "pending"
-    RUNNING = "running"
-    WAITING = "waiting"
     REGISTERING = "registering"
-    FINISHED = "finished"
 
     def __init__(self, status: str, images: List, koji_task_id: str):
         self.status = status
@@ -156,11 +150,11 @@ class ComposeStatus:
     def is_finished(self):
         if self.is_success:
             return True
-        return self.status in [self.FAILED]
+        return self.status in [self.FAILURE]
 
     @property
     def is_success(self):
-        return self.status in [self.SUCCESS, self.FINISHED]
+        return self.status in [self.SUCCESS]
 
 
 class Client:
