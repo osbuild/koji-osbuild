@@ -33,6 +33,10 @@ from koji.tasks import BaseTaskHandler
 
 DEFAULT_COMPOSER_URL = "http://localhost:8701/"
 DEFAULT_KOJIHUB_URL = "https://localhost/kojihub"
+DEFAULT_CONFIG_FILES = [
+    "/usr/share/koji-osbuild/builder.conf",
+    "/etc/koji-osbuild/builder.conf"
+]
 
 
 # The following classes are a implementation of osbuild composer's
@@ -211,10 +215,7 @@ class OSBuildImage(BaseTaskHandler):
             "koji": {"url": DEFAULT_KOJIHUB_URL}
         })
 
-        cfg.read([
-            "/usr/share/koji-osbuild/builder.conf",
-            "/etc/koji-osbuild/builder.conf"
-        ])
+        cfg.read(DEFAULT_CONFIG_FILES)
 
         self.composer_url = cfg["composer"]["url"]
         self.koji_url = cfg["koji"]["url"]
