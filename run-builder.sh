@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+set -euo pipefail
 
 SHARE_DIR=/tmp/osbuild-composer-koji-test
 DATA_DIR=/var/tmp/osbuild-koji-data
