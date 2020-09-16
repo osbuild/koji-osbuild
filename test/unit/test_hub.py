@@ -2,6 +2,7 @@
 # koji hub plugin unit tests
 #
 
+import jsonschema
 import koji
 from flexmock import flexmock
 
@@ -31,6 +32,12 @@ class TestHubPlugin(PluginTest):
         kojihub.should_receive("make_task") \
                .with_args("osbuildImage", args, **task)
         return kojihub
+
+    def test_plugin_jsonschema(self):
+        # Make sure the schema used to validate the input is
+        # itself correct jsonschema
+        schema = self.plugin.OSBUILD_IMAGE_SCHEMA
+        jsonschema.Draft4Validator.check_schema(schema)
 
     def test_basic(self):
         context = self.mock_koji_context()
