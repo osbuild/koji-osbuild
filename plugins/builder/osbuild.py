@@ -220,6 +220,21 @@ class OSBuildImage(BaseTaskHandler):
         self.koji_url = cfg["koji"]["url"]
         self.client = Client(self.composer_url)
 
+        composer = cfg["composer"]
+
+        if "ssl_cert" in composer:
+            data = cfg["composer"]["ssl_cert"]
+            cert = [s.strip() for s in data.split(',')]
+            self.client.http.cert = cert
+
+        if "ssl_verify" in composer:
+            try:
+                val = composer.getboolean("ssl_verify")
+            except ValueError:
+                val = composer["ssl_verify"]
+
+            self.client.http.verify = val
+
     @staticmethod
     def arches_for_config(buildconfig: Dict):
         archstr = buildconfig["arches"]
@@ -379,6 +394,10 @@ def main():
                         action="append", type=str, default=[])
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
                         default=DEFAULT_KOJIHUB_URL)
+    subpar.add_argument("--cert", metavar="cert", help='The client SSL certificates to use',
+                        type=str, action="append", default=[])
+    subpar.add_argument("--ca", metavar="ca", help='The SSL certificate authority',
+                        type=str)
     subpar.set_defaults(cmd='compose')
 
     subpar = sp.add_parser("status", help='status of a compose')
@@ -397,6 +416,14 @@ def main():
         return 1
 
     client = Client(args.url)
+
+    if args.cert:
+        print("Using client certificates")
+        client.http.cert = args.cert
+        client.http.verify = True
+
+    if args.ca:
+        client.http.verify = args.ca
 
     if args.cmd == "compose":
         return compose_cmd(client, args)
