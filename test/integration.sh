@@ -53,30 +53,11 @@ sudo ./run-koji-container.sh start
 greenprint "Print logs"
 sudo podman logs org.osbuild.koji.koji
 
-greenprint "Adding kerberos config"
-sudo cp \
-    /tmp/osbuild-composer-koji-test/client.keytab \
-    /etc/krb5.keytab
+greenprint "Copying credentials and certificates"
+sudo test/copy-creds.sh
 
-sudo cp \
-    test/data/krb5.local.conf \
-    /etc/krb5.conf.d/local
-
-greenprint "Initializing Kerberos"
-kinit osbuild-krb@LOCAL -k
-sudo -u _osbuild-composer kinit osbuild-krb@LOCAL -k
-sudo kinit osbuild-krb@LOCAL -k
-
-greenprint "Adding generated CA cert"
-sudo cp \
-    /tmp/osbuild-composer-koji-test/ca-crt.pem \
-    /etc/pki/ca-trust/source/anchors/koji-ca-crt.pem
-sudo update-ca-trust
-
-greenprint "Testing Koji"
+greenprint "Testing Koji hub API access"
 koji --server=http://localhost/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
-koji --server=http://localhost/kojihub hello
-sudo -u _osbuild-composer koji --server=http://localhost/kojihub hello
 
 greenprint "Starting koji builder"
 sudo ./run-builder.sh start
