@@ -1,0 +1,6 @@
+[brew]
+name=brew
+baseurl=http://download.eng.bos.redhat.com/brewroot/repos/brew-rhel-8/4285303/x86_64
+enabled=1
+gpgcheck=0
+metadata_expire=60
