@@ -250,11 +250,12 @@ class TestBuilderPlugin(PluginTest):
                                            session,
                                            options)
 
+        repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
                 ["image_type"],
                 "fedora-candidate",
                 ["x86_64"],
-                {}]
+                {"repo": ",".join(repos)}]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
@@ -262,6 +263,15 @@ class TestBuilderPlugin(PluginTest):
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
+        compose_id = res["composer_id"]
+        compose = composer.composes.get(compose_id)
+        self.assertIsNotNone(compose)
+
+        ireqs = compose["request"]["image_requests"]
+        for ir in ireqs:
+            self.assertEqual(ir["architecture"], "x86_64")
+            have = [r["baseurl"] for r in ir["repositories"]]
+            self.assertEqual(have, repos)
 
     @httpretty.activate
     def test_cli_compose_success(self):
