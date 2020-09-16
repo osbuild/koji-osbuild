@@ -56,7 +56,7 @@ sudo cp \
     /etc/krb5.keytab
 
 sudo cp \
-    osbuild-local.conf \
+    test/data/krb5.local.conf \
     /etc/krb5.conf.d/local
 
 greenprint "Initializing Kerberos"
