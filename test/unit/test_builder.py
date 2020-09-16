@@ -364,6 +364,11 @@ class TestBuilderPlugin(PluginTest):
         composer = MockComposer(url, architectures=["x86_64"])
         composer.httpretty_regsiter()
 
+        certs = [
+            "test/data/example-crt.pem",
+            "test/data/example-key.pem"
+        ]
+
         args = [
             "plugins/builder/osbuild.py",
             "compose",
@@ -372,7 +377,9 @@ class TestBuilderPlugin(PluginTest):
             "20201015.0",
             "fedora-32",
             "http://download.localhost/pub/linux/$arch",
-            "x86_64"
+            "x86_64",
+            "--cert", ", ".join(certs),
+            "--ca", "test/data/example-ca.pem"
         ]
 
         with unittest.mock.patch.object(sys, 'argv', args):
