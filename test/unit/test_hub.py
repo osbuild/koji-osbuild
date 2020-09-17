@@ -42,7 +42,8 @@ class TestHubPlugin(PluginTest):
     def test_basic(self):
         context = self.mock_koji_context()
 
-        opts = {}
+        opts = {"repo": ["repo1", "repo2"],
+                "release": "1.2.3"}
         args = ["name", "version", "distro",
                 ["image_type"],
                 "target",
@@ -56,7 +57,7 @@ class TestHubPlugin(PluginTest):
         setattr(self.plugin, "context", context)
         setattr(self.plugin, "kojihub", kojihub)
 
-        self.plugin.osbuildImage(*args, opts)
+        self.plugin.osbuildImage(*args, {})
 
     def test_input_validation(self):
         context = self.mock_koji_context()
