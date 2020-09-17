@@ -3,7 +3,7 @@ set -euo pipefail
 
 
 run_test() {
-  podman run -it -v $(pwd):/github/workspace:z --env "GITHUB_WORKSPACE=/github/workspace" koji.test "$1"
+  podman run -it -v "$(pwd)":/github/workspace:z --env "GITHUB_WORKSPACE=/github/workspace" koji.test "$1"
 }
 
 pushd test
