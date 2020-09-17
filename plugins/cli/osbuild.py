@@ -76,7 +76,7 @@ def handle_osbuild_image(options, session, argv):
         opts["release"] = args.release
 
     if args.repo:
-        opts["repo"] = ",".join(args.repo)
+        opts["repo"] = args.repo
 
     # Do some early checks to be able to give quick feedback
     check_target(session, target)

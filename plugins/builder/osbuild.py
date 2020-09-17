@@ -267,9 +267,8 @@ class OSBuildImage(BaseTaskHandler):
         return [Repository(repourl + "/$arch")]
 
     def make_repos_for_user(self, repos):
-        urls = repos.split(',')
-        self.logger.debug("user repo override: %s", urls)
-        return [Repository(u.strip()) for u in urls]
+        self.logger.debug("user repo override: %s", str(repos))
+        return [Repository(r) for r in repos]
 
     # pylint: disable=arguments-differ
     def handler(self, name, version, distro, image_types, target, arches, opts):
