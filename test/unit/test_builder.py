@@ -338,7 +338,7 @@ class TestBuilderPlugin(PluginTest):
                 ["image_type"],
                 "fedora-candidate",
                 ["x86_64"],
-                {"repo": ",".join(repos)}]
+                {"repo": repos}]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])

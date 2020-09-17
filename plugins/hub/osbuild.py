@@ -52,8 +52,11 @@ OSBUILD_IMAGE_SCHEMA = {
             "additionalProperties": False,
             "properties": {
                 "repo": {
-                    "type": "string",
-                    "description": "Repositories"
+                    "type": "array",
+                    "description": "Repositories",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "release": {
                     "type": "string",
