@@ -18,6 +18,7 @@ RUN dnf -y upgrade \
 	python3-pytest \
 	python3-koji \
 	python3-requests \
+	ShellCheck \
 	&& dnf clean all
 
 COPY entrypoint.sh /entrypoint.sh
