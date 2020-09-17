@@ -39,7 +39,10 @@ OSBUILD_IMAGE_SCHEMA = {
         {
             "type": "array",
             "description": "Architectures",
-            "minItems": 1
+            "minItems": 1,
+            "items": {
+                "type": "string"
+            }
         },
         {
             "type": "object",
