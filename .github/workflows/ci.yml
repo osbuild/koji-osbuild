@@ -4,7 +4,7 @@ on: [pull_request, push]
 
 jobs:
   pylint:
-    name: Source code liniting
+    name: Source code linting
     runs-on: ubuntu-latest
     steps:
     - name: "Clone Repository"
