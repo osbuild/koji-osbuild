@@ -7,7 +7,6 @@ function greenprint {
 
 # Get OS data.
 source /etc/os-release
-ARCH=$(uname -m)
 
 if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     greenprint "📦 Setting up EPEL repository"
