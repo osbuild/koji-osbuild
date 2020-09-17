@@ -28,3 +28,14 @@ jobs:
           pytest --cov-report=xml --cov=osbuild test/unit/
     - name: Send coverage to codecov.io
       run: bash <(curl -s https://codecov.io/bash)
+
+  shellcheck:
+    name: "Shellcheck"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Run ShellCheck"
+      uses: ludeeus/action-shellcheck@0.5.0
+      with:
+        severity: warning
