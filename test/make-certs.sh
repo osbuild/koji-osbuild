@@ -21,7 +21,6 @@ openssl req -new -nodes -x509 -days 365 \
 openssl genrsa -out "${CA_DIR}/key.pem" 2048
 
 # composer
-ALT_NAMES="DNS:localhost,DNS:org.osbuild.koji.composer,DNS:composer"
 openssl genrsa -out ${CA_DIR}/composer-key.pem 2048
 openssl req -new -sha256 \
         -key ${CA_DIR}/composer-key.pem	\
