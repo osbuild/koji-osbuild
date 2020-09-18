@@ -313,17 +313,18 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Waiting for comose to finish")
         status = client.wait_for_compose(cid)
 
-        if not status.is_success:
-            self.logger.error("Compose failed: %s", str(status))
-            return {
-                'koji_builds': []
-            }
 
-        return {
-            'koji_builds': [bid],
-            'composer_id': cid,
-            'build': bid,
+        result = {
+            "status": status.status,
+            "composer": {
+                "server": self.composer_url,
+                "id": cid
+            },
+            "koji": {
+                "build": bid
+            }
         }
+        return result
 
 
 # Stand alone osbuild composer API client executable
