@@ -326,7 +326,6 @@ class OSBuildImage(BaseTaskHandler):
             raise koji.BuildError(f"Compose failed (id: {cid})")
 
         result = {
-            "status": status.status,
             "composer": {
                 "server": self.composer_url,
                 "id": cid
