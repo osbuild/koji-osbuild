@@ -171,11 +171,11 @@ class Client:
 
         return certs
 
-    def compose_create(self, nvr: NVR, distro: str, images: List[ImageRequest], kojidata: ComposeRequest.Koji):
+    def compose_create(self, compose_request: ComposeRequest):
         url = urllib.parse.urljoin(self.url, f"/compose")
-        cro = ComposeRequest(nvr, distro, images, kojidata)
 
-        res = self.http.post(url, json=cro.as_dict())
+        data = compose_request.as_dict()
+        res = self.http.post(url, json=data)
 
         if res.status_code != 201:
             body = res.content.decode("utf-8").strip()
@@ -311,9 +311,10 @@ class OSBuildImage(BaseTaskHandler):
                           nvr, distro, self.koji_url,
                           str([i.as_dict() for i in ireqs]))
 
-        # Setup down, talk to composer to create the compose
+        # Setup done, create the compose request and send it off
         kojidata = ComposeRequest.Koji(self.koji_url, self.id)
-        cid, bid = client.compose_create(nvr, distro, ireqs, kojidata)
+        request = ComposeRequest(nvr, distro, ireqs, kojidata)
+        cid, bid = client.compose_create(request)
         self.logger.info("Compose id: %s, Koji build id: %s", cid, bid)
 
         self.logger.debug("Waiting for comose to finish")
@@ -363,7 +364,8 @@ def compose_cmd(client: Client, args):
             images.append(ireq)
 
     kojidata = ComposeRequest.Koji(args.koji, 0)
-    cid, bid = client.compose_create(nvr, args.distro, images, kojidata)
+    request = ComposeRequest(nvr, args.distro, images, kojidata)
+    cid, bid = client.compose_create(request)
 
     print(f"Compose: {cid} [koji build id: {bid}]")
     while True:
