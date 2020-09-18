@@ -322,6 +322,9 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Compose finished: %s", str(status))
         self.logger.info("Compose result: %s", status.status)
 
+        if not status.is_success:
+            raise koji.BuildError(f"Compose failed (id: {cid})")
+
         result = {
             "status": status.status,
             "composer": {
