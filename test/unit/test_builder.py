@@ -346,7 +346,7 @@ class TestBuilderPlugin(PluginTest):
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
-        compose_id = res["composer_id"]
+        compose_id = res["composer"]["id"]
         compose = composer.composes.get(compose_id)
         self.assertIsNotNone(compose)
 
