@@ -17,7 +17,6 @@ alone client for composer's API.
 
 import configparser
 import enum
-import json
 import sys
 import time
 import urllib.parse
@@ -116,12 +115,6 @@ class ComposeRequest:
                 img.as_dict() for img in self.image_requests
             ]
         }
-
-    def to_json(self, encoding=None):
-        data = json.dumps(self.as_dict())
-        if encoding:
-            data = data.encode('utf-8')
-        return data
 
 
 class ImageStatus(enum.Enum):
