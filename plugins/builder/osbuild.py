@@ -226,12 +226,16 @@ class OSBuildImage(BaseTaskHandler):
         self.koji_url = cfg["koji"]["url"]
         self.client = Client(self.composer_url)
 
+        self.logger.debug("composer: %s", self.composer_url)
+        self.logger.debug("koji: %s", self.composer_url)
+
         composer = cfg["composer"]
 
         if "ssl_cert" in composer:
             data = cfg["composer"]["ssl_cert"]
             cert = self.client.parse_certs(data)
             self.client.http.cert = cert
+            self.logger.debug("ssl cert: %s", cert)
 
         if "ssl_verify" in composer:
             try:
@@ -240,6 +244,8 @@ class OSBuildImage(BaseTaskHandler):
                 val = composer["ssl_verify"]
 
             self.client.http.verify = val
+            self.logger.debug("ssl verify: %s", val)
+
 
     @staticmethod
     def arches_for_config(buildconfig: Dict):
@@ -308,11 +314,13 @@ class OSBuildImage(BaseTaskHandler):
         # Setup down, talk to composer to create the compose
         kojidata = ComposeRequest.Koji(self.koji_url, self.id)
         cid, bid = client.compose_create(nvr, distro, ireqs, kojidata)
-        self.logger.info("Compose id: %s", cid)
+        self.logger.info("Compose id: %s, Koji build id: %s", cid, bid)
 
         self.logger.debug("Waiting for comose to finish")
         status = client.wait_for_compose(cid)
 
+        self.logger.debug("Compose finished: %s", str(status))
+        self.logger.info("Compose result: %s", status.status)
 
         result = {
             "status": status.status,
