@@ -358,6 +358,33 @@ class TestBuilderPlugin(PluginTest):
             self.assertEqual(have, repos)
 
     @httpretty.activate
+    def test_compose_failure(self):
+        # Simulate a failed compose, check exception is raised
+        session = self.mock_session()
+        options = self.mock_options()
+
+        handler = self.plugin.OSBuildImage(1,
+                                           "osbuildImage",
+                                           "params",
+                                           session,
+                                           options)
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                ["x86_64"],
+                {}]
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        composer.status = "failure"
+
+        with self.assertRaises(koji.BuildError):
+            handler.handler(*args)
+
+    @httpretty.activate
     def test_cli_compose_success(self):
         # Check the basic usage of the plugin as a stand-alone client
         # for the osbuild-composer API
