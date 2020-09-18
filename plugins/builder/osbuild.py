@@ -17,6 +17,8 @@ alone client for composer's API.
 
 import configparser
 import enum
+import io
+import json
 import sys
 import time
 import urllib.parse
@@ -27,6 +29,7 @@ from typing import Dict, List
 import requests
 import koji
 
+from koji.daemon import fast_incremental_upload
 from koji.tasks import BaseTaskHandler
 
 
@@ -246,6 +249,17 @@ class OSBuildImage(BaseTaskHandler):
             self.client.http.verify = val
             self.logger.debug("ssl verify: %s", val)
 
+    def upload_meta_data(self, data: Dict, name: str):
+        fd = io.StringIO()
+        json.dump(data, fd, indent=4, sort_keys=True)
+        fd.seek(0)
+        path = koji.pathinfo.taskrelpath(self.id)
+        fast_incremental_upload(self.session,
+                                name + ".json",
+                                fd,
+                                path,
+                                3,  # retries
+                                self.logger)
 
     @staticmethod
     def arches_for_config(buildconfig: Dict):
@@ -314,6 +328,9 @@ class OSBuildImage(BaseTaskHandler):
         # Setup done, create the compose request and send it off
         kojidata = ComposeRequest.Koji(self.koji_url, self.id)
         request = ComposeRequest(nvr, distro, ireqs, kojidata)
+
+        self.upload_meta_data(request.as_dict(), "compose-request")
+
         cid, bid = client.compose_create(request)
         self.logger.info("Compose id: %s, Koji build id: %s", cid, bid)
 
