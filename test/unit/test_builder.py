@@ -24,6 +24,7 @@ class MockComposer:
         self.composes = {}
         self.errors = []
         self.build_id = 1
+        self.status = "success"
 
     def httpretty_regsiter(self):
         httpretty.register_uri(
@@ -62,7 +63,7 @@ class MockComposer:
         self.composes[compose_id] = {
             "request": js,
             "result": compose,
-            "status": "success",
+            "status": self.status,
         }
 
         httpretty.register_uri(
