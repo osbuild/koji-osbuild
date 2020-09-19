@@ -178,7 +178,7 @@ class Client:
         res = self.http.post(url, json=cro.as_dict())
 
         if res.status_code != 201:
-            body = res.content.strip()
+            body = res.content.decode("utf-8").strip()
             msg = f"Failed to create the compose request: {body}"
             raise koji.GenericError(msg) from None
 
@@ -192,7 +192,7 @@ class Client:
         res = self.http.get(url)
 
         if res.status_code != 200:
-            body = res.content.strip()
+            body = res.content.decode("utf-8").strip()
             msg = f"Failed to get the compose status: {body}"
             raise koji.GenericError(msg) from None
 
