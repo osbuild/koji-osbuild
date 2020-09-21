@@ -91,8 +91,39 @@ class MockComposer:
         return [200, response_headers, json.dumps(result)]
 
 
+class UploadTracker:
+    """Mock koji file uploading and keep track of uploaded files
+
+    This assumes that `fast_incremental_upload` will be imported
+    directly into the plugin namespace.
+    """
+
+    def __init__(self):
+        self.uploads = {}
+
+    def patch(self, plugin):
+        setattr(plugin,
+                "fast_incremental_upload",
+                self._fast_incremental_upload)
+
+    def _fast_incremental_upload(self, _session, name, fd, path, _tries, _log):
+        upload = self.uploads.get(name, {"path": path})
+        fd.seek(0, os.SEEK_END)
+        upload["pos"] = fd.tell()
+        self.uploads[name] = upload
+
+    def assert_upload(self, name):
+        if name not in self.uploads:
+            raise AssertionError(f"Upload {name} missing")
+
+
 @PluginTest.load_plugin("builder")
 class TestBuilderPlugin(PluginTest):
+
+    def setUp(self):
+        super().setUp()
+        self.uploads = UploadTracker()
+        self.uploads.patch(self.plugin)
 
     @staticmethod
     def mock_session():
