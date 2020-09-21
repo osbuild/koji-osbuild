@@ -353,6 +353,8 @@ class TestBuilderPlugin(PluginTest):
         with self.assertRaises(koji.GenericError):
             handler.handler(*args)
 
+        self.uploads.assert_upload("compose-request.json")
+
     @httpretty.activate
     def test_compose_success(self):
         # Simulate a successful compose, check return value
@@ -388,6 +390,8 @@ class TestBuilderPlugin(PluginTest):
             have = [r["baseurl"] for r in ir["repositories"]]
             self.assertEqual(have, repos)
 
+        self.uploads.assert_upload("compose-request.json")
+
     @httpretty.activate
     def test_compose_failure(self):
         # Simulate a failed compose, check exception is raised
@@ -414,6 +418,8 @@ class TestBuilderPlugin(PluginTest):
 
         with self.assertRaises(koji.BuildError):
             handler.handler(*args)
+
+        self.uploads.assert_upload("compose-request.json")
 
     @httpretty.activate
     def test_cli_compose_success(self):
