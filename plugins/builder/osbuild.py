@@ -283,6 +283,22 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("user repo override: %s", str(repos))
         return [Repository(r) for r in repos]
 
+    def tag_build(self, tag, build_id):
+        args = [
+            tag,       # tag id
+            build_id,  # build id
+            False,     # force
+            None,      # from tag
+            True       # ignore_success (not sending notification)
+        ]
+
+        task = self.session.host.subtask(method='tagBuild',
+                                         arglist=args,
+                                         label='tag',
+                                         parent=self.id,
+                                         arch='noarch')
+        self.wait(task)
+
     # pylint: disable=arguments-differ
     def handler(self, name, version, distro, image_types, target, arches, opts):
         """Main entry point for the task"""
@@ -342,6 +358,8 @@ class OSBuildImage(BaseTaskHandler):
 
         if not status.is_success:
             raise koji.BuildError(f"Compose failed (id: {cid})")
+
+        self.tag_build(target_info["dest_tag"], bid)
 
         result = {
             "composer": {
