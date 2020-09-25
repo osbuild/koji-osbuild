@@ -5,7 +5,7 @@
 To support local development an container `test/Dockerfile` contains
 the environment to test all three plugins. It can be built and run
 via `./run-test.sh`. This will execute the unit tests as well as
-run pylint and ShellCheck on the source code.
+run `pylint` and ShellCheck on the source code.
 
 ## Local integration testing
 
@@ -37,7 +37,7 @@ the koji builder to authorize itself to koji hub.
 sudo ./run-koji-container.sh start
 ```
 
-Koji web will now be running at: http://localhost/koji/
+Koji web will now be running at: http://localhost:8080/koji/
 
 
 Copy the credentials: The TLS certificates for the koji builder plugin
@@ -57,6 +57,16 @@ the container stopped via `ctrl+c`.
 
 ```
 sudo ./run-builder.sh fg
+```
+
+Verify we can talk to koji hub via the koji command line client:
+
+```
+$ koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
+grüezi, osbuild!
+
+You are using the hub at http://localhost:8080/kojihub
+Authenticated via password
 ```
 
 ### Setup the tags
@@ -92,7 +102,7 @@ ln -s plugins/cli/osbuild.py \
 Now that all is setup a build can be created via:
 
 ```
-koji --server=http://localhost/kojihub \
+koji --server=http://localhost:8080/kojihub \
      --user=kojiadmin \
 	 --password=kojipass \
 	 --authtype=password \
@@ -105,6 +115,38 @@ koji --server=http://localhost/kojihub \
 	 --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/32/Everything/$arch/os/' \
 	 --image-type qcow2 \
 	 --release 1
+```
+
+### Troubleshooting
+
+Check logs:
+
+```
+sudo podman logs org.osbuild.koji.koji  # koji hub
+sudo podman logs org.osbuild.koji.kdc   # kerberos kdc
+```
+
+Execute into the container:
+
+```
+sudo podman exec -it org.osbuild.koji.koji /bin/bash
+sudo podman exec -it org.osbuild.koji.kdc /bin/bash
+sudo podman exec -it org.osbuild.koji.kojid /bin/bash
+```
+
+### Cleanup
+
+Stopping the container:
+
+```
+sudo ./run-koji-container.sh stop
+
+```
+
+Cleanup of kerberos tickets:
+```
+sudo kdestroy -A
+sudo -u _osbuild-composer kdestroy -A
 ```
 
 ## Useful links
