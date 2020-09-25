@@ -457,6 +457,9 @@ class TestBuilderPlugin(PluginTest):
             self.assertEqual(have, repos)
 
         self.uploads.assert_upload("compose-request.json")
+        build_id = res["koji"]["build"]
+        # build should have been tagged
+        self.assertIn(build_id, session.host.tags)
 
     @httpretty.activate
     def test_compose_failure(self):
