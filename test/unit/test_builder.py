@@ -489,6 +489,8 @@ class TestBuilderPlugin(PluginTest):
             handler.handler(*args)
 
         self.uploads.assert_upload("compose-request.json")
+        # build must not have been tagged
+        self.assertEqual(len(session.host.tags), 0)
 
     @httpretty.activate
     def test_cli_compose_success(self):
