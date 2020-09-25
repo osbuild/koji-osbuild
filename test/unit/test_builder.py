@@ -117,6 +117,70 @@ class UploadTracker:
             raise AssertionError(f"Upload {name} missing")
 
 
+class MockHost:
+    """Mock for the HostExport koji class
+
+    HostExport has the builder specific XML-RPC methods. This mocks a
+    small subset of it. Currently the methods to support tagging a
+    build are supported.
+    The `tags` property, a mapping from build it to a list of tag ids,
+    can be used see what tags were applied to a build id.
+    """
+    def __init__(self):
+        self.tasks = {}
+        self.waitset = {}
+        self.count = 0
+        self.tags = {}
+
+    def subtask(self, method, arglist, parent, **opts):
+        if method != "tagBuild":
+            raise ValueError(f"{method} not mocked")
+
+        task = {
+            "method": method,
+            "parent": parent,
+            "arglist": arglist,
+            "opts": opts,
+            "result": True
+        }
+
+        self._tag_build(task)
+
+        self.count += 1
+        task_id = self.count
+        self.tasks[task_id] = task
+
+    def taskSetWait(self, parent, tasks):
+        if tasks is None:
+            tasks = [k for k, v in self.tasks.items() if v["parent"] == parent]
+        self.waitset[parent] = tasks
+
+    def taskWait(self, parent):
+        tasks = self.waitset[parent]
+        return tasks, []
+
+    def taskWaitResults(self, parent, tasks, canfail=None):
+        if canfail is None:
+            canfail = []
+        waitset = self.waitset[parent]
+        selected = [t for t in waitset if t in tasks]
+        res = {t: self.tasks[t]["result"] for t in selected}
+        return res
+
+    def _tag_build(self, task):
+        assert task["parent"], "tagBuild: need parent"
+        args = task["arglist"]
+        assert 2 < len(args) < 6, "tagBuild: wrong argument number"
+        tag = args[0]
+        build = args[1]
+        assert isinstance(tag, int), "tagBuild: tag id not int"
+        assert isinstance(build, int), "tagBuild: build id not int"
+
+        tags = self.tags.get(build, [])
+        tags += [tag]
+        self.tags[build] = tags
+
+
 @PluginTest.load_plugin("builder")
 class TestBuilderPlugin(PluginTest):
 
@@ -127,7 +191,9 @@ class TestBuilderPlugin(PluginTest):
 
     @staticmethod
     def mock_session():
-        session = flexmock()
+
+        host = MockHost()
+        session = flexmock(host=host)
 
         build_target = {
             "build_tag": 23,
