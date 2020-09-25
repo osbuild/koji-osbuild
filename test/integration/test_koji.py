@@ -55,7 +55,7 @@ class TestIntegration(unittest.TestCase):
 
     def setUp(self):
         global_args = dict(
-            server="http://localhost/kojihub",
+            server="http://localhost:8080/kojihub",
             user="kojiadmin",
             password="kojipass",
             authtype="password")

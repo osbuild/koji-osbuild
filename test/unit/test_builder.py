@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+import urllib.parse
 import uuid
 import unittest.mock
 from flexmock import flexmock
@@ -17,9 +18,12 @@ import httpretty
 from plugintest import PluginTest
 
 
+API_BASE = "api/composer-koji/v1/"
+
+
 class MockComposer:
     def __init__(self, url, *, architectures=["x86_64"]):
-        self.url = url
+        self.url = urllib.parse.urljoin(url, API_BASE)
         self.architectures = architectures[:]
         self.composes = {}
         self.errors = []
@@ -29,7 +33,7 @@ class MockComposer:
     def httpretty_regsiter(self):
         httpretty.register_uri(
             httpretty.POST,
-            self.url + "compose",
+            urllib.parse.urljoin(self.url, "compose"),
             body=self.compose_create
         )
 
@@ -68,7 +72,7 @@ class MockComposer:
 
         httpretty.register_uri(
             httpretty.GET,
-            self.url + "compose/" + compose_id,
+            urllib.parse.urljoin(self.url, "compose/" + compose_id),
             body=self.compose_status
         )
 
