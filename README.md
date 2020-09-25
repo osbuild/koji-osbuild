@@ -14,11 +14,3 @@ plugins:
 ## Development
 
 See [`HACKING.md`](HACKING.md) for how to develop and test this project.
-
-### Useful links
-
-- [koji source](https://pagure.io/koji/tree/master)
-- [koji plugin howto](https://docs.pagure.org/koji/writing_a_plugin/)
-- [koji server howto](https://docs.pagure.org/koji/server_howto/)
-- [koji server bootstrap](https://docs.pagure.org/koji/server_bootstrap/)
-- [osbs koji plugin](https://github.com/containerbuildsystem/koji-containerbuild/)
