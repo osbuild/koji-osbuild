@@ -33,13 +33,14 @@ from koji.daemon import fast_incremental_upload
 from koji.tasks import BaseTaskHandler
 
 
-DEFAULT_COMPOSER_URL = "http://localhost:8701/"
+DEFAULT_COMPOSER_URL = "https://localhost"
 DEFAULT_KOJIHUB_URL = "https://localhost/kojihub"
 DEFAULT_CONFIG_FILES = [
     "/usr/share/koji-osbuild/builder.conf",
     "/etc/koji-osbuild/builder.conf"
 ]
 
+API_BASE = "api/composer-koji/v1/"
 
 # The following classes are a implementation of osbuild composer's
 # koji API. It is based on the corresponding OpenAPI specification
@@ -159,7 +160,8 @@ class ComposeStatus:
 
 class Client:
     def __init__(self, url):
-        self.url = url
+        self.server = url
+        self.url = urllib.parse.urljoin(url, API_BASE)
         self.http = requests.Session()
 
     @staticmethod
@@ -175,7 +177,7 @@ class Client:
         return certs
 
     def compose_create(self, compose_request: ComposeRequest):
-        url = urllib.parse.urljoin(self.url, f"/compose")
+        url = urllib.parse.urljoin(self.url, "compose")
 
         data = compose_request.as_dict()
         res = self.http.post(url, json=data)
@@ -190,7 +192,7 @@ class Client:
         return compose_id, koji_build_id
 
     def compose_status(self, compose_id: str):
-        url = urllib.parse.urljoin(self.url, f"/compose/{compose_id}")
+        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}")
 
         res = self.http.get(url)
 

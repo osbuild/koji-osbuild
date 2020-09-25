@@ -56,7 +56,7 @@ greenprint "Copying credentials and certificates"
 sudo test/copy-creds.sh
 
 greenprint "Testing Koji hub API access"
-koji --server=http://localhost/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
+koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
 
 greenprint "Starting koji builder"
 sudo ./run-builder.sh start
