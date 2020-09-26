@@ -18,12 +18,13 @@ Make certificates for osbuild-composer. This is needed to authorize
 clients to use the composer API. There is a script that will create
 the certificates and also copy it to the correct places in `/etc`.
 
-```
+```sh
 sudo test/make-certs.sh
 ```
 
 Build the containers:
-```
+
+```sh
 sudo test/build-container.sh
 ```
 
@@ -33,7 +34,7 @@ Run the infra containers, i.e. the database server, the kerberos kdc,
 and koji hub. This will also create the kerberos keytabs needed for
 the koji builder to authorize itself to koji hub.
 
-```
+```sh
 sudo ./run-koji-container.sh start
 ```
 
@@ -45,7 +46,7 @@ to make authorize requests to composer and the kerberos keytabs
 needed for composer and worker (of composer) to reserve and import the
 build via the koji XML RPC.
 
-```
+```sh
 sudo  test/copy-creds.sh
 ```
 
@@ -55,13 +56,13 @@ Run the koji builder instance can be started. Here `fg` means that
 it will be running in the foreground, so logs can be inspected and
 the container stopped via `ctrl+c`.
 
-```
+```sh
 sudo ./run-builder.sh fg
 ```
 
 Verify we can talk to koji hub via the koji command line client:
 
-```
+```sh
 $ koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
 grüezi, osbuild!
 
@@ -81,7 +82,7 @@ Specifically:
 A helper script will create a minimum set that is necessary to build
 an image call `Fedora-Cloud` for `f32-candidate`:
 
-```
+```sh
 ./make-tags.sh
 ```
 
@@ -91,7 +92,7 @@ The client plugin needs to be installed either by creating the RPMs
 first via meson, or via a symlink from the checkout to the koji cli
 plugin directory:
 
-```
+```sh
 mkdir -p /usr/lib/python3.8/site-packages/koji/koji_cli_plugins/
 ln -s plugins/cli/osbuild.py \
 	  /usr/lib/python3.8/site-packages/koji/koji_cli_plugins/osbuild.py
@@ -101,7 +102,7 @@ ln -s plugins/cli/osbuild.py \
 
 Now that all is setup a build can be created via:
 
-```
+```sh
 koji --server=http://localhost:8080/kojihub \
      --user=kojiadmin \
 	 --password=kojipass \
@@ -121,14 +122,14 @@ koji --server=http://localhost:8080/kojihub \
 
 Check logs:
 
-```
+```sh
 sudo podman logs org.osbuild.koji.koji  # koji hub
 sudo podman logs org.osbuild.koji.kdc   # kerberos kdc
 ```
 
 Execute into the container:
 
-```
+```sh
 sudo podman exec -it org.osbuild.koji.koji /bin/bash
 sudo podman exec -it org.osbuild.koji.kdc /bin/bash
 sudo podman exec -it org.osbuild.koji.kojid /bin/bash
@@ -138,13 +139,12 @@ sudo podman exec -it org.osbuild.koji.kojid /bin/bash
 
 Stopping the container:
 
-```
+```sh
 sudo ./run-koji-container.sh stop
-
 ```
 
 Cleanup of kerberos tickets:
-```
+```sh
 sudo kdestroy -A
 sudo -u _osbuild-composer kdestroy -A
 ```
