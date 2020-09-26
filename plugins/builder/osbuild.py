@@ -221,14 +221,14 @@ class OSBuildImage(BaseTaskHandler):
 
         cfg = configparser.ConfigParser()
         cfg.read_dict({
-            "composer": {"url": DEFAULT_COMPOSER_URL},
-            "koji": {"url": DEFAULT_KOJIHUB_URL}
+            "composer": {"server": DEFAULT_COMPOSER_URL},
+            "koji": {"server": DEFAULT_KOJIHUB_URL}
         })
 
         cfg.read(DEFAULT_CONFIG_FILES)
 
-        self.composer_url = cfg["composer"]["url"]
-        self.koji_url = cfg["koji"]["url"]
+        self.composer_url = cfg["composer"]["server"]
+        self.koji_url = cfg["koji"]["server"]
         self.client = Client(self.composer_url)
 
         self.logger.debug("composer: %s", self.composer_url)

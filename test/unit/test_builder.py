@@ -267,12 +267,12 @@ class TestBuilderPlugin(PluginTest):
 
             cfg = configparser.ConfigParser()
             cfg["composer"] = {
-                "url": composer_url,
+                "server": composer_url,
                 "ssl_cert": ssl_cert,
                 "ssl_verify": ssl_verify
             }
             cfg["koji"] = {
-                "url": koji_url
+                "server": koji_url
             }
 
             cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
