@@ -1,3 +1,15 @@
+# Patches
+
+Patches should be submitted in the form of pull requests at
+[github][github].
+
+# Coding style
+
+Standard PEP-8 formatting is used project wide for Python, with a few
+relaxations, like maximum line length (120). A pylint config file
+[`.pylintrc`](.pylintrc) is provided. The `./run-test.sh` will lint
+the source code using this (see *Testing* below).
+
 # Testing
 
 ## Unit tests
@@ -156,3 +168,5 @@ sudo -u _osbuild-composer kdestroy -A
 - [koji server howto](https://docs.pagure.org/koji/server_howto/)
 - [koji server bootstrap](https://docs.pagure.org/koji/server_bootstrap/)
 - [osbs koji plugin](https://github.com/containerbuildsystem/koji-containerbuild/)
+
+[github][https://github.com/osbuild/koji-osbuild]
