@@ -11,9 +11,9 @@ if [ $UID != 0 ]; then
 fi
 
 # decide whether podman or docker should be used
-if which podman 2>/dev/null >&2; then
+if command -v podman 2>/dev/null >&2; then
   CONTAINER_RUNTIME=podman
-elif which docker 2>/dev/null >&2; then
+elif command -v docker 2>/dev/null >&2; then
   CONTAINER_RUNTIME=docker
 else
   echo No container runtime found, install podman or docker.
