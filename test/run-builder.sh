@@ -28,7 +28,7 @@ builder_start() {
     --name org.osbuild.koji.builder --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
     -v "${DATA_DIR}:/mnt:z" \
-    -v "${PWD}/container/builder/osbuild-koji.conf:/etc/koji-osbuild/builder.conf:z" \
+    -v "${PWD}/test/container/builder/osbuild-koji.conf:/etc/koji-osbuild/builder.conf:z" \
     --hostname org.osbuild.koji.kojid \
     --add-host=composer:${GATEWAY_IP} \
     koji.builder
