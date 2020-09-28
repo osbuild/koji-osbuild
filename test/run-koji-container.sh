@@ -2,7 +2,7 @@
 set -eu
 
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
-DATA_DIR=/var/tmp/osbuild-koji-data
+DATA_DIR=${DATA_DIR:-/var/tmp/osbuild-koji-data}
 
 KOJI_HUB_IMAGE=koji.hub
 
