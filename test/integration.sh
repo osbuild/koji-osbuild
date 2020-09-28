@@ -47,7 +47,7 @@ sudo podman build -t koji.hub -f container/hub/Dockerfile.${ID} .
 sudo podman build -t koji.builder -f container/builder/Dockerfile.${ID} .
 
 greenprint "Starting containers"
-sudo ./run-koji-container.sh start
+sudo test/run-koji-container.sh start
 
 greenprint "Print logs"
 sudo podman logs org.osbuild.koji.koji
@@ -71,7 +71,7 @@ greenprint "Stopping koji builder"
 sudo ./run-builder.sh stop
 
 greenprint "Stopping containers"
-sudo ./run-koji-container.sh stop
+sudo test/run-koji-container.sh stop
 
 greenprint "Removing generated CA cert"
 sudo rm \

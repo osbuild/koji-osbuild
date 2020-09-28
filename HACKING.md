@@ -47,7 +47,7 @@ and koji hub. This will also create the kerberos keytabs needed for
 the koji builder to authorize itself to koji hub.
 
 ```sh
-sudo ./run-koji-container.sh start
+sudo test/run-koji-container.sh start
 ```
 
 Koji web will now be running at: http://localhost:8080/koji/
@@ -152,7 +152,7 @@ sudo podman exec -it org.osbuild.koji.kojid /bin/bash
 Stopping the container:
 
 ```sh
-sudo ./run-koji-container.sh stop
+sudo test/run-koji-container.sh stop
 ```
 
 Cleanup of kerberos tickets:
