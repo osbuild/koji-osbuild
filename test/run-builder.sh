@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
-DATA_DIR=/var/tmp/osbuild-koji-data
+DATA_DIR=${DATA_DIR:-/var/tmp/osbuild-koji-data}
 
 # this script must be run as root
 if [ $UID != 0 ]; then
