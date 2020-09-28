@@ -396,14 +396,7 @@ class TestBuilderPlugin(PluginTest):
     @httpretty.activate
     def test_bad_request(self):
         # Simulate a bad request by asking for an unsupported architecture
-        session = self.mock_session()
-        options = self.mock_options()
-
-        handler = self.plugin.OSBuildImage(1,
-                                           "osbuildImage",
-                                           "params",
-                                           session,
-                                           options)
+        handler = self.make_handler()
 
         args = ["name", "version", "distro",
                 ["image_type"],
@@ -424,13 +417,7 @@ class TestBuilderPlugin(PluginTest):
     def test_compose_success(self):
         # Simulate a successful compose, check return value
         session = self.mock_session()
-        options = self.mock_options()
-
-        handler = self.plugin.OSBuildImage(1,
-                                           "osbuildImage",
-                                           "params",
-                                           session,
-                                           options)
+        handler = self.make_handler(session=session)
 
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
@@ -464,13 +451,7 @@ class TestBuilderPlugin(PluginTest):
     def test_compose_failure(self):
         # Simulate a failed compose, check exception is raised
         session = self.mock_session()
-        options = self.mock_options()
-
-        handler = self.plugin.OSBuildImage(1,
-                                           "osbuildImage",
-                                           "params",
-                                           session,
-                                           options)
+        handler = self.make_handler(session=session)
 
         args = ["name", "version", "distro",
                 ["image_type"],
