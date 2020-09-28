@@ -280,86 +280,56 @@ class TestBuilderPlugin(PluginTest):
             return creator()
 
     def test_plugin_config(self):
-        session = flexmock()
-        options = self.mock_options()
 
         composer_url = "https://image-builder.osbuild.org:2323"
         koji_url = "https://koji.osbuild.org/kojihub"
         certs = ["crt", "key"]
         ssl_cert = ", ".join(certs)
         ssl_verify = False
-        with tempfile.TemporaryDirectory() as tmp:
 
-            cfg = configparser.ConfigParser()
-            cfg["composer"] = {
-                "server": composer_url,
-                "ssl_cert": ssl_cert,
-                "ssl_verify": ssl_verify
-            }
-            cfg["koji"] = {
-                "server": koji_url
-            }
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+            "ssl_cert": ssl_cert,
+            "ssl_verify": ssl_verify
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
 
-            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
-            with open(cfgfile, 'w') as f:
-                cfg.write(f)
 
-            self.plugin.DEFAULT_CONFIG_FILES = [cfgfile]
-            handler = self.plugin.OSBuildImage(1,
-                                               "osbuildImage",
-                                               "params",
-                                               session,
-                                               options)
+        handler = self.make_handler(config=cfg)
 
-            self.assertEqual(handler.composer_url, composer_url)
-            self.assertEqual(handler.koji_url, koji_url)
-            session = handler.client.http
-            self.assertEqual(session.cert, certs)
-            self.assertEqual(session.verify, ssl_verify)
+        self.assertEqual(handler.composer_url, composer_url)
+        self.assertEqual(handler.koji_url, koji_url)
+        session = handler.client.http
+        self.assertEqual(session.cert, certs)
+        self.assertEqual(session.verify, ssl_verify)
 
-            # check we can handle a path in ssl_verify
-            ssl_verify = "/a/path/to/a/ca"
-            cfg["composer"]["ssl_verify"] = ssl_verify
-            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
-            with open(cfgfile, 'w') as f:
-                cfg.write(f)
+        # check we can handle a path in ssl_verify
+        ssl_verify = "/a/path/to/a/ca"
+        cfg["composer"]["ssl_verify"] = ssl_verify
 
-            handler = self.plugin.OSBuildImage(1,
-                                               "osbuildImage",
-                                               "params",
-                                               session,
-                                               options)
-            session = handler.client.http
-            self.assertEqual(session.verify, ssl_verify)
+        handler = self.make_handler(config=cfg)
 
-            # check we can handle a plain ssl_cert string
-            ssl_cert = "/a/path/to/a/cert"
-            cfg["composer"]["ssl_cert"] = ssl_cert
-            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
-            with open(cfgfile, 'w') as f:
-                cfg.write(f)
+        session = handler.client.http
+        self.assertEqual(session.verify, ssl_verify)
 
-            handler = self.plugin.OSBuildImage(1,
-                                               "osbuildImage",
-                                               "params",
-                                               session,
-                                               options)
-            session = handler.client.http
-            self.assertEqual(session.cert, ssl_cert)
+        # check we can handle a plain ssl_cert string
+        ssl_cert = "/a/path/to/a/cert"
+        cfg["composer"]["ssl_cert"] = ssl_cert
 
-            # check we handle detect wrong cert configs, i.e.
-            # three certificate compoments
-            cfg["composer"]["ssl_cert"] = "1, 2, 3"
-            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
-            with open(cfgfile, 'w') as f:
-                cfg.write(f)
+        handler = self.make_handler(config=cfg)
 
-            with self.assertRaises(ValueError):
-                handler = self.plugin.OSBuildImage(1,
-                                                   "osbuildImage",
-                                                   "params",
-                                                   session,
-                                                   options)
+        session = handler.client.http
+        self.assertEqual(session.cert, ssl_cert)
+
+        # check we handle detect wrong cert configs, i.e.
+        # three certificate components
+        cfg["composer"]["ssl_cert"] = "1, 2, 3"
+
+        with self.assertRaises(ValueError):
+            self.make_handler(config=cfg)
 
     def test_unknown_build_target(self):
         session = flexmock()
