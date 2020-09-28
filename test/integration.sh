@@ -62,7 +62,7 @@ greenprint "Starting koji builder"
 sudo ./run-builder.sh start
 
 greenprint "Creating Koji tag infrastructure"
-./make-tags.sh
+test/make-tags.sh
 
 greenprint "Running integration tests"
 python3 -m unittest discover -v test/integration/

@@ -95,7 +95,7 @@ A helper script will create a minimum set that is necessary to build
 an image call `Fedora-Cloud` for `f32-candidate`:
 
 ```sh
-./make-tags.sh
+test/make-tags.sh
 ```
 
 ### Client plugin
