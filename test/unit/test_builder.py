@@ -254,6 +254,31 @@ class TestBuilderPlugin(PluginTest):
         )
         return options
 
+    def make_handler(self, *, config=None, session=None, options=None):
+        if not session:
+            session = self.mock_session()
+
+        if not options:
+            options = self.mock_options()
+
+        def creator():
+            return self.plugin.OSBuildImage(1,
+                                            "osbuildImage",
+                                            "params",
+                                            session,
+                                            options)
+
+        if not config:
+            return creator()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
+            with open(cfgfile, 'w') as f:
+                config.write(f)
+
+            self.plugin.DEFAULT_CONFIG_FILES = [cfgfile]
+            return creator()
+
     def test_plugin_config(self):
         session = flexmock()
         options = self.mock_options()
