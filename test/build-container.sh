@@ -11,8 +11,8 @@ source /etc/os-release
 
 podman build \
        -t koji.hub \
-       -f container/hub/Dockerfile.${ID} .
+       -f test/container/hub/Dockerfile.${ID} .
 
 podman build -t \
        koji.builder \
-       -f container/builder/Dockerfile.${ID} .
+       -f test/container/builder/Dockerfile.${ID} .

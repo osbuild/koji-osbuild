@@ -13,9 +13,9 @@ RUN dnf -y upgrade \
 	python3-requests \
 	&& dnf clean all
 
-COPY container/builder/kojid.conf /etc/kojid/kojid.conf
+COPY test/container/builder/kojid.conf /etc/kojid/kojid.conf
 COPY plugins/builder/osbuild.py /usr/lib/koji-builder-plugins/
-COPY container/builder/run-kojid.sh /app/run-kojid.sh
-COPY container/builder/osbuild.krb5.conf /etc/krb5.conf.d/
+COPY test/container/builder/run-kojid.sh /app/run-kojid.sh
+COPY test/container/builder/osbuild.krb5.conf /etc/krb5.conf.d/
 
 ENTRYPOINT /app/run-kojid.sh

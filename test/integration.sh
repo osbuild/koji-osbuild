@@ -43,8 +43,7 @@ greenprint "Creating composer SSL certificates"
 sudo test/make-certs.sh
 
 greenprint "Building containers"
-sudo podman build -t koji.hub -f container/hub/Dockerfile.${ID} .
-sudo podman build -t koji.builder -f container/builder/Dockerfile.${ID} .
+sudo test/build-container.sh
 
 greenprint "Starting containers"
 sudo test/run-koji-container.sh start
