@@ -69,7 +69,7 @@ it will be running in the foreground, so logs can be inspected and
 the container stopped via `ctrl+c`.
 
 ```sh
-sudo ./run-builder.sh fg
+sudo test/run-builder.sh fg
 ```
 
 Verify we can talk to koji hub via the koji command line client:

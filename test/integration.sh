@@ -59,7 +59,7 @@ greenprint "Testing Koji hub API access"
 koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
 
 greenprint "Starting koji builder"
-sudo ./run-builder.sh start
+sudo test/run-builder.sh start
 
 greenprint "Creating Koji tag infrastructure"
 test/make-tags.sh
@@ -68,7 +68,7 @@ greenprint "Running integration tests"
 python3 -m unittest discover -v test/integration/
 
 greenprint "Stopping koji builder"
-sudo ./run-builder.sh stop
+sudo test/run-builder.sh stop
 
 greenprint "Stopping containers"
 sudo test/run-koji-container.sh stop
