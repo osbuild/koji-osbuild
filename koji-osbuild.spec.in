@@ -1,5 +1,5 @@
 %global         commit @commit@
-%global         forgeurl https://github.com/gicmo/koji-osbuild
+%global         forgeurl https://github.com/osbuild/koji-osbuild
 
 Name:           koji-osbuild
 Version:        @version@
