@@ -10,7 +10,7 @@ This is done via three plugins:
  - Koji **builder** plugin: Handles `osbuildImage` Koji tasks and will talk
    to osbuild-composer to create new composes via composer's Koji API.
 
- - Koji **cli** plugin: Adds a new `osbuild-command` to the existing `koji`
+ - Koji **cli** plugin: Adds a new `osbuild-image` to the existing `koji`
    command line client. This will then use the new XMLRPC API to request a
    new compose.
 
