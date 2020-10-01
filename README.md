@@ -33,8 +33,8 @@ plugin is enabled by adding `osbuild` to the `Plugins` directive. The
 *builder*: configuration file at `/etc/kojid/kojid.conf`. Here `osbuild`
 needs to be added to the `plugin` directive.
 For an example, see the test container configuration files
-[`hub.conf`](test/container/hub/hub.conf`) for the hub and
-[`kojid.conf`](`container/builder/kojid.conf`) for the builder.
+[`hub.conf`](test/container/hub/hub.conf) for the hub and
+[`kojid.conf`](container/builder/kojid.conf) for the builder.
 
 Additionally, an osbuild-composer instance, at least version 21, with the
 koji API enabled needs to be running and reachable via TCP from the host
