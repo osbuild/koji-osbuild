@@ -25,10 +25,12 @@ sudo dnf -y install \
     koji-osbuild-cli \
     podman
 
+greenprint "Install the podman dnsname plugin"
 if [[ $ID == rhel ]]; then
-  greenprint "Tweaking podman, maybe."
   sudo cp schutzbot/vendor/87-podman-bridge.conflist /etc/cni/net.d/
   sudo cp schutzbot/vendor/dnsname /usr/libexec/cni/
+else
+  sudo dnf -y install podman-plugins
 fi
 
 greenprint "Fetching RPMs"
