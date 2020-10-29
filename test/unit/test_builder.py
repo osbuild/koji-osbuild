@@ -22,9 +22,9 @@ API_BASE = "api/composer-koji/v1/"
 
 
 class MockComposer:
-    def __init__(self, url, *, architectures=["x86_64"]):
+    def __init__(self, url, *, architectures=None):
         self.url = urllib.parse.urljoin(url, API_BASE)
-        self.architectures = architectures[:]
+        self.architectures = architectures or ["x86_64"]
         self.composes = {}
         self.errors = []
         self.build_id = 1
