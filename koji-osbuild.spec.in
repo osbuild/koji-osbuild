@@ -23,6 +23,7 @@ Koji integration for osbuild composer.
 Summary:        Koji hub plugin for osbuild composer integration
 Requires:       %{name} = %{version}-%{release}
 Requires:       koji-hub
+Requires:       python3-jsonschema
 
 %description    hub
 Koji hub plugin for osbuild composer integration.
