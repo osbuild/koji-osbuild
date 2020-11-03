@@ -1,5 +1,28 @@
 # koji-osuild  - Koji and OSBuild integration
 
+## CHANGES WITH 2:
+
+  * Fix the logic in the builder plugin that checks that
+    all requested architectures for a requested build are
+    indeed supported by the build tag. The existing check
+    had its operands mixed up.
+
+  * Fix the spec file so that the builder package now
+    depends on python3-jsonschema.
+
+  * Adapt the CI for a podman package change: previously
+    the podman-plugins package, which contains the dnsname
+    plugin, was automatically pulled in on Fedora. This
+    changed recently which in turn broke our Fedora
+    integration test. Explicitly install podman-plugins.
+
+  * CI: Integrate codespell spell-checking.
+
+  * Small fixes for the README.md.
+
+Contributions from: Christian Kellner, Tomas Kopecek
+
+— Berlin, 2020-11-03
 
 ## CHANGES WITH 1:
 
