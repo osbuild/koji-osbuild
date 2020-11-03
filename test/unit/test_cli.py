@@ -77,6 +77,14 @@ class TestCliPlugin(PluginTest):
 
         # check one successful invocation
         argv = ["name", "version", "distro", "target", "arch1"]
+
+        expected_args = ["name", "version", "distro",
+                         ['qcow2'], # the default image type
+                         "target",
+                         ['arch1']]
+
+        expected_opts = {}
+
         task_result = {"compose_id": "42", "build_id": 23}
         task_id = 1
         koji_lib = self.mock_koji_lib()
@@ -87,7 +95,7 @@ class TestCliPlugin(PluginTest):
         self.mock_session_add_valid_tag(session)
 
         session.should_receive("osbuildImage") \
-               .with_args(str, str, str, list, str, list, opts=dict) \
+               .with_args(*expected_args, opts=expected_opts) \
                .and_return(task_id) \
                .once()
 
