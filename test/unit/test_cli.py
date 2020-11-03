@@ -82,7 +82,8 @@ class TestCliPlugin(PluginTest):
             "name", "version", "distro", "target", "arch1",
             # optional keyword arguments
             "--repo", "https://first.repo",
-            "--repo", "https://second.repo"
+            "--repo", "https://second.repo",
+            "--release", "20200202.n2"
         ]
 
         expected_args = ["name", "version", "distro",
@@ -91,6 +92,7 @@ class TestCliPlugin(PluginTest):
                          ['arch1']]
 
         expected_opts = {
+            "release": "20200202.n2",
             "repo": ["https://first.repo", "https://second.repo"]
         }
 
