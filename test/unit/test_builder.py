@@ -213,7 +213,7 @@ class TestBuilderPlugin(PluginTest):
         }
 
         build_config = {
-            "arches": "x86_64"
+            "arches": "s390x aarch64 ppc64le x86_64"
         }
 
         repo_info = {
