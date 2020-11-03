@@ -76,14 +76,23 @@ class TestCliPlugin(PluginTest):
         f.close()
 
         # check one successful invocation
-        argv = ["name", "version", "distro", "target", "arch1"]
+
+        argv = [
+            # the required positional arguments
+            "name", "version", "distro", "target", "arch1",
+            # optional keyword arguments
+            "--repo", "https://first.repo",
+            "--repo", "https://second.repo"
+        ]
 
         expected_args = ["name", "version", "distro",
                          ['qcow2'], # the default image type
                          "target",
                          ['arch1']]
 
-        expected_opts = {}
+        expected_opts = {
+            "repo": ["https://first.repo", "https://second.repo"]
+        }
 
         task_result = {"compose_id": "42", "build_id": 23}
         task_id = 1
