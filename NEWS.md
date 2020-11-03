@@ -34,9 +34,7 @@
   * Detailed instructions on how to run a local test setup
     are included in `HACKING.md`.
 
-
 Contributions from: Christian Kellner, Lars Karlitski &
                     Tom Gundersen
-
 
 — Berlin, 2020-09-30
