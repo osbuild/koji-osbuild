@@ -105,9 +105,9 @@ first via meson, or via a symlink from the checkout to the koji cli
 plugin directory:
 
 ```sh
-mkdir -p /usr/lib/python3.8/site-packages/koji/koji_cli_plugins/
-ln -s plugins/cli/osbuild.py \
-	  /usr/lib/python3.8/site-packages/koji/koji_cli_plugins/osbuild.py
+mkdir -p /usr/lib/python3.8/site-packages/koji_cli_plugins/
+ln -s $(pwd)/plugins/cli/osbuild.py \
+	  /usr/lib/python3.8/site-packages/koji_cli_plugins/osbuild.py
 ```
 
 ### Making a build
