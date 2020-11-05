@@ -416,7 +416,9 @@ class OSBuildImage(BaseTaskHandler):
         if not status.is_success:
             raise koji.BuildError(f"Compose failed (id: {cid})")
 
-        self.tag_build(target_info["dest_tag"], bid)
+        # Build was successful, tag it
+        if not opts.get('skip_tag'):
+            self.tag_build(target_info["dest_tag"], bid)
 
         result = {
             "composer": {

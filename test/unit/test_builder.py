@@ -536,8 +536,34 @@ class TestBuilderPlugin(PluginTest):
         assert res, "invalid compose result"
 
         self.uploads.assert_upload("compose-request.json")
+
         with self.assertRaises(AssertionError):
             self.uploads.assert_upload("x86_64-image_type.log.json")
+
+    @httpretty.activate
+    def test_skip_tag(self):
+        # Simulate a successful compose, where the tagging
+        # should be skipped
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url)
+        composer.httpretty_regsiter()
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                composer.architectures,
+                {"skip_tag": True}]
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+
+        self.uploads.assert_upload("compose-request.json")
+
+        # build must *not* have been tagged
+        self.assertEqual(len(session.host.tags), 0)
 
     @httpretty.activate
     def test_cli_compose_success(self):
