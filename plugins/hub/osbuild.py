@@ -64,6 +64,10 @@ OSBUILD_IMAGE_SCHEMA = {
                 "release": {
                     "type": "string",
                     "description": "Release override"
+                },
+                "skip_tag": {
+                    "type": "boolean",
+                    "description": "Omit tagging the result"
                 }
             }
         }

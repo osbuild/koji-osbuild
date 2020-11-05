@@ -83,7 +83,8 @@ class TestCliPlugin(PluginTest):
             # optional keyword arguments
             "--repo", "https://first.repo",
             "--repo", "https://second.repo",
-            "--release", "20200202.n2"
+            "--release", "20200202.n2",
+            "--skip-tag"
         ]
 
         expected_args = ["name", "version", "distro",
@@ -93,7 +94,8 @@ class TestCliPlugin(PluginTest):
 
         expected_opts = {
             "release": "20200202.n2",
-            "repo": ["https://first.repo", "https://second.repo"]
+            "repo": ["https://first.repo", "https://second.repo"],
+            "skip_tag": True
         }
 
         task_result = {"compose_id": "42", "build_id": 23}

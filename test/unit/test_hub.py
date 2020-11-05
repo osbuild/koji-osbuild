@@ -43,7 +43,8 @@ class TestHubPlugin(PluginTest):
         context = self.mock_koji_context()
 
         opts = {"repo": ["repo1", "repo2"],
-                "release": "1.2.3"}
+                "release": "1.2.3",
+                "skip_tag": True}
         args = ["name", "version", "distro",
                 ["image_type"],
                 "target",

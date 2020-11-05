@@ -30,6 +30,8 @@ def parse_args(argv):
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: qcow2]',
                       type=str, action="append", default=[])
+    parser.add_option("--skip-tag", action="store_true",
+                      help=_("Do not attempt to tag package"))
     parser.add_option("--wait", action="store_true",
                       help=_("Wait on the image creation, even if running in the background"))
 
@@ -77,6 +79,9 @@ def handle_osbuild_image(options, session, argv):
 
     if args.repo:
         opts["repo"] = args.repo
+
+    if args.skip_tag:
+        opts["skip_tag"] = True
 
     # Do some early checks to be able to give quick feedback
     check_target(session, target)
