@@ -69,7 +69,7 @@ koji_start() {
     -e POSTGRES_USER=koji \
     -e POSTGRES_PASSWORD=kojipass \
     -e POSTGRES_DB=koji \
-    docker.io/library/postgres:12-alpine
+    quay.io/osbuild/postgres:v1
 
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.kdc \
     --hostname org.osbuild.koji.kdc \
