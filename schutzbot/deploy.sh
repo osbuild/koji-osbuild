@@ -62,8 +62,8 @@ sudo cp mock.repo /etc/yum.repos.d/
 sudo cp schutzbot/repos/${ID}/${VERSION_ID}/* /etc/yum.repos.d/
 
 # Install the Image Builder packages and the koji cli plugin.
-retry sudo dnf -y install osbuild-composer-koji koji-osbuild-cli
+retry sudo dnf -y install osbuild-composer koji-osbuild-cli
 
 # Start services.
 sudo systemctl enable --now osbuild-composer.socket
-sudo systemctl enable --now osbuild-composer-koji.socket
+sudo systemctl enable --now osbuild-composer-api.socket
