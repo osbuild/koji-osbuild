@@ -75,6 +75,5 @@ greenprint "Stopping containers"
 sudo test/run-koji-container.sh stop
 
 greenprint "Removing generated CA cert"
-sudo rm \
-    /etc/pki/ca-trust/source/anchors/koji-ca-crt.pem
+sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
 sudo update-ca-trust
