@@ -10,13 +10,7 @@ fi
 TEST_DATA=${TEST_DATA:-test/data}
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
 
-if [[ -f "/etc/osbuild-composer/client-key.pem" ]]; then
-  echo "Copying client certificates"
-
-  cp /etc/osbuild-composer/client-key.pem ${SHARE_DIR}
-  cp /etc/osbuild-composer/client-crt.pem ${SHARE_DIR}
-  cp /etc/osbuild-composer/ca-crt.pem ${SHARE_DIR}/client-ca.pem
-fi
+mkdir -p "${SHARE_DIR}"
 
 mkdir -p /etc/osbuild-composer
 mkdir -p /etc/osbuild-worker
@@ -39,9 +33,3 @@ cp ${TEST_DATA}/osbuild-worker.toml \
 echo "Copying system kerberos configuration"
 cp ${TEST_DATA}/krb5.local.conf \
    /etc/krb5.conf.d/local
-
-echo "Updating system trust chain"
-cp ${SHARE_DIR}/ca-crt.pem \
-   /etc/pki/ca-trust/source/anchors/koji-ca-crt.pem
-
-update-ca-trust

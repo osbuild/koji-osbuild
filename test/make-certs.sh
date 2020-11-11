@@ -40,6 +40,21 @@ openssl ca -config "$CONFIG" -batch \
         -in "${CA_DIR}/composer-csr.pem" \
         -out "${CA_DIR}/composer-crt.pem"
 
+# koji
+echo "-=[ koji"
+openssl genrsa -out ${CA_DIR}/koji-key.pem 2048
+openssl req -new -sha256 \
+        -config "${CONFIG}" \
+        -key ${CA_DIR}/koji-key.pem	\
+        -out ${CA_DIR}/koji-csr.pem \
+        -subj "/CN=localhost" \
+        -addext "subjectAltName=DNS.1:localhost,DNS.2:org.osbuild.koji.koji"
+
+openssl ca -config "$CONFIG" -batch \
+        -extensions osbuild_server_ext \
+        -in "${CA_DIR}/koji-csr.pem" \
+        -out "${CA_DIR}/koji-crt.pem"
+
 # client
 echo "-=[ client"
 openssl genrsa -out ${CA_DIR}/client-key.pem 2048
@@ -57,3 +72,9 @@ openssl ca -config "$CONFIG" -batch \
 
 # fix permissions for composer
 chown _osbuild-composer:_osbuild-composer ${CA_DIR}/composer-*
+
+echo "-=[ Updating system trust chain"
+cp ${CA_DIR}/ca-crt.pem \
+   /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
+
+update-ca-trust
