@@ -10,12 +10,12 @@ fi
 TEST_DATA=${TEST_DATA:-test/data}
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
 
-if [[ -f "/etc/osbuild-composer/worker-key.pem" ]]; then
-  echo "Copying worker certificates"
+if [[ -f "/etc/osbuild-composer/client-key.pem" ]]; then
+  echo "Copying client certificates"
 
-  cp /etc/osbuild-composer/worker-key.pem ${SHARE_DIR}
-  cp /etc/osbuild-composer/worker-crt.pem ${SHARE_DIR}
-  cp /etc/osbuild-composer/ca-crt.pem ${SHARE_DIR}/worker-ca.pem
+  cp /etc/osbuild-composer/client-key.pem ${SHARE_DIR}
+  cp /etc/osbuild-composer/client-crt.pem ${SHARE_DIR}
+  cp /etc/osbuild-composer/ca-crt.pem ${SHARE_DIR}/client-ca.pem
 fi
 
 mkdir -p /etc/osbuild-composer
