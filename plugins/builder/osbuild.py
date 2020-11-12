@@ -144,7 +144,9 @@ class ComposeStatus:
     def from_dict(cls, data: Dict):
         status = data["status"].lower()
         koji_task_id = data["koji_task_id"]
-        images = [ImageStatus(s["status"].lower()) for s in data["image_statuses"]]
+        images = [
+            ImageStatus(s["status"].lower()) for s in data["image_statuses"]
+        ]
         return cls(status, images, koji_task_id)
 
     def as_dict(self):
