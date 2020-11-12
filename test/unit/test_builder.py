@@ -89,7 +89,7 @@ class MockComposer:
             "status": compose["status"],
             "koji_task_id": compose["request"]["koji"]["task_id"],
             "image_statuses": [
-                {"status": compose["status"] for _ in ireqs}
+                {"status": compose["status"]} for _ in ireqs
             ]
         }
         return [200, response_headers, json.dumps(result)]
