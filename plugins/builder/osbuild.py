@@ -158,6 +158,16 @@ class ComposeStatus:
         return self.status in [self.SUCCESS]
 
 
+class ComposeLogs:
+    def __init__(self, image_logs: List):
+        self.image_logs = image_logs
+
+    @classmethod
+    def from_dict(cls, data: Dict):
+        image_logs = data["image_logs"]
+        return cls(image_logs)
+
+
 class Client:
     def __init__(self, url):
         self.server = url
@@ -202,6 +212,18 @@ class Client:
             raise koji.GenericError(msg) from None
 
         return ComposeStatus.from_dict(res.json())
+
+    def compose_logs(self, compose_id: str):
+        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/logs")
+
+        res = self.http.get(url)
+
+        if res.status_code != 200:
+            body = res.content.decode("utf-8").strip()
+            msg = f"Failed to get the compose logs: {body}"
+            raise koji.GenericError(msg) from None
+
+        return ComposeLogs.from_dict(res.json())
 
     def wait_for_compose(self, compose_id: str, *, sleep_time=2):
         while True:
@@ -262,6 +284,30 @@ class OSBuildImage(BaseTaskHandler):
                                 path,
                                 3,  # retries
                                 self.logger)
+
+    def attach_logs(self, compose_id: str, ireqs: ImageRequest):
+        self.logger.debug("Fetching logs")
+
+        try:
+            logs = self.client.compose_logs(compose_id)
+        except koji.GenericError as e:
+            self.logger.warning("Failed to fetch logs: %s", str(e))
+            return
+
+        ilogs = zip(logs.image_logs, ireqs)
+        for log, ireq in ilogs:
+            name = "%s-%s" % (ireq.architecture, ireq.image_type)
+            self.logger.debug("Uploading logs for %s", name)
+            fd = io.StringIO()
+            json.dump(log, fd, indent=4, sort_keys=True)
+            fd.seek(0)
+            path = koji.pathinfo.taskrelpath(self.id)
+            fast_incremental_upload(self.session,
+                                    name + ".log.json",
+                                    fd,
+                                    path,
+                                    3,  # retries
+                                    self.logger)
 
     @staticmethod
     def arches_for_config(buildconfig: Dict):
@@ -356,6 +402,8 @@ class OSBuildImage(BaseTaskHandler):
 
         self.logger.debug("Compose finished: %s", str(status))
         self.logger.info("Compose result: %s", status.status)
+
+        self.attach_logs(cid, ireqs)
 
         if not status.is_success:
             raise koji.BuildError(f"Compose failed (id: {cid})")
