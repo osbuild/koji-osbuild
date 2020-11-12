@@ -236,9 +236,12 @@ class Client:
 
         return ComposeLogs.from_dict(res.json())
 
-    def wait_for_compose(self, compose_id: str, *, sleep_time=2):
+    def wait_for_compose(self, compose_id: str, *, sleep_time=2, callback=None):
         while True:
             status = self.compose_status(compose_id)
+            if callback:
+                callback(status)
+
             if status.is_finished:
                 return status
 
@@ -349,6 +352,9 @@ class OSBuildImage(BaseTaskHandler):
                                          arch='noarch')
         self.wait(task)
 
+    def on_status_update(self, status: ComposeStatus):
+        self.upload_json(status.as_dict(), "compose-status")
+
     # pylint: disable=arguments-differ
     def handler(self, name, version, distro, image_types, target, arches, opts):
         """Main entry point for the task"""
@@ -400,12 +406,11 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.info("Compose id: %s, Koji build id: %s", cid, bid)
 
         self.logger.debug("Waiting for comose to finish")
-        status = client.wait_for_compose(cid)
+        status = client.wait_for_compose(cid, callback=self.on_status_update)
 
         self.logger.debug("Compose finished: %s", str(status.as_dict()))
         self.logger.info("Compose result: %s", status.status)
 
-        self.upload_json(status.as_dict(), "compose-status")
         self.attach_logs(cid, ireqs)
 
         if not status.is_success:
