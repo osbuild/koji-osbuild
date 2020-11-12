@@ -147,6 +147,15 @@ class ComposeStatus:
         images = [ImageStatus(s["status"].lower()) for s in data["image_statuses"]]
         return cls(status, images, koji_task_id)
 
+    def as_dict(self):
+        return {
+            "status": self.status,
+            "koji_task_id": self.koji_task_id,
+            "image_statuses": [
+                {"status": status.value} for status in self.images
+            ]
+        }
+
     @property
     def is_finished(self):
         if self.is_success:
@@ -391,7 +400,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Waiting for comose to finish")
         status = client.wait_for_compose(cid)
 
-        self.logger.debug("Compose finished: %s", str(status))
+        self.logger.debug("Compose finished: %s", str(status.as_dict()))
         self.logger.info("Compose result: %s", status.status)
 
         self.attach_logs(cid, ireqs)
