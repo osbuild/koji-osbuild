@@ -419,15 +419,16 @@ class TestBuilderPlugin(PluginTest):
         session = self.mock_session()
         handler = self.make_handler(session=session)
 
+        arches = ["x86_64", "s390x"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
                 ["image_type"],
                 "fedora-candidate",
-                ["x86_64"],
+                arches,
                 {"repo": repos}]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
-        composer = MockComposer(url, architectures=["x86_64"])
+        composer = MockComposer(url, architectures=arches)
         composer.httpretty_regsiter()
 
         res = handler.handler(*args)
@@ -437,8 +438,13 @@ class TestBuilderPlugin(PluginTest):
         self.assertIsNotNone(compose)
 
         ireqs = compose["request"]["image_requests"]
+
+        # Check we got all the requested architectures
+        ireq_arches = [i["architecture"] for i in ireqs]
+        diff = set(arches) ^ set(ireq_arches)
+        self.assertEqual(diff, set())
+
         for ir in ireqs:
-            self.assertEqual(ir["architecture"], "x86_64")
             have = [r["baseurl"] for r in ir["repositories"]]
             self.assertEqual(have, repos)
 
