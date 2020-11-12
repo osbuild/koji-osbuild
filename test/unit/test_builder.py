@@ -479,6 +479,7 @@ class TestBuilderPlugin(PluginTest):
         for arch in arches:
             self.uploads.assert_upload(f"{arch}-image_type.log.json")
         self.uploads.assert_upload("compose-request.json")
+        self.uploads.assert_upload("compose-status.json")
 
         build_id = res["koji"]["build"]
         # build should have been tagged
@@ -507,6 +508,7 @@ class TestBuilderPlugin(PluginTest):
 
         self.uploads.assert_upload("compose-request.json")
         self.uploads.assert_upload("x86_64-image_type.log.json")
+        self.uploads.assert_upload("compose-status.json")
         # build must not have been tagged
         self.assertEqual(len(session.host.tags), 0)
 
