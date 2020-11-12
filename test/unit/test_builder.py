@@ -29,6 +29,7 @@ class MockComposer:
         self.errors = []
         self.build_id = 1
         self.status = "success"
+        self.routes = {}
 
     def httpretty_regsiter(self):
         httpretty.register_uri(
@@ -68,12 +69,21 @@ class MockComposer:
             "request": js,
             "result": compose,
             "status": self.status,
+            "routes": {
+                "logs": 200
+            }
         }
 
         httpretty.register_uri(
             httpretty.GET,
             urllib.parse.urljoin(self.url, "compose/" + compose_id),
             body=self.compose_status
+        )
+
+        httpretty.register_uri(
+            httpretty.GET,
+            urllib.parse.urljoin(self.url, "compose/" + compose_id + "/logs"),
+            body=self.compose_logs
         )
 
         return [201, response_headers, json.dumps(compose)]
@@ -94,6 +104,23 @@ class MockComposer:
         }
         return [200, response_headers, json.dumps(result)]
 
+    def compose_logs(self, _request, uri, response_headers):
+        route = self.routes.get("logs")
+        if route and route["status"] != 200:
+            return [route["status"], response_headers, "Internal error"]
+
+        target = os.path.basename(os.path.dirname(uri))
+        compose = self.composes.get(target)
+        if not compose:
+            return [400, response_headers, f"Unknown compose: {target}"]
+
+        ireqs = compose["request"]["image_requests"]
+        result = {
+            "image_logs": [
+                {"osbuild": "log log log"} for _ in ireqs
+            ]
+        }
+        return [200, response_headers, json.dumps(result)]
 
 class UploadTracker:
     """Mock koji file uploading and keep track of uploaded files
@@ -448,7 +475,11 @@ class TestBuilderPlugin(PluginTest):
             have = [r["baseurl"] for r in ir["repositories"]]
             self.assertEqual(have, repos)
 
+        # check uploads: logs, compose request
+        for arch in arches:
+            self.uploads.assert_upload(f"{arch}-image_type.log.json")
         self.uploads.assert_upload("compose-request.json")
+
         build_id = res["koji"]["build"]
         # build should have been tagged
         self.assertIn(build_id, session.host.tags)
@@ -475,8 +506,36 @@ class TestBuilderPlugin(PluginTest):
             handler.handler(*args)
 
         self.uploads.assert_upload("compose-request.json")
+        self.uploads.assert_upload("x86_64-image_type.log.json")
         # build must not have been tagged
         self.assertEqual(len(session.host.tags), 0)
+
+    @httpretty.activate
+    def test_compose_no_logs(self):
+        # Simulate fetching the logs fails, a non-fatal issue
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url)
+        composer.httpretty_regsiter()
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                composer.architectures,
+                {}]
+
+        composer.routes["logs"] = {
+            "status": 500
+        }
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+
+        self.uploads.assert_upload("compose-request.json")
+        with self.assertRaises(AssertionError):
+            self.uploads.assert_upload("x86_64-image_type.log.json")
 
     @httpretty.activate
     def test_cli_compose_success(self):
