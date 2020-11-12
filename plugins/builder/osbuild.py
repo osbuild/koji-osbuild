@@ -405,6 +405,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Compose finished: %s", str(status.as_dict()))
         self.logger.info("Compose result: %s", status.status)
 
+        self.upload_json(status.as_dict(), "compose-status")
         self.attach_logs(cid, ireqs)
 
         if not status.is_success:
