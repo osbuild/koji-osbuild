@@ -318,8 +318,7 @@ class OSBuildImage(BaseTaskHandler):
 
         # Architectures
         tag_arches = self.arches_for_config(buildconfig)
-        arches = set(arches)
-        diff = arches - tag_arches
+        diff = set(arches) - tag_arches
         if diff:
             raise koji.BuildError("Unsupported architecture(s): " + str(diff))
 
