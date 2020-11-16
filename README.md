@@ -14,6 +14,10 @@ This is done via three plugins:
    command line client. This will then use the new XMLRPC API to request a
    new compose.
 
+The following image visualizes the overall architecture and integration
+points of `koji-osbuild` with `koji`/`brew` and Composer:
+
+![overview](docs/koji-osbuild.svg)
 
 ## Installation
 
