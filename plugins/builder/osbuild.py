@@ -177,13 +177,17 @@ class ComposeStatus:
 
 
 class ComposeLogs:
-    def __init__(self, image_logs: List):
+    def __init__(self, image_logs: List, import_logs, init_logs):
         self.image_logs = image_logs
+        self.koji_import_logs = import_logs
+        self.koji_init_logs = init_logs
 
     @classmethod
     def from_dict(cls, data: Dict):
         image_logs = data["image_logs"]
-        return cls(image_logs)
+        import_logs = data["koji_import_logs"]
+        init_logs = data["koji_init_logs"]
+        return cls(image_logs, import_logs, init_logs)
 
 
 class Client:
@@ -313,6 +317,12 @@ class OSBuildImage(BaseTaskHandler):
         except koji.GenericError as e:
             self.logger.warning("Failed to fetch logs: %s", str(e))
             return
+
+        if logs.koji_init_logs:
+            self.upload_json(logs.koji_init_logs, "koji-init.log")
+
+        if logs.koji_import_logs:
+            self.upload_json(logs.koji_import_logs, "koji-import.log")
 
         ilogs = zip(logs.image_logs, ireqs)
         for log, ireq in ilogs:

@@ -117,9 +117,11 @@ class MockComposer:
 
         ireqs = compose["request"]["image_requests"]
         result = {
+            "koji_init_logs": {"log": "yes, please!"},
             "image_logs": [
                 {"osbuild": "log log log"} for _ in ireqs
-            ]
+            ],
+            "koji_import_logs": {"log": "yes, indeed!"},
         }
         return [200, response_headers, json.dumps(result)]
 
@@ -481,6 +483,8 @@ class TestBuilderPlugin(PluginTest):
             self.uploads.assert_upload(f"{arch}-image_type.log.json")
         self.uploads.assert_upload("compose-request.json")
         self.uploads.assert_upload("compose-status.json")
+        self.uploads.assert_upload("koji-init.log.json")
+        self.uploads.assert_upload("koji-import.log.json")
 
         build_id = res["koji"]["build"]
         # build should have been tagged
