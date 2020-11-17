@@ -61,11 +61,11 @@ class MockComposer:
         compose_id = str(uuid.uuid4())
         build_id = self.next_build_id()
         compose = {
-            "id": compose_id,
-            "koji_build_id": build_id,
+            "id": compose_id
         }
 
         self.composes[compose_id] = {
+            "build_id": build_id,
             "request": js,
             "result": compose,
             "status": self.status,
@@ -98,6 +98,7 @@ class MockComposer:
         result = {
             "status": compose["status"],
             "koji_task_id": compose["request"]["koji"]["task_id"],
+            "koji_build_id": compose["build_id"],
             "image_statuses": [
                 {"status": compose["status"]} for _ in ireqs
             ]
