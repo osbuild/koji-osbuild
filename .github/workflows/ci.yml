@@ -10,7 +10,7 @@ jobs:
     - name: "Clone Repository"
       uses: actions/checkout@v2
     - name: "Run pylint"
-      uses: osbuild/koji-osbuild/test@master
+      uses: osbuild/koji-osbuild/test@main
       with:
         run: |
           pylint plugins/**/*.py test/**/*.py
@@ -22,7 +22,7 @@ jobs:
     - name: "Clone Repository"
       uses: actions/checkout@v2
     - name: "Run unit tests"
-      uses: osbuild/koji-osbuild/test@master
+      uses: osbuild/koji-osbuild/test@main
       with:
         run: |
           pytest --cov-report=xml --cov=osbuild test/unit/
