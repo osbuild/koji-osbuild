@@ -135,28 +135,35 @@ class ComposeStatus:
     PENDING = "pending"
     REGISTERING = "registering"
 
-    def __init__(self, status: str, images: List, koji_task_id: str):
+    def __init__(self, status: str, images: List, task_id: int, build_id):
         self.status = status
         self.images = images
-        self.koji_task_id = koji_task_id
+        self.koji_task_id = task_id
+        self.koji_build_id = build_id
 
     @classmethod
     def from_dict(cls, data: Dict):
         status = data["status"].lower()
         koji_task_id = data["koji_task_id"]
+        koji_build_id = data.get("koji_build_id")
         images = [
             ImageStatus(s["status"].lower()) for s in data["image_statuses"]
         ]
-        return cls(status, images, koji_task_id)
+        return cls(status, images, koji_task_id, koji_build_id)
 
     def as_dict(self):
-        return {
+        data = {
             "status": self.status,
             "koji_task_id": self.koji_task_id,
             "image_statuses": [
                 {"status": status.value} for status in self.images
             ]
         }
+
+        if self.koji_build_id is not None:
+            data["koji_build_id"] = self.koji_build_id
+
+        return data
 
     @property
     def is_finished(self):
@@ -209,8 +216,7 @@ class Client:
             raise koji.GenericError(msg) from None
 
         ps = res.json()
-        compose_id, koji_build_id = ps["id"], ps["koji_build_id"]
-        return compose_id, koji_build_id
+        return ps["id"]  # the compose id
 
     def compose_status(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"compose/{compose_id}")
@@ -402,8 +408,8 @@ class OSBuildImage(BaseTaskHandler):
 
         self.upload_json(request.as_dict(), "compose-request")
 
-        cid, bid = client.compose_create(request)
-        self.logger.info("Compose id: %s, Koji build id: %s", cid, bid)
+        cid = client.compose_create(request)
+        self.logger.info("Compose id: %s", cid)
 
         self.logger.debug("Waiting for comose to finish")
         status = client.wait_for_compose(cid, callback=self.on_status_update)
@@ -415,6 +421,9 @@ class OSBuildImage(BaseTaskHandler):
 
         if not status.is_success:
             raise koji.BuildError(f"Compose failed (id: {cid})")
+
+        # Successful compose, must have a build id associated
+        bid = status.koji_build_id
 
         # Build was successful, tag it
         if not opts.get('skip_tag'):
@@ -442,6 +451,8 @@ RED = "\033[31m"
 def show_compose(cs):
     print(f"status: {BOLD}{cs.status}{RESET}")
     print("koji task: " + str(cs.koji_task_id))
+    if cs.koji_build_id is not None:
+        print("koji build: " + str(cs.koji_build_id))
     print("images: ")
     for image in cs.images:
         print("  " + str(image))
@@ -459,9 +470,9 @@ def compose_cmd(client: Client, args):
 
     kojidata = ComposeRequest.Koji(args.koji, 0)
     request = ComposeRequest(nvr, args.distro, images, kojidata)
-    cid, bid = client.compose_create(request)
+    cid = client.compose_create(request)
 
-    print(f"Compose: {cid} [koji build id: {bid}]")
+    print(f"Compose: {cid}")
     while True:
         status = client.compose_status(cid)
         print(f"status: {status.status: <10}\r", end="")
