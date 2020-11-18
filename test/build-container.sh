@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+TEST_PATH=${1:-test}
+
 # this script must be run as root
 if [ $UID != 0 ]; then
   echo This script must be run as root.
@@ -11,8 +13,8 @@ source /etc/os-release
 
 podman build \
        -t koji.hub \
-       -f test/container/hub/Dockerfile.${ID} .
+       -f ${TEST_PATH}/container/hub/Dockerfile.${ID} $TEST_PATH
 
 podman build -t \
        koji.builder \
-       -f test/container/builder/Dockerfile.${ID} .
+       -f ${TEST_PATH}/container/builder/Dockerfile.${ID} $TEST_PATH

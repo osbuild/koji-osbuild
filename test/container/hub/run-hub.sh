@@ -2,10 +2,12 @@
 set -eux
 
 if ls /share/rpms/*.rpm 1> /dev/null 2>&1; then
-  echo "Using RPMs"
-  rm /usr/lib/koji-hub-plugins/osbuild.py
-  rpm -i /share/rpms/koji-osbuild-?-0.*.rpm \
-         /share/rpms/koji-osbuild-hub-*.rpm
+   echo "Using RPMs"
+   rpm -i /share/rpms/koji-osbuild-?-0.*.rpm \
+          /share/rpms/koji-osbuild-hub-*.rpm
+else
+  echo "Using local plugin"
+  cp /share/plugins/hub/osbuild.py /usr/lib/koji-hub-plugins/
 fi
 
 # Set DB credentials

@@ -15,18 +15,10 @@ if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     sudo rpm -Uvh /tmp/epel.rpm
 fi
 
-greenprint "Installing required packages"
-sudo dnf -y install \
-    container-selinux \
-    dnsmasq \
-    jq \
-    krb5-workstation \
-    koji \
-    koji-osbuild-cli \
-    podman
-
 # HACK: podman-plugins was only recently added to RHEL. Fetch it from the
-# internal RHEL 8.3.1 repository until that is released.
+# internal RHEL 8.3.1 repository until that is released. On Fedora,
+# podman-plugins is installed in the koji-osbuild-tests package. Please adjust
+# the spec file to do the same on RHEL before removing this block.
 greenprint "Install the podman dnsname plugin"
 if [[ $ID == rhel ]]; then
   sudo tee /etc/yum.repos.d/rhel-8-3-1.repo << EOF
@@ -38,8 +30,6 @@ gpgcheck = 1
 EOF
 
   sudo dnf -y install '--disablerepo=*' --enablerepo=rhel-8-3-1 podman-plugins
-else
-  sudo dnf -y install podman-plugins
 fi
 
 greenprint "Fetching RPMs"
@@ -51,37 +41,40 @@ sudo dnf -y \
      "koji-osbuild*"
 
 greenprint "Creating composer SSL certificates"
-sudo test/make-certs.sh
+sudo /usr/libexec/koji-osbuild-tests/make-certs.sh /usr/share/koji-osbuild-tests
+
+greenprint "Starting osbuild-composer's socket"
+sudo systemctl enable --now osbuild-composer-api.socket
 
 greenprint "Building containers"
-sudo test/build-container.sh
+sudo /usr/libexec/koji-osbuild-tests/build-container.sh /usr/share/koji-osbuild-tests
 
 greenprint "Starting containers"
-sudo test/run-koji-container.sh start
+sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh start
 
 greenprint "Print logs"
 sudo podman logs org.osbuild.koji.koji
 
 greenprint "Copying credentials and certificates"
-sudo test/copy-creds.sh
+sudo /usr/libexec/koji-osbuild-tests/copy-creds.sh /usr/share/koji-osbuild-tests
 
 greenprint "Testing Koji hub API access"
 koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
 
 greenprint "Starting koji builder"
-sudo test/run-builder.sh start
+sudo /usr/libexec/koji-osbuild-tests/run-builder.sh start /usr/share/koji-osbuild-tests
 
 greenprint "Creating Koji tag infrastructure"
-test/make-tags.sh
+/usr/libexec/koji-osbuild-tests/make-tags.sh
 
 greenprint "Running integration tests"
-python3 -m unittest discover -v test/integration/
+python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
 
 greenprint "Stopping koji builder"
-sudo test/run-builder.sh stop
+sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests
 
 greenprint "Stopping containers"
-sudo test/run-koji-container.sh stop
+sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop
 
 greenprint "Removing generated CA cert"
 sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem

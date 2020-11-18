@@ -84,8 +84,8 @@ gpgcheck=0
 priority=10
 EOF
 
-# Install the Image Builder packages and the koji cli plugin.
-retry sudo dnf -y install osbuild-composer koji-osbuild-cli
+# Installing koji-osbuild-tests package
+retry sudo dnf -y install koji-osbuild-tests
 
 # Start services.
 sudo systemctl enable --now osbuild-composer.socket

@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 set -euo pipefail
 
+TEST_PATH=${2:-test}
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
 DATA_DIR=${DATA_DIR:-/var/tmp/osbuild-koji-data}
 
@@ -28,7 +29,7 @@ builder_start() {
     --name org.osbuild.koji.builder --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
     -v "${DATA_DIR}:/mnt:z" \
-    -v "${PWD}/test/container/builder/osbuild-koji.conf:/etc/koji-osbuild/builder.conf:z" \
+    -v "${TEST_PATH}/container/builder/osbuild-koji.conf:/etc/koji-osbuild/builder.conf" \
     --hostname org.osbuild.koji.kojid \
     --add-host=composer:${GATEWAY_IP} \
     koji.builder
@@ -40,9 +41,9 @@ builder_stop() {
 }
 
 # check arguments
-if [[ $# -ne 1 || ( "$1" != "start" && "$1" != "stop" && "$1" != "fg") ]]; then
+if [[ $# -lt 1 || ( "$1" != "start" && "$1" != "stop" && "$1" != "fg") ]]; then
   cat <<DOC
-usage: $0 start|stop|fg
+usage: $0 start|stop|fg [TEST_PATH]
 
 start - starts the builder container (background)
 fg    - start the builder container in the foreground

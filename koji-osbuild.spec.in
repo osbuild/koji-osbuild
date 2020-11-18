@@ -64,6 +64,50 @@ install -d %{buildroot}%{python3_sitelib}/koji_cli_plugins
 install -p -m 0644 plugins/cli/osbuild.py %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
 %py_byte_compile %{__python3} %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
 
+# Tests
+install -m 0755 -vd                                             %{buildroot}/%{_libexecdir}/tests/%{name}
+install -m 0755 -vp test/integration.sh                         %{buildroot}/%{_libexecdir}/tests/%{name}/
+
+install -m 0755 -vd                                             %{buildroot}/%{_libexecdir}/%{name}-tests
+install -m 0755 -vp test/make-certs.sh                          %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/build-container.sh                     %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/run-koji-container.sh                  %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/copy-creds.sh                          %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/run-builder.sh                         %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/make-tags.sh                           %{buildroot}/%{_libexecdir}/%{name}-tests/
+
+install -m 0755 -vd                                             %{buildroot}/%{_libexecdir}/%{name}-tests/integration
+install -m 0755 -vp test/integration/*                          %{buildroot}/%{_libexecdir}/%{name}-tests/integration/
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/data
+install -m 0755 -vp test/data/*                                 %{buildroot}/%{_datadir}/%{name}-tests/data/
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container
+install -m 0755 -vp test/container/brew.repo                    %{buildroot}/%{_datadir}/%{name}-tests/container/
+install -m 0755 -vp test/container/rhel.repo                    %{buildroot}/%{_datadir}/%{name}-tests/container/
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container/builder
+install -m 0755 -vp test/container/builder/Dockerfile.fedora    %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+install -m 0755 -vp test/container/builder/Dockerfile.rhel      %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+install -m 0755 -vp test/container/builder/kojid.conf           %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+install -m 0755 -vp test/container/builder/osbuild-koji.conf    %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+install -m 0755 -vp test/container/builder/osbuild.krb5.conf    %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+install -m 0755 -vp test/container/builder/run-kojid.sh         %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container/hub
+install -m 0755 -vp test/container/hub/Dockerfile.fedora        %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/Dockerfile.rhel          %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/hub.conf                 %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/kojiweb.conf             %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/run-hub.sh               %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/ssl.conf                 %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+install -m 0755 -vp test/container/hub/web.conf                 %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+
+install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container/hub/plugin
+install -m 0755 -vp test/container/hub/plugin/osbuild.py        %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
+
 %files
 %license LICENSE
 %doc README.md
@@ -79,6 +123,32 @@ install -p -m 0644 plugins/cli/osbuild.py %{buildroot}%{python3_sitelib}/koji_cl
 %files cli
 %{python3_sitelib}/koji_cli_plugins/osbuild.py
 %{python3_sitelib}/koji_cli_plugins/__pycache__/osbuild.*
+
+%package tests
+Summary:        Integration tests for koji-osbuild
+Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}-cli
+Requires:       container-selinux
+Requires:       dnsmasq
+Requires:       jq
+Requires:       koji
+Requires:       krb5-workstation
+Requires:       openssl
+Requires:       osbuild-composer >= 22
+Requires:       podman
+
+# See comment in test/integration.sh
+%if 0%{?fedora}
+Requires:       podman-plugins
+%endif
+
+%description tests
+Integration tests for koji-osbuild. To be run on a dedicated system.
+
+%files tests
+%{_libexecdir}/tests/%{name}
+%{_libexecdir}/%{name}-tests
+%{_datadir}/%{name}-tests
 
 
 %changelog
