@@ -7,7 +7,8 @@ if [ $UID != 0 ]; then
   exit 1
 fi
 
-TEST_DATA=${TEST_DATA:-test/data}
+TEST_PATH=${1:-test}
+TEST_DATA=${TEST_PATH}/data
 
 CA_DIR="/etc/osbuild-composer"
 echo "Generating certificates"

@@ -2,10 +2,12 @@
 set -ux
 
 if ls /share/rpms/*.rpm 1> /dev/null 2>&1; then
-  echo "Using RPMs"
-  rm /usr/lib/koji-builder-plugins/osbuild.py
-  rpm -i /share/rpms/koji-osbuild-?-0.*.rpm \
-         /share/rpms/koji-osbuild-builder-*.rpm
+   echo "Using RPMs"
+   rpm -i /share/rpms/koji-osbuild-?-0.*.rpm \
+          /share/rpms/koji-osbuild-builder-*.rpm
+else
+  echo "Using local plugin"
+  cp /share/plugins/builder/osbuild.py /usr/lib/koji-builder-plugins/
 fi
 
 KOJI="koji --server=http://org.osbuild.koji.koji/kojihub --user=kojiadmin --password=kojipass --authtype=password"

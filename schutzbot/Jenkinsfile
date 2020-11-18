@@ -158,7 +158,7 @@ void run_tests(test_type) {
     if (test_type == 'integration') {
         sh (
             label: "Integration tests",
-            script: "test/integration.sh"
+            script: "/usr/libexec/tests/koji-osbuild/integration.sh"
         )
     }
 
