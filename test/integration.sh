@@ -25,10 +25,19 @@ sudo dnf -y install \
     koji-osbuild-cli \
     podman
 
+# HACK: podman-plugins was only recently added to RHEL. Fetch it from the
+# internal RHEL 8.3.1 repository until that is released.
 greenprint "Install the podman dnsname plugin"
 if [[ $ID == rhel ]]; then
-  sudo cp schutzbot/vendor/87-podman-bridge.conflist /etc/cni/net.d/
-  sudo cp schutzbot/vendor/dnsname /usr/libexec/cni/
+  sudo tee /etc/yum.repos.d/rhel-8-3-1.repo << EOF
+[rhel-8-3-1]
+name = RHEL 8.3.1 override
+baseurl = http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/RHEL-8.3.1-20201118.n.0/compose/AppStream/x86_64/os
+enabled = 0
+gpgcheck = 1
+EOF
+
+  sudo dnf -y install '--disablerepo=*' --enablerepo=rhel-8-3-1 podman-plugins
 else
   sudo dnf -y install podman-plugins
 fi
