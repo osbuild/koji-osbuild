@@ -1,4 +1,4 @@
-project('koji-osbuild', license: 'ASL 2.0', version: '2')
+project('koji-osbuild', license: 'ASL 2.0', version: '3')
 
 srcdir = meson.source_root()
 
