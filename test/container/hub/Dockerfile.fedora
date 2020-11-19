@@ -1,11 +1,17 @@
-FROM quay.io/osbuild/koji:v1
+FROM docker.io/library/fedora:latest
+
+# koji db schema is in docs, remove nodocs from from dnf config
+RUN sed  -i '/^tsflags=nodocs$/d' /etc/dnf/dnf.conf
 
 RUN dnf -y upgrade \
     && dnf -y \
             --setopt=fastestmirror=True \
             --setopt=install_weak_deps=False \
             install \
+	koji-hub \
 	koji-web \
+        postgresql \
+        mod_ssl \
 	python3-jsonschema \
 	&& dnf clean all
 
