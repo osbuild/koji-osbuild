@@ -7,6 +7,7 @@ if ls /share/rpms/*.rpm 1> /dev/null 2>&1; then
           /share/rpms/koji-osbuild-builder-*.rpm
 else
   echo "Using local plugin"
+  mkdir -p /usr/lib/koji-builder-plugins/
   cp /share/plugins/builder/osbuild.py /usr/lib/koji-builder-plugins/
 fi
 
