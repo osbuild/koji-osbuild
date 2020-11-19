@@ -108,6 +108,17 @@ koji_start() {
   # koji data
   mkdir -p ${DATA_DIR}/koji/{packages,repos,work,scratch,repos-dist}
 
+  # maybe copy the 'hub' plugin to the share dir
+  PLUGIN_NAME="hub"
+  PLUGIN_PATH="plugins/${PLUGIN_NAME}"
+  if [[ -f "${PLUGIN_PATH}/osbuild.py" ]]; then
+    PLUGIN_DEST="${SHARE_DIR}/${PLUGIN_PATH}"
+
+    echo "[COPY] '${PLUGIN_NAME}' plugin to ${PLUGIN_DEST}"
+    mkdir -p "${PLUGIN_DEST}"
+    cp "${PLUGIN_PATH}/osbuild.py" "${PLUGIN_DEST}"
+  fi
+
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.koji --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
     -v "${DATA_DIR}:/mnt:z" \

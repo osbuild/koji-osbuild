@@ -25,6 +25,17 @@ builder_start() {
   GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].plugins[0].ipam.ranges[0][0].gateway")
   echo "Gateway IP is $GATEWAY_IP"
 
+  # maybe copy the 'builder' plugin to the share dir
+  PLUGIN_NAME="builder"
+  PLUGIN_PATH="plugins/${PLUGIN_NAME}"
+  if [[ -f "${PLUGIN_PATH}/osbuild.py" ]]; then
+    PLUGIN_DEST="${SHARE_DIR}/${PLUGIN_PATH}"
+
+    echo "[COPY] '${PLUGIN_NAME}' plugin to ${PLUGIN_DEST}"
+    mkdir -p "${PLUGIN_DEST}"
+    cp "${PLUGIN_PATH}/osbuild.py" "${PLUGIN_DEST}"
+  fi
+
   ${CONTAINER_RUNTIME} run ${CONTAINER_FLAGS} \
     --name org.osbuild.koji.builder --network org.osbuild.koji \
     -v "${SHARE_DIR}:/share:z" \
