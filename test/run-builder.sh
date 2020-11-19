@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-TEST_PATH=${2:-test}
+TEST_PATH=${2:-${PWD}/test}
 SHARE_DIR=${SHARE_DIR:-/tmp/osbuild-composer-koji-test}
 DATA_DIR=${DATA_DIR:-/var/tmp/osbuild-koji-data}
 
