@@ -1,4 +1,6 @@
-FROM docker.io/library/fedora:latest
+ARG version=latest
+
+FROM docker.io/library/fedora:$version
 
 RUN dnf -y upgrade \
     && dnf -y \
