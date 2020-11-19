@@ -13,4 +13,6 @@ $KOJI add-target f32-candidate f32-build f32-candidate
 $KOJI add-pkg --owner kojiadmin f32-candidate Fedora-Cloud
 $KOJI add-pkg --owner kojiadmin f32-candidate RHEL-Cloud
 
+$KOJI add-pkg --owner kojiadmin f32-candidate Fedora-IoT
+
 $KOJI regen-repo f32-build
