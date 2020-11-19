@@ -12,9 +12,11 @@ fi
 source /etc/os-release
 
 podman build \
+       --build-arg version=${VERSION_ID} \
        -t koji.hub \
        -f ${TEST_PATH}/container/hub/Dockerfile.${ID} $TEST_PATH
 
-podman build -t \
-       koji.builder \
+podman build \
+       --build-arg version=${VERSION_ID} \
+       -t koji.builder \
        -f ${TEST_PATH}/container/builder/Dockerfile.${ID} $TEST_PATH

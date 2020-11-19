@@ -1,4 +1,6 @@
-FROM docker.io/library/fedora:latest
+ARG version=latest
+
+FROM docker.io/library/fedora:$version
 
 # koji db schema is in docs, remove nodocs from from dnf config
 RUN sed  -i '/^tsflags=nodocs$/d' /etc/dnf/dnf.conf
