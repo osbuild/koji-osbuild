@@ -62,13 +62,18 @@ fi
 # Add osbuild team ssh keys.
 cat schutzbot/team_ssh_keys.txt | tee -a ~/.ssh/authorized_keys > /dev/null
 
-# Set up a dnf repository for the RPMs we built via mock.
-sudo cp mock.repo /etc/yum.repos.d/
-
 # Set up dnf repositories with the RPMs we want to test
 sudo tee /etc/yum.repos.d/osbuild.repo << EOF
-[osbuild]
+[koji-osbuild]
 name=osbuild ${GIT_COMMIT}
+baseurl=${DNF_REPO_BASEURL}/koji-osbuild/${ID}-${VERSION_ID}/${ARCH}/${GIT_COMMIT}
+enabled=1
+gpgcheck=0
+# Default dnf repo priority is 99. Lower number means higher priority.
+priority=5
+
+[osbuild]
+name=osbuild ${OSBUILD_COMMIT}
 baseurl=${DNF_REPO_BASEURL}/osbuild/${ID}-${VERSION_ID}/${ARCH}/${OSBUILD_COMMIT}
 enabled=1
 gpgcheck=0

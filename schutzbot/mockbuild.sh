@@ -87,15 +87,3 @@ greenprint "☁ Uploading RPMs to S3"
 pushd repo
     s3cmd --acl-public sync . s3://${REPO_BUCKET}/
 popd
-
-# Create a repository file.
-greenprint "📜 Generating dnf repository file"
-tee mock.repo << EOF
-[schutzbot-mock]
-name=schutzbot mock ${GIT_SHA} ${ID}${VERSION_ID//./}
-baseurl=${REPO_URL}
-enabled=1
-gpgcheck=0
-# Default dnf repo priority is 99. Lower number means higher priority.
-priority=5
-EOF
