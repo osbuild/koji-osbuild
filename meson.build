@@ -1,4 +1,4 @@
-project('koji-osbuild', license: 'ASL 2.0', version: '3')
+project('koji-osbuild', license: 'ASL 2.0')
 
 srcdir = meson.source_root()
 
@@ -16,33 +16,12 @@ install_data(
 )
 
 git = find_program('git')
-
-subs = configuration_data()
-subs.set('version', meson.project_version())
-
-longdate = run_command('date', '+%a %b %d %Y').stdout().strip()
-subs.set('longdate', longdate)
-
-gitres = run_command(git, ['--git-dir=@0@/.git'.format(srcdir),
-                           'rev-parse',
-                           '--short=7',
-                           'HEAD'])
-
-if gitres.returncode() == 0
-  commit = gitres.stdout().strip()
-  subs.set('commit', commit)
-
-  gitrev = gitres.stdout().strip()
-  gitdate = run_command('date', '+%Y%m%d').stdout().strip()
-  # YYYYMMDD<scm><revision>
-  subs.set('reltag', '@0@git@1@'.format(gitdate, gitrev))
-endif
-
-spec_file = configure_file(
-  input: 'koji-osbuild.spec.in',
-  output: 'koji-osbuild.spec',
-  configuration: subs
+gitres = run_command(
+  git,
+  ['--git-dir=@0@/.git'.format(srcdir), 'rev-parse', 'HEAD'],
+  check=True
 )
+commit = gitres.stdout().strip()
 
 archive_name = meson.project_name() + '-' + gitrev
 full_archive_name = archive_name + '.tar.gz'
@@ -79,7 +58,8 @@ srpm_target = custom_target(
     rpmbuild, '-bs',
     spec_file,
     '--define', '_sourcedir ' + meson.build_root(),
-    '--define', '_topdir ' + rpmdirs_target.full_path()
+    '--define', '_topdir ' + rpmdirs_target.full_path(),
+    '--define', 'commit ' + commit
   ],
   output: 'srpms',
   depends: [archive]
@@ -91,15 +71,14 @@ rpm_target = custom_target(
     rpmbuild, '-ba',
     spec_file,
     '--define', '_sourcedir ' + meson.build_root(),
-    '--define', '_topdir ' + rpmdirs_target.full_path()
+    '--define', '_topdir ' + rpmdirs_target.full_path(),
+    '--define', 'commit ' + commit
   ],
   output: 'rpms',
   depends: [archive]
 )
 
 msg = ['',
-  'version:               @0@'.format(meson.project_version()),
-  '',
   'hub plugins path:      @0@'.format(hub_plugins_path),
   'builder plugins path:  @0@'.format(builder_plugins_path),
   '',
