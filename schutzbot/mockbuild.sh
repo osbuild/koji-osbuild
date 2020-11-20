@@ -35,9 +35,6 @@ if ! s3cmd --version > /dev/null 2>&1; then
     sudo pip3 -q install s3cmd
 fi
 
-# Jenkins sets a workspace variable as the root of its working directory.
-WORKSPACE=${WORKSPACE:-$(pwd)}
-
 # Mock configuration file to use for building RPMs.
 MOCK_CONFIG="${ID}-${VERSION_ID%.*}-$(uname -m)"
 
