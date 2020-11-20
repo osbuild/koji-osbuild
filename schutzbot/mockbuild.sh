@@ -39,7 +39,7 @@ fi
 MOCK_CONFIG="${ID}-${VERSION_ID%.*}-$(uname -m)"
 
 # The commit we are testing
-GIT_SHA=$(git rev-parse --short HEAD)
+GIT_SHA=$(git rev-parse HEAD)
 
 # Bucket in S3 where our artifacts are uploaded
 REPO_BUCKET=osbuild-composer-repos
@@ -47,11 +47,15 @@ REPO_BUCKET=osbuild-composer-repos
 # Public URL for the S3 bucket with our artifacts.
 MOCK_REPO_BASE_URL="http://${REPO_BUCKET}.s3-website.us-east-2.amazonaws.com"
 
+# Relative path of the repository – used for constructing both the local and
+# remote paths below, so that they're consistent.
+REPO_PATH=koji-osbuild/${ID}-${VERSION_ID}/${ARCH}/${GIT_SHA}
+
 # Directory to hold the RPMs temporarily before we upload them.
-REPO_DIR=koji-osbuild/${GIT_SHA}/${ID}${VERSION_ID//./}_${ARCH}
+REPO_DIR=repo/${REPO_PATH}
 
 # Full URL to the RPM repository after they are uploaded.
-REPO_URL=${MOCK_REPO_BASE_URL}/${REPO_DIR}
+REPO_URL=${MOCK_REPO_BASE_URL}/${REPO_PATH}
 
 # Print some data.
 greenprint "🧬 Using mock config: ${MOCK_CONFIG}"
@@ -65,18 +69,18 @@ ninja -C build srpms
 
 # Compile RPMs in a mock chroot
 greenprint "🎁 Building RPMs with mock"
-sudo mock -v -r $MOCK_CONFIG --resultdir repo/$REPO_DIR --with=tests \
+sudo mock -v -r $MOCK_CONFIG --resultdir $REPO_DIR --with=tests \
     build/rpmbuild/SRPMS/*.src.rpm
 
 # Change the ownership of all of our repo files from root to our CI user.
-sudo chown -R $USER repo/${REPO_DIR%%/*}
+sudo chown -R $USER ${REPO_DIR%%/*}
 
 greenprint "  Remove logs from mock build"
-rm repo/${REPO_DIR}/*.log
+rm ${REPO_DIR}/*.log
 
 # Create a repo of the built RPMs.
 greenprint "⛓️ Creating dnf repository"
-createrepo_c repo/${REPO_DIR}
+createrepo_c ${REPO_DIR}
 
 # Upload repository to S3.
 greenprint "☁ Uploading RPMs to S3"
