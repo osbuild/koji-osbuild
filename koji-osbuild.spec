@@ -1,8 +1,7 @@
-%global         commit @commit@
 %global         forgeurl https://github.com/osbuild/koji-osbuild
 
 Name:           koji-osbuild
-Version:        @version@
+Version:        3
 Release:        0%{?dist}
 Summary:        Koji integration for osbuild composer
 
@@ -152,5 +151,8 @@ Integration tests for koji-osbuild. To be run on a dedicated system.
 
 
 %changelog
-* @longdate@ osbuild <osbuilders@osbuild.org> - @version@-@reltag@
-- build from git sources.
+# the changelog is distribution-specific, therefore there's just one entry
+# to make rpmlint happy.
+
+* Tue Aug 25 2020 Image Builder team <osbuilders@osbuild.org> - 0-1
+- On this day, this project was born.
