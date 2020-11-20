@@ -55,7 +55,7 @@ fi
 
 # Install requirements for building RPMs in mock.
 greenprint "📦 Installing mock requirements"
-sudo dnf -y install createrepo_c meson mock ninja-build python3-pip rpm-build
+sudo dnf -y install createrepo_c mock python3-pip rpm-build
 
 # Install s3cmd if it is not present.
 if ! s3cmd --version > /dev/null 2>&1; then
@@ -68,15 +68,19 @@ greenprint "🧬 Using mock config: ${MOCK_CONFIG}"
 greenprint "📦 Git SHA: ${GIT_SHA}"
 greenprint "📤 RPMS will be uploaded to: ${REPO_URL}"
 
-# Build source RPMs.
-greenprint "🔧 Building source RPMs."
-meson build
-ninja -C build srpms
+greenprint "🔧 Building source RPM"
+git archive --prefix "koji-osbuild-${GIT_SHA}/" --output "koji-osbuild-${GIT_SHA}.tar.gz" HEAD
+sudo mock -v -r "$MOCK_CONFIG" --buildsrpm \
+  --define "commit ${GIT_SHA}" \
+  --spec ./koji-osbuild.spec \
+  --sources "./koji-osbuild-${GIT_SHA}.tar.gz" \
+  --resultdir ./srpm
 
-# Compile RPMs in a mock chroot
-greenprint "🎁 Building RPMs with mock"
-sudo mock -v -r $MOCK_CONFIG --resultdir $REPO_DIR --with=tests \
-    build/rpmbuild/SRPMS/*.src.rpm
+greenprint "🎁 Building RPMs"
+sudo mock -v -r $MOCK_CONFIG \
+  --define "commit ${GIT_SHA}" \
+  --resultdir $REPO_DIR \
+  srpm/*.src.rpm
 
 # Change the ownership of all of our repo files from root to our CI user.
 sudo chown -R $USER ${REPO_DIR%%/*}
