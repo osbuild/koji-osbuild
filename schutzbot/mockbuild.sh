@@ -10,31 +10,6 @@ function greenprint {
 source /etc/os-release
 ARCH=$(uname -m)
 
-# Mock is only available in EPEL for RHEL.
-if [[ $ID == rhel ]] && ! rpm -q epel-release; then
-    greenprint "📦 Setting up EPEL repository"
-    curl -Ls --retry 5 --output /tmp/epel.rpm \
-        https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    sudo rpm -Uvh /tmp/epel.rpm
-fi
-
-# Register RHEL if we are provided with a registration script.
-if [[ -n "${RHN_REGISTRATION_SCRIPT:-}" ]] && ! sudo subscription-manager status; then
-    greenprint "🪙 Registering RHEL instance"
-    sudo chmod +x $RHN_REGISTRATION_SCRIPT
-    sudo $RHN_REGISTRATION_SCRIPT
-fi
-
-# Install requirements for building RPMs in mock.
-greenprint "📦 Installing mock requirements"
-sudo dnf -y install createrepo_c meson mock ninja-build python3-pip rpm-build
-
-# Install s3cmd if it is not present.
-if ! s3cmd --version > /dev/null 2>&1; then
-    greenprint "📦 Installing s3cmd"
-    sudo pip3 -q install s3cmd
-fi
-
 # Mock configuration file to use for building RPMs.
 MOCK_CONFIG="${ID}-${VERSION_ID%.*}-$(uname -m)"
 
@@ -61,6 +36,31 @@ REPO_URL=${MOCK_REPO_BASE_URL}/${REPO_PATH}
 if curl --silent --fail --head --output /dev/null "${REPO_URL}/repodata/repomd.xml"; then
   greenprint "🎁 Repository already exists. Exiting."
   exit 0
+fi
+
+# Mock is only available in EPEL for RHEL.
+if [[ $ID == rhel ]] && ! rpm -q epel-release; then
+    greenprint "📦 Setting up EPEL repository"
+    curl -Ls --retry 5 --output /tmp/epel.rpm \
+        https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    sudo rpm -Uvh /tmp/epel.rpm
+fi
+
+# Register RHEL if we are provided with a registration script.
+if [[ -n "${RHN_REGISTRATION_SCRIPT:-}" ]] && ! sudo subscription-manager status; then
+    greenprint "🪙 Registering RHEL instance"
+    sudo chmod +x $RHN_REGISTRATION_SCRIPT
+    sudo $RHN_REGISTRATION_SCRIPT
+fi
+
+# Install requirements for building RPMs in mock.
+greenprint "📦 Installing mock requirements"
+sudo dnf -y install createrepo_c meson mock ninja-build python3-pip rpm-build
+
+# Install s3cmd if it is not present.
+if ! s3cmd --version > /dev/null 2>&1; then
+    greenprint "📦 Installing s3cmd"
+    sudo pip3 -q install s3cmd
 fi
 
 # Print some data.
