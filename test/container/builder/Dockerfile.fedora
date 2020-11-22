@@ -1,6 +1,6 @@
 ARG version=latest
 
-FROM docker.io/library/fedora:$version
+FROM registry.fedoraproject.org/fedora:$version
 
 RUN dnf -y upgrade \
     && dnf -y \

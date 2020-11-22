@@ -1,4 +1,4 @@
-FROM docker.io/library/fedora:latest
+FROM registry.fedoraproject.org/fedora:latest
 
 RUN dnf -y upgrade \
     && dnf -y \
