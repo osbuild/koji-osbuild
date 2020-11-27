@@ -67,6 +67,8 @@ sudo /usr/libexec/koji-osbuild-tests/run-builder.sh start /usr/share/koji-osbuil
 greenprint "Creating Koji tag infrastructure"
 /usr/libexec/koji-osbuild-tests/make-tags.sh
 
+sudo systemctl start osbuild-worker@2 osbuild-worker@3 osbuild-worker@4
+
 greenprint "Running integration tests"
 python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
 

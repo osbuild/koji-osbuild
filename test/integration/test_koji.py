@@ -106,14 +106,8 @@ class TestIntegration(unittest.TestCase):
                         "rhel-8",
                         "f32-candidate",
                         "x86_64",
-                        "--wait",
-                        *repos)
-        self.check_res(res)
-
-        res = self.koji("RHEL-Cloud",
-                        "8",
-                        "rhel-8",
-                        "f32-candidate",
+                        "x86_64",
+                        "x86_64",
                         "x86_64",
                         "--wait",
                         *repos)
@@ -124,6 +118,9 @@ class TestIntegration(unittest.TestCase):
                         "rhel-8",
                         "f32-candidate",
                         "x86_64",
+                        "x86_64",
+                        "x86_64",
+                        "x86_64",
                         "--wait",
                         *repos)
         self.check_res(res)
@@ -132,6 +129,21 @@ class TestIntegration(unittest.TestCase):
                         "8",
                         "rhel-8",
                         "f32-candidate",
+                        "x86_64",
+                        "x86_64",
+                        "x86_64",
+                        "x86_64",
+                        "--wait",
+                        *repos)
+        self.check_res(res)
+
+        res = self.koji("RHEL-Cloud",
+                        "8",
+                        "rhel-8",
+                        "f32-candidate",
+                        "x86_64",
+                        "x86_64",
+                        "x86_64",
                         "x86_64",
                         "--wait",
                         *repos)
