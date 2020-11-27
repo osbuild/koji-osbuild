@@ -110,6 +110,33 @@ class TestIntegration(unittest.TestCase):
                         *repos)
         self.check_res(res)
 
+        res = self.koji("RHEL-Cloud",
+                        "8",
+                        "rhel-8",
+                        "f32-candidate",
+                        "x86_64",
+                        "--wait",
+                        *repos)
+        self.check_res(res)
+
+        res = self.koji("RHEL-Cloud",
+                        "8",
+                        "rhel-8",
+                        "f32-candidate",
+                        "x86_64",
+                        "--wait",
+                        *repos)
+        self.check_res(res)
+
+        res = self.koji("RHEL-Cloud",
+                        "8",
+                        "rhel-8",
+                        "f32-candidate",
+                        "x86_64",
+                        "--wait",
+                        *repos)
+        self.check_res(res)
+
     def test_unknown_tag_check(self):
         """Unknown Tag check"""
         # Check building an unknown tag fails
