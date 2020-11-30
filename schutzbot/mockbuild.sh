@@ -55,13 +55,7 @@ fi
 
 # Install requirements for building RPMs in mock.
 greenprint "📦 Installing mock requirements"
-sudo dnf -y install createrepo_c mock python3-pip rpm-build
-
-# Install s3cmd if it is not present.
-if ! s3cmd --version > /dev/null 2>&1; then
-    greenprint "📦 Installing s3cmd"
-    sudo pip3 -q install s3cmd
-fi
+sudo dnf -y install createrepo_c mock rpm-build s3cmd
 
 # Print some data.
 greenprint "🧬 Using mock config: ${MOCK_CONFIG}"
