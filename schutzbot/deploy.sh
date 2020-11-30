@@ -65,7 +65,7 @@ cat schutzbot/team_ssh_keys.txt | tee -a ~/.ssh/authorized_keys > /dev/null
 # Set up dnf repositories with the RPMs we want to test
 sudo tee /etc/yum.repos.d/osbuild.repo << EOF
 [koji-osbuild]
-name=osbuild ${GIT_COMMIT}
+name=koji-osbuild ${GIT_COMMIT}
 baseurl=${DNF_REPO_BASEURL}/koji-osbuild/${ID}-${VERSION_ID}/${ARCH}/${GIT_COMMIT}
 enabled=1
 gpgcheck=0
