@@ -24,7 +24,7 @@ if [[ $ID == rhel ]]; then
   sudo tee /etc/yum.repos.d/rhel-8-3-1.repo << EOF
 [rhel-8-3-1]
 name = RHEL 8.3.1 override
-baseurl = http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/RHEL-8.3.1-20201118.n.0/compose/AppStream/x86_64/os
+baseurl = http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/RHEL-8.3.1-20201130.n.2/compose/AppStream/x86_64/os
 enabled = 0
 gpgcheck = 1
 EOF
