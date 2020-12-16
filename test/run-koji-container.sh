@@ -67,7 +67,7 @@ koji_start() {
     cp /etc/osbuild-composer/ca-crt.pem ${SHARE_DIR}/client-ca.pem
   fi
 
-  ${CONTAINER_RUNTIME} network create org.osbuild.koji
+  ${CONTAINER_RUNTIME} network create org.osbuild.koji --subnet 10.89.0.0/24 --gateway 10.89.0.1
 
   ${CONTAINER_RUNTIME} run -d --name org.osbuild.koji.postgres --network org.osbuild.koji \
     --hostname org.osbuild.koji.koji \
