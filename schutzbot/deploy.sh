@@ -43,15 +43,6 @@ fi
 # Enable fastestmirror to speed up dnf operations.
 echo -e "fastestmirror=1" | sudo tee -a /etc/dnf/dnf.conf
 
-# Ensure we are using the latest dnf since early revisions of Fedora 31 had
-# some dnf repo priority bugs like BZ 1733582.
-# NOTE(mhayden): We can exclude kernel updates here to save time with dracut
-# and module updates. The system will not be rebooted in CI anyway, so a
-# kernel update is not needed.
-if [[ $ID == fedora ]]; then
-    sudo dnf -y upgrade --exclude kernel --exclude kernel-core
-fi
-
 # Add osbuild team ssh keys.
 cat schutzbot/team_ssh_keys.txt | tee -a ~/.ssh/authorized_keys > /dev/null
 
