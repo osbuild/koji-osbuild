@@ -1,5 +1,7 @@
 build/
 **/__pycache__/
 
+.vscode/
+
 .coverage
 coverage.xml
