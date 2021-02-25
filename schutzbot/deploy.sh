@@ -69,8 +69,8 @@ name=osbuild-composer ${OSBUILD_COMPOSER_COMMIT}
 baseurl=${DNF_REPO_BASEURL}/osbuild-composer/${ID}-${VERSION_ID}/${ARCH}/${OSBUILD_COMPOSER_COMMIT}
 enabled=1
 gpgcheck=0
-# Give this a slightly lower priority, because we used to have osbuild in this repo as well.
-priority=10
+# Default dnf repo priority is 99. Lower number means higher priority.
+priority=5
 EOF
 
 # Installing koji-osbuild-tests package
