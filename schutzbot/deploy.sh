@@ -20,8 +20,8 @@ function retry {
 
 # Variables for where to find osbuild-composer RPMs to test against
 DNF_REPO_BASEURL=http://osbuild-composer-repos.s3-website.us-east-2.amazonaws.com
-OSBUILD_COMMIT=f5bfb22355befeddfc4f313b753f81fe919b8e98             # main as of Sun Nov 15 11:10:09 2020
-OSBUILD_COMPOSER_COMMIT=2dff7d05298349ef59adf94a4de7a3dd289c06d3    # release 25
+OSBUILD_COMMIT=3086c7d70c304214e2855cdcf495d4b70f4b04c6             # release 26
+OSBUILD_COMPOSER_COMMIT=8ca6b1ea157183ff88594ac1b06af1c28d8e0a2c    # release 28
 
 # Get OS details.
 source /etc/os-release
