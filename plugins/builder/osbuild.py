@@ -246,6 +246,18 @@ class Client:
 
         return ComposeLogs.from_dict(res.json())
 
+    def compose_manifests(self, compose_id: str):
+        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/manifests")
+
+        res = self.http.get(url)
+
+        if res.status_code != 200:
+            body = res.content.decode("utf-8").strip()
+            msg = f"Failed to get the compose manifests: {body}"
+            raise koji.GenericError(msg) from None
+
+        return res.json()
+
     def wait_for_compose(self, compose_id: str, *, sleep_time=2, callback=None):
         while True:
             status = self.compose_status(compose_id)
@@ -329,6 +341,21 @@ class OSBuildImage(BaseTaskHandler):
             name = "%s-%s.log" % (ireq.architecture, ireq.image_type)
             self.logger.debug("Uploading logs: %s", name)
             self.upload_json(log, name)
+
+    def attach_manifests(self, compose_id: str, ireqs: ImageRequest):
+        self.logger.debug("Fetching manifests")
+
+        try:
+            manifests = self.client.compose_manifests(compose_id)
+        except koji.GenericError as e:
+            self.logger.warning("Failed to fetch manifests: %s", str(e))
+            return
+
+        imanifests = zip(manifests, ireqs)
+        for manifest, ireq in imanifests:
+            name = "%s-%s.manifest" % (ireq.architecture, ireq.image_type)
+            self.logger.debug("Uploading manifest: %s", name)
+            self.upload_json(manifest, name)
 
     @staticmethod
     def arches_for_config(buildconfig: Dict):
@@ -427,6 +454,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Compose finished: %s", str(status.as_dict()))
         self.logger.info("Compose result: %s", status.status)
 
+        self.attach_manifests(cid, ireqs)
         self.attach_logs(cid, ireqs)
 
         if not status.is_success:
