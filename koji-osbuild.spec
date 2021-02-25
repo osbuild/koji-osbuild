@@ -135,6 +135,7 @@ Requires:       krb5-workstation
 Requires:       openssl
 Requires:       osbuild-composer >= 22
 Requires:       podman
+Requires:       podman-plugins
 
 # See comment in test/integration.sh
 %if 0%{?fedora}

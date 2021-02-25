@@ -15,23 +15,6 @@ if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     sudo rpm -Uvh /tmp/epel.rpm
 fi
 
-# HACK: podman-plugins was only recently added to RHEL. Fetch it from the
-# RHEL 8.4.0 snapshot until 8.3.1 released (we don't do z-stream snapshots).
-# On Fedora, podman-plugins is installed in the koji-osbuild-tests package.
-# Please adjust the spec file to do the same on RHEL before removing this block.
-greenprint "Install the podman dnsname plugin"
-if [[ $ID == rhel ]]; then
-  sudo tee /etc/yum.repos.d/rhel-8-4-0.repo << EOF
-[rhel-8-4-0]
-name = RHEL 8.4.0 override
-baseurl = https://rpmrepo.osbuild.org/v1/psi/el8/el8-x86_64-appstream-8.4.0.n-20201201
-enabled = 0
-gpgcheck = 1
-EOF
-
-  sudo dnf -y install '--disablerepo=*' --enablerepo=rhel-8-4-0 podman-plugins
-fi
-
 greenprint "Fetching RPMs"
 sudo mkdir -p /tmp/osbuild-composer-koji-test/rpms
 sudo dnf -y \
