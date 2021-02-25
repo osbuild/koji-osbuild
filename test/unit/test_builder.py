@@ -70,7 +70,8 @@ class MockComposer:
             "result": compose,
             "status": self.status,
             "routes": {
-                "logs": 200
+                "logs": 200,
+                "manifests": 200
             }
         }
 
@@ -84,6 +85,12 @@ class MockComposer:
             httpretty.GET,
             urllib.parse.urljoin(self.url, "compose/" + compose_id + "/logs"),
             body=self.compose_logs
+        )
+
+        httpretty.register_uri(
+            httpretty.GET,
+            urllib.parse.urljoin(self.url, "compose/" + compose_id + "/manifests"),
+            body=self.compose_manifests
         )
 
         return [201, response_headers, json.dumps(compose)]
@@ -124,6 +131,24 @@ class MockComposer:
             "koji_import_logs": {"log": "yes, indeed!"},
         }
         return [200, response_headers, json.dumps(result)]
+
+
+    def compose_manifests(self, _request, uri, response_headers):
+        route = self.routes.get("manifests")
+        if route and route["status"] != 200:
+            return [route["status"], response_headers, "Internal error"]
+
+        target = os.path.basename(os.path.dirname(uri))
+        compose = self.composes.get(target)
+        if not compose:
+            return [400, response_headers, f"Unknown compose: {target}"]
+
+        ireqs = compose["request"]["image_requests"]
+        result = [
+            {"sources": {}, "pipeline": {}} for _ in ireqs
+        ]
+        return [200, response_headers, json.dumps(result)]
+
 
 class UploadTracker:
     """Mock koji file uploading and keep track of uploaded files
@@ -481,6 +506,7 @@ class TestBuilderPlugin(PluginTest):
         # check uploads: logs, compose request
         for arch in arches:
             self.uploads.assert_upload(f"{arch}-image_type.log.json")
+            self.uploads.assert_upload(f"{arch}-image_type.manifest.json")
         self.uploads.assert_upload("compose-request.json")
         self.uploads.assert_upload("compose-status.json")
         self.uploads.assert_upload("koji-init.log.json")
@@ -513,6 +539,7 @@ class TestBuilderPlugin(PluginTest):
 
         self.uploads.assert_upload("compose-request.json")
         self.uploads.assert_upload("x86_64-image_type.log.json")
+        self.uploads.assert_upload("x86_64-image_type.manifest.json")
         self.uploads.assert_upload("compose-status.json")
         # build must not have been tagged
         self.assertEqual(len(session.host.tags), 0)
@@ -544,6 +571,34 @@ class TestBuilderPlugin(PluginTest):
 
         with self.assertRaises(AssertionError):
             self.uploads.assert_upload("x86_64-image_type.log.json")
+
+    @httpretty.activate
+    def test_compose_no_manifest(self):
+        # Simulate fetching the manifests fails, a non-fatal issue
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url)
+        composer.httpretty_regsiter()
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                composer.architectures,
+                {}]
+
+        composer.routes["manifests"] = {
+            "status": 500
+        }
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+
+        self.uploads.assert_upload("compose-request.json")
+
+        with self.assertRaises(AssertionError):
+            self.uploads.assert_upload("x86_64-image_type.manifest.json")
 
     @httpretty.activate
     def test_skip_tag(self):
