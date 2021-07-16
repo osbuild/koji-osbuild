@@ -35,7 +35,7 @@ if [[ $ID == rhel ]] && ! rpm -q epel-release; then
 fi
 
 # Register RHEL if we are provided with a registration script.
-if [[ -n "${RHN_REGISTRATION_SCRIPT:-}" ]] && ! sudo subscription-manager status; then
+if [[ $ID == "rhel" && -n "${RHN_REGISTRATION_SCRIPT:-}" ]] && ! sudo subscription-manager status; then
     sudo chmod +x $RHN_REGISTRATION_SCRIPT
     sudo $RHN_REGISTRATION_SCRIPT
 fi
@@ -59,8 +59,8 @@ fi
 # Set up dnf repositories with the RPMs we want to test
 sudo tee /etc/yum.repos.d/osbuild.repo << EOF
 [koji-osbuild]
-name=koji-osbuild ${GIT_COMMIT}
-baseurl=${DNF_REPO_BASEURL}/koji-osbuild/${DISTRO_VERSION}/${ARCH}/${GIT_COMMIT}
+name=koji-osbuild ${CI_COMMIT_SHA}
+baseurl=${DNF_REPO_BASEURL}/koji-osbuild/${DISTRO_VERSION}/${ARCH}/${CI_COMMIT_SHA}
 enabled=1
 gpgcheck=0
 # Default dnf repo priority is 99. Lower number means higher priority.
