@@ -83,6 +83,11 @@ gpgcheck=0
 priority=5
 EOF
 
+# see https://bugzilla.redhat.com/show_bug.cgi?id=1985321
+if [[ $ID == fedora && $VERSION_ID == 34 ]]; then
+  retry sudo dnf -y upgrade selinux-policy
+fi
+
 # Installing koji-osbuild-tests package
 retry sudo dnf -y install koji-osbuild-tests
 
