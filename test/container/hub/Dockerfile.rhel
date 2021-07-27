@@ -2,7 +2,6 @@ ARG version=latest
 
 FROM registry.access.redhat.com/ubi8/ubi:$version
 
-COPY container/rhel.repo /etc/yum.repos.d/
 COPY container/brew.repo /etc/yum.repos.d/
 
 # koji db schema is in docs, remove nodocs from from dnf config
