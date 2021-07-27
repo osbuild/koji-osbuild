@@ -85,7 +85,6 @@ install -m 0755 -vp test/data/*                                 %{buildroot}/%{_
 
 install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container
 install -m 0755 -vp test/container/brew.repo                    %{buildroot}/%{_datadir}/%{name}-tests/container/
-install -m 0755 -vp test/container/rhel.repo                    %{buildroot}/%{_datadir}/%{name}-tests/container/
 
 install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container/builder
 install -m 0755 -vp test/container/builder/Dockerfile.fedora    %{buildroot}/%{_datadir}/%{name}-tests/container/builder/
