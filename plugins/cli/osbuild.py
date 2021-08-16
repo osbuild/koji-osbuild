@@ -48,7 +48,7 @@ def parse_args(argv):
     return opts
 
 
-def check_target(session, name: str):
+def check_target(session, name):
     """Check the target with name exists and has a destination tag"""
 
     target = session.getBuildTarget(name)
