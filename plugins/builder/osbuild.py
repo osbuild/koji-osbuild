@@ -420,7 +420,7 @@ class Client:
 
 class OSBuildImage(BaseTaskHandler):
     Methods = ['osbuildImage']
-    _taskWeight = 2.0
+    _taskWeight = 0.2
 
     def __init__(self, task_id, method, params, session, options):
         super().__init__(task_id, method, params, session, options)
