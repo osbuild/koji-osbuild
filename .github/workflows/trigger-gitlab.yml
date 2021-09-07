@@ -1,7 +1,11 @@
 # inspired by rhinstaller/anaconda
 
 name: Trigger GitLab CI
-on: [push, pull_request_target]
+on:
+  pull_request_target:
+  push:
+    branches:
+      - main
 
 jobs:
   pr-info:
