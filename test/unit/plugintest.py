@@ -3,7 +3,7 @@
 #
 
 
-import imp
+import importlib
 import os
 import unittest
 
@@ -29,13 +29,12 @@ class PluginTest(unittest.TestCase):
             return None
 
         root = os.getenv("GITHUB_WORKSPACE", os.getcwd())
-        haystack = os.path.join(root, "plugins", plugin_type)
-        fp, path, desc = imp.find_module("osbuild", [haystack])
-
-        try:
-            return imp.load_module("osbuild", fp, path, desc)
-        finally:
-            fp.close()
+        haystack = os.path.join(root, "plugins", plugin_type, "osbuild.py")
+        spec = importlib.util.spec_from_file_location("osbuild", haystack)
+        assert spec, f"Could not find '{plugin_type}' plugin"
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
 
     def setUp(self):
         """Setup plugin testing environment
