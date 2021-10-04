@@ -35,8 +35,8 @@ RPM:
           - aws/fedora-33-aarch64
           - aws/fedora-34-x86_64
           - aws/fedora-34-aarch64
-          - aws/rhel-8-x86_64
-          - aws/rhel-8-aarch64
+          - aws/rhel-8.4-ga-x86_64
+          - aws/rhel-8.4-ga-aarch64
 
 Testing:
   stage: test
@@ -57,8 +57,8 @@ Testing:
           - aws/fedora-34-x86_64
           # - aws/fedora-34-aarch64
       - RUNNER:
-          - aws/rhel-8-x86_64
-          # - aws/rhel-8-aarch64
+          - aws/rhel-8.4-ga-x86_64
+          # - aws/rhel-8.4-ga-aarch64
         INTERNAL_NETWORK: ["true"]
 
 finish:
