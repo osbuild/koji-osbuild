@@ -34,10 +34,13 @@ if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     sudo rpm -Uvh /tmp/epel.rpm
 fi
 
-# Register RHEL if we are provided with a registration script.
-if [[ $ID == "rhel" && -n "${RHN_REGISTRATION_SCRIPT:-}" ]] && ! sudo subscription-manager status; then
-    sudo chmod +x $RHN_REGISTRATION_SCRIPT
-    sudo $RHN_REGISTRATION_SCRIPT
+if [[ "$ID" == rhel ]] && sudo subscription-manager status; then
+  # If this script runs on subscribed RHEL, install content built using CDN
+  # repositories.
+  DISTRO_VERSION=rhel-${VERSION_ID%.*}-cdn
+
+  # workaround for https://github.com/osbuild/osbuild/issues/717
+  sudo subscription-manager config --rhsm.manage_repos=1
 fi
 
 # Enable fastestmirror to speed up dnf operations.
