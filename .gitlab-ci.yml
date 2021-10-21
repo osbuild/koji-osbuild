@@ -7,10 +7,6 @@ stages:
 .terraform:
   tags:
     - terraform
-  artifacts:
-    paths:
-      - journal-log
-    when: always
 
 init:
   stage: init
@@ -27,7 +23,6 @@ RPM:
     - sh "schutzbot/mockbuild.sh"
   after_script:
     - schutzbot/update_github_status.sh update
-    - schutzbot/save_journal.sh
   parallel:
     matrix:
       - RUNNER:
@@ -47,7 +42,6 @@ Testing:
     - sh "/usr/libexec/tests/koji-osbuild/integration.sh"
   after_script:
     - schutzbot/update_github_status.sh update
-    - schutzbot/save_journal.sh
   parallel:
     matrix:
       - RUNNER:
