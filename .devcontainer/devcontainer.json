@@ -1,0 +1,32 @@
+{
+  "name": "koji-osbuild",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+  },
+  "mounts": [
+    "source=osbuild-share,target=/root/.local/share,type=volume"
+  ],
+  "runArgs": [
+    "--privileged"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/fish",
+    "python.pythonPath": "/usr/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pyTestEnabled": true,
+    "python.testing.pyTestArgs": [
+      "test"
+    ]
+  },
+  "extensions": [
+    "editorconfig.editorconfig",
+    "laurenttreguier.rpm-spec",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-vscode-remote.remote-containers"
+  ]
+}

@@ -1,0 +1,48 @@
+FROM fedora:latest
+RUN dnf install -y \
+    bat \
+    findutils \
+    fish \
+    fpaste \
+    git \
+    glibc-langpack-en \
+    hostname \
+    ipython3 \
+    jq \
+    koji \
+    koji-builder \
+    koji-hub \
+    koji-utils \
+    lsof \
+    make \
+    podman \
+    postgresql \
+    pylint \
+    python3-autopep8 \
+    python3-devel \
+    python3-docutils \
+    python3-enchant \
+    python3-flexmock \
+    python3-httpretty \
+    python3-iniparse \
+    python3-jsonschema \
+    python3-koji \
+    python3-mako \
+    python3-pip \
+    python3-pycodestyle \
+    python3-pylint \
+    python3-pytest \
+    python3-pytest-cov \
+    python3-pyyaml \
+    python3-requests \
+    qemu-img \
+    qemu-system-x86 \
+    rpm-build \
+    rpmlint \
+    ShellCheck \
+    skopeo \
+    strace \
+    the_silver_searcher \
+    tree
+
+WORKDIR /workspaces/koji-osbuild
