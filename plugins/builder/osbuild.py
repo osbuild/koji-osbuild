@@ -24,7 +24,7 @@ import time
 import urllib.parse
 
 from string import Template
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import requests
 import koji
@@ -209,11 +209,20 @@ class Client:
 
         return certs
 
+    def request(self, method: str, url: str, js: Optional[Dict] = None):
+        return self.http.request(method, url, json=js)
+
+    def get(self, url: str) -> requests.Response:
+        return self.request("GET", url)
+
+    def post(self, url: str, js: Optional[Dict] = None):
+        return self.request("POST", url, js=js)
+
     def compose_create(self, compose_request: ComposeRequest):
         url = urllib.parse.urljoin(self.url, "compose")
 
         data = compose_request.as_dict()
-        res = self.http.post(url, json=data)
+        res = self.post(url, js=data)
 
         if res.status_code != 201:
             body = res.content.decode("utf-8").strip()
@@ -226,7 +235,7 @@ class Client:
     def compose_status(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"compose/{compose_id}")
 
-        res = self.http.get(url)
+        res = self.get(url)
 
         if res.status_code != 200:
             body = res.content.decode("utf-8").strip()
@@ -238,7 +247,7 @@ class Client:
     def compose_logs(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/logs")
 
-        res = self.http.get(url)
+        res = self.get(url)
 
         if res.status_code != 200:
             body = res.content.decode("utf-8").strip()
@@ -250,7 +259,7 @@ class Client:
     def compose_manifests(self, compose_id: str):
         url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/manifests")
 
-        res = self.http.get(url)
+        res = self.get(url)
 
         if res.status_code != 200:
             body = res.content.decode("utf-8").strip()
