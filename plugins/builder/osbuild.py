@@ -547,9 +547,9 @@ def main():
 
     subpar = sp.add_parser("compose", help='create a new compose')
     subpar.add_argument("name", metavar="NAME", help='The name')
-    subpar.add_argument("version", metavar="NAME", help='The version')
+    subpar.add_argument("version", metavar="VERSION", help='The version')
     subpar.add_argument("release", metavar="RELEASE", help='The release')
-    subpar.add_argument("distro", metavar="NAME", help='The distribution')
+    subpar.add_argument("distro", metavar="DISTRO", help='The distribution')
     subpar.add_argument("repo", metavar="REPO", help='The repository to use',
                         type=str, action="append", default=[])
     subpar.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
