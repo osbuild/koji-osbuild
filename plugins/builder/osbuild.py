@@ -46,6 +46,7 @@ API_BASE = "api/composer-koji/v1/"
 # koji API. It is based on the corresponding OpenAPI specification
 # version '1' and should model it closely.
 
+
 class Repository:
     def __init__(self, baseurl: str, gpgkey: str = None):
         self.baseurl = baseurl
