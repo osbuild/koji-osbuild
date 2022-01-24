@@ -15,6 +15,7 @@ RUN dnf install -y \
     koji-utils \
     lsof \
     make \
+    openssl \
     podman \
     postgresql \
     pylint \
