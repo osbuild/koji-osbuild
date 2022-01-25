@@ -551,10 +551,10 @@ def main():
     subpar.add_argument("version", metavar="VERSION", help='The version')
     subpar.add_argument("release", metavar="RELEASE", help='The release')
     subpar.add_argument("distro", metavar="DISTRO", help='The distribution')
-    subpar.add_argument("repo", metavar="REPO", help='The repository to use',
-                        type=str, action="append", default=[])
     subpar.add_argument("arch", metavar="ARCHITECTURE", help='Request the architecture',
                         type=str, nargs="+")
+    subpar.add_argument("--repo", metavar="REPO", help='The repository to use',
+                        type=str, action="append", default=[])
     subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [qcow2]',
                         action="append", type=str, default=[])
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
