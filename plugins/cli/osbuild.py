@@ -11,35 +11,34 @@ from pprint import pprint
 import koji
 import koji_cli.lib as kl
 from koji.plugin import export_cli
-from koji_cli.lib import _
 
 
 def parse_args(argv):
-    usage = _("usage: %prog osbuild-image [options] <name> <version> "
-              "<distro> <target> <arch> [<arch> ...]")
+    usage = ("usage: %prog osbuild-image [options] <name> <version> "
+             "<distro> <target> <arch> [<arch> ...]")
 
     parser = kl.OptionParser(usage=kl.get_usage_str(usage))
 
     parser.add_option("--nowait", action="store_false", dest="wait",
-                      help=_("Don't wait on image creation"))
-    parser.add_option("--release", help=_("Forcibly set the release field"))
+                      help="Don't wait on image creation")
+    parser.add_option("--release", help="Forcibly set the release field")
     parser.add_option("--repo", action="append",
-                      help=_("Specify a repo that will override the repo used to install "
-                             "RPMs in the image. May be used multiple times. The "
-                             "build tag repo associated with the target is the default."))
+                      help=("Specify a repo that will override the repo used to install "
+                            "RPMs in the image. May be used multiple times. The "
+                            "build tag repo associated with the target is the default."))
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: qcow2]',
                       type=str, action="append", default=[])
     parser.add_option("--skip-tag", action="store_true",
-                      help=_("Do not attempt to tag package"))
+                      help="Do not attempt to tag package")
     parser.add_option("--wait", action="store_true",
-                      help=_("Wait on the image creation, even if running in the background"))
+                      help="Wait on the image creation, even if running in the background")
 
     opts, args = parser.parse_args(argv)
     if len(args) < 5:
-        parser.error(_("At least five arguments are required: a name, "
-                       "a version, a distribution, a build target, "
-                       "and 1 or more architectures."))
+        parser.error("At least five arguments are required: a name, "
+                     "a version, a distribution, a build target, "
+                     "and 1 or more architectures.")
 
     for i, arg in enumerate(("name", "version", "distro", "target")):
         setattr(opts, arg, args[i])
@@ -53,12 +52,12 @@ def check_target(session, name):
 
     target = session.getBuildTarget(name)
     if not target:
-        raise koji.GenericError(_("Unknown build target: %s" % name))
+        raise koji.GenericError("Unknown build target: %s" % name)
 
     tag = session.getTag(target['dest_tag'])
     if not tag:
-        raise koji.GenericError(_("Unknown destination tag: %s" %
-                                  target['dest_tag_name']))
+        raise koji.GenericError("Unknown destination tag: %s" %
+                                target['dest_tag_name'])
 
 
 @export_cli
