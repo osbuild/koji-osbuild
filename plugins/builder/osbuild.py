@@ -543,6 +543,10 @@ def main():
     parser.add_argument("--url", metavar="URL", type=str,
                         default=DEFAULT_COMPOSER_URL,
                         help="The URL of the osbuild composer koji API endpoint")
+    parser.add_argument("--cert", metavar="cert", help='The client SSL certificates to use',
+                        type=str)
+    parser.add_argument("--ca", metavar="ca", help='The SSL certificate authority',
+                        type=str)
     parser.set_defaults(cmd=None)
     sp = parser.add_subparsers(help='commands')
 
@@ -559,10 +563,6 @@ def main():
                         action="append", type=str, default=[])
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
                         default=DEFAULT_KOJIHUB_URL)
-    subpar.add_argument("--cert", metavar="cert", help='The client SSL certificates to use',
-                        type=str)
-    subpar.add_argument("--ca", metavar="ca", help='The SSL certificate authority',
-                        type=str)
     subpar.set_defaults(cmd='compose')
 
     subpar = sp.add_parser("status", help='status of a compose')

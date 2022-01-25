@@ -640,6 +640,8 @@ class TestBuilderPlugin(PluginTest):
 
         args = [
             "plugins/builder/osbuild.py",
+            "--cert", ", ".join(certs),
+            "--ca", "test/data/example-ca.pem",
             "compose",
             "Fedora-Cloud-Image",
             "33",
@@ -647,8 +649,6 @@ class TestBuilderPlugin(PluginTest):
             "fedora-33",
             "x86_64",
             "--repo", "http://download.localhost/pub/linux/$arch",
-            "--cert", ", ".join(certs),
-            "--ca", "test/data/example-ca.pem"
         ]
 
         with unittest.mock.patch.object(sys, 'argv', args):
