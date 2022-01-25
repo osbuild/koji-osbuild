@@ -20,7 +20,7 @@ else
   echo "Container detected, direct mode."
 fi
 
-SCRIPTS="$(git ls-files --exclude='*.sh' --ignored | xargs echo)"
+SCRIPTS="$(git ls-files --exclude='*.sh' --ignored --cached | xargs echo)"
 
 run_test "shellcheck -S ${SHELLCHECK_SEVERITY} ${SCRIPTS}"
 run_test "pytest -v --cov-report=term --cov=osbuild test/unit/"
