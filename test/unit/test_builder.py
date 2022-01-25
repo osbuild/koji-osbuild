@@ -645,8 +645,8 @@ class TestBuilderPlugin(PluginTest):
             "33",
             "20201015.0",
             "fedora-33",
-            "http://download.localhost/pub/linux/$arch",
             "x86_64",
+            "--repo", "http://download.localhost/pub/linux/$arch",
             "--cert", ", ".join(certs),
             "--ca", "test/data/example-ca.pem"
         ]
