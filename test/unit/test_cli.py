@@ -88,7 +88,7 @@ class TestCliPlugin(PluginTest):
         ]
 
         expected_args = ["name", "version", "distro",
-                         ['qcow2'], # the default image type
+                         ['guest-image'],  # the default image type
                          "target",
                          ['arch1']]
 

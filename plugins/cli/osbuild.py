@@ -27,7 +27,7 @@ def parse_args(argv):
                             "RPMs in the image. May be used multiple times. The "
                             "build tag repo associated with the target is the default."))
     parser.add_option("--image-type", metavar="TYPE",
-                      help='Request an image-type [default: qcow2]',
+                      help='Request an image-type [default: guest-image]',
                       type=str, action="append", default=[])
     parser.add_option("--skip-tag", action="store_true",
                       help="Do not attempt to tag package")
@@ -69,7 +69,7 @@ def handle_osbuild_image(options, session, argv):
     distro, image_types = args.distro, args.image_type
 
     if not image_types:
-        image_types = ["qcow2"]
+        image_types = ["guest-image"]
 
     opts = {}
 

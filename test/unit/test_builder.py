@@ -19,7 +19,7 @@ import httpretty
 from plugintest import PluginTest
 
 
-API_BASE = "api/composer-koji/v1/"
+API_BASE = "api/image-builder-composer/v2/"
 
 
 class MockComposer:  # pylint: disable=too-many-instance-attributes
@@ -84,19 +84,19 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
 
         httpretty.register_uri(
             httpretty.GET,
-            urllib.parse.urljoin(self.url, "compose/" + compose_id),
+            urllib.parse.urljoin(self.url, "composes/" + compose_id),
             body=self.compose_status
         )
 
         httpretty.register_uri(
             httpretty.GET,
-            urllib.parse.urljoin(self.url, "compose/" + compose_id + "/logs"),
+            urllib.parse.urljoin(self.url, "composes/" + compose_id + "/logs"),
             body=self.compose_logs
         )
 
         httpretty.register_uri(
             httpretty.GET,
-            urllib.parse.urljoin(self.url, "compose/" + compose_id + "/manifests"),
+            urllib.parse.urljoin(self.url, "composes/" + compose_id + "/manifests"),
             body=self.compose_manifests
         )
 
@@ -115,8 +115,9 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
         ireqs = compose["request"]["image_requests"]
         result = {
             "status": compose["status"],
-            "koji_task_id": compose["request"]["koji"]["task_id"],
-            "koji_build_id": compose["build_id"],
+            "koji_status": {
+                "build_id": compose["build_id"],
+            },
             "image_statuses": [
                 {"status": compose["status"]} for _ in ireqs
             ]
@@ -138,11 +139,13 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
 
         ireqs = compose["request"]["image_requests"]
         result = {
-            "koji_init_logs": {"log": "yes, please!"},
-            "image_logs": [
+            "image_builds": [
                 {"osbuild": "log log log"} for _ in ireqs
             ],
-            "koji_import_logs": {"log": "yes, indeed!"},
+            "koji": {
+                "init": {"log": "yes, please!"},
+                "import": {"log": "yes, indeed!"},
+            }
         }
         return [200, response_headers, json.dumps(result)]
 
@@ -161,9 +164,11 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
             return [400, response_headers, f"Unknown compose: {target}"]
 
         ireqs = compose["request"]["image_requests"]
-        result = [
-            {"sources": {}, "pipeline": {}} for _ in ireqs
-        ]
+        result = {
+            "manifests": [
+                {"sources": {}, "pipelines": []} for _ in ireqs
+            ]
+        }
         return [200, response_headers, json.dumps(result)]
 
     def oauth_acquire_token(self, req, _uri, response_headers):
