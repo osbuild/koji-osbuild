@@ -40,24 +40,29 @@ DEFAULT_CONFIG_FILES = [
     "/etc/koji-osbuild/builder.conf"
 ]
 
-API_BASE = "api/composer-koji/v1/"
+API_BASE = "api/image-builder-composer/v2/"
+
 
 # The following classes are a implementation of osbuild composer's
-# koji API. It is based on the corresponding OpenAPI specification
-# version '1' and should model it closely.
-
+# cloud API. It is based on the corresponding OpenAPI specification
+# version '2' with integrated koji support (>= commit c81d0d0).
 
 class Repository:
     def __init__(self, baseurl: str, gpgkey: str = None):
         self.baseurl = baseurl
         self.gpgkey = gpgkey
+        self.rhsm = False
 
     def as_dict(self, arch: str = ""):
         tmp = Template(self.baseurl)
         url = tmp.substitute(arch=arch)
-        res = {"baseurl": url}
+        res = {
+            "baseurl": url,
+            "rhsm": self.rhsm
+        }
         if self.gpgkey:
-            res["gpgkey"] = self.gpgkey
+            res["gpg_key"] = self.gpgkey
+            res["check_gpg"] = True
         return res
 
 
@@ -97,25 +102,28 @@ class NVR:
 
 class ComposeRequest:
     class Koji:
-        def __init__(self, server: str, task_id: int):
+        def __init__(self, server: str, task_id: int, nvr: NVR):
             self.server = server
             self.task_id = task_id
+            self.nvr = nvr
+
+        def as_dict(self):
+            return {
+                **self.nvr.as_dict(),
+                "server": str(self.server),
+                "task_id": self.task_id
+            }
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, nvr: NVR, distro: str, ireqs: List[ImageRequest], koji: Koji):
-        self.nvr = nvr
+    def __init__(self,  distro: str, ireqs: List[ImageRequest], koji: Koji):
         self.distribution = distro
         self.image_requests = ireqs
         self.koji = koji
 
     def as_dict(self):
         return {
-            **self.nvr.as_dict(),
             "distribution": self.distribution,
-            "koji": {
-                "server": str(self.koji.server),
-                "task_id": self.koji.task_id
-            },
+            "koji": self.koji.as_dict(),
             "image_requests": [
                 img.as_dict() for img in self.image_requests
             ]
@@ -128,6 +136,7 @@ class ImageStatus(enum.Enum):
     PENDING = "pending"
     BUILDING = "building"
     UPLOADING = "uploading"
+    REGISTERING = 'registering'
 
 
 class ComposeStatus:
@@ -145,8 +154,9 @@ class ComposeStatus:
     @classmethod
     def from_dict(cls, data: Dict):
         status = data["status"].lower()
-        koji_task_id = data["koji_task_id"]
-        koji_build_id = data.get("koji_build_id")
+        koji_status = data.get("koji_status", {})
+        koji_task_id = koji_status.get("task_id")
+        koji_build_id = koji_status.get("build_id")
         images = [
             ImageStatus(s["status"].lower()) for s in data["image_statuses"]
         ]
@@ -185,9 +195,10 @@ class ComposeLogs:
 
     @classmethod
     def from_dict(cls, data: Dict):
-        image_logs = data["image_logs"]
-        import_logs = data["koji_import_logs"]
-        init_logs = data["koji_init_logs"]
+        image_logs = data["image_builds"]
+        koji_logs = data.get("koji", {})
+        import_logs = koji_logs.get("import")
+        init_logs = koji_logs.get("init")
         return cls(image_logs, import_logs, init_logs)
 
 
@@ -322,7 +333,7 @@ class Client:
         return ps["id"]  # the compose id
 
     def compose_status(self, compose_id: str):
-        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}")
+        url = urllib.parse.urljoin(self.url, f"composes/{compose_id}")
 
         res = self.get(url)
 
@@ -334,7 +345,7 @@ class Client:
         return ComposeStatus.from_dict(res.json())
 
     def compose_logs(self, compose_id: str):
-        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/logs")
+        url = urllib.parse.urljoin(self.url, f"composes/{compose_id}/logs")
 
         res = self.get(url)
 
@@ -346,7 +357,7 @@ class Client:
         return ComposeLogs.from_dict(res.json())
 
     def compose_manifests(self, compose_id: str):
-        url = urllib.parse.urljoin(self.url, f"compose/{compose_id}/manifests")
+        url = urllib.parse.urljoin(self.url, f"composes/{compose_id}/manifests")
 
         res = self.get(url)
 
@@ -355,7 +366,8 @@ class Client:
             msg = f"Failed to get the compose manifests: {body}"
             raise koji.GenericError(msg) from None
 
-        return res.json()
+        js = res.json()
+        return js.get("manifests", [])
 
     def wait_for_compose(self, compose_id: str, *, sleep_time=2, callback=None):
         while True:
@@ -545,9 +557,11 @@ class OSBuildImage(BaseTaskHandler):
                           nvr, distro, self.koji_url,
                           str([i.as_dict() for i in ireqs]))
 
+        self.logger.debug("Composer API: %s", self.client.url)
+
         # Setup done, create the compose request and send it off
-        kojidata = ComposeRequest.Koji(self.koji_url, self.id)
-        request = ComposeRequest(nvr, distro, ireqs, kojidata)
+        kojidata = ComposeRequest.Koji(self.koji_url, self.id, nvr)
+        request = ComposeRequest(distro, ireqs, kojidata)
 
         self.upload_json(request.as_dict(), "compose-request")
 
@@ -605,15 +619,15 @@ def show_compose(cs):
 def compose_cmd(client: Client, args):
     nvr = NVR(args.name, args.version, args.release)
     images = []
-    formats = args.format or ["qcow2"]
+    formats = args.format or ["guest-image"]
     repos = [Repository(url) for url in args.repo]
     for fmt in formats:
         for arch in args.arch:
             ireq = ImageRequest(arch, fmt, repos)
             images.append(ireq)
 
-    kojidata = ComposeRequest.Koji(args.koji, 0)
-    request = ComposeRequest(nvr, args.distro, images, kojidata)
+    kojidata = ComposeRequest.Koji(args.koji, 0, nvr)
+    request = ComposeRequest(args.distro, images, kojidata)
     cid = client.compose_create(request)
 
     print(f"Compose: {cid}")
@@ -664,7 +678,7 @@ def main():
                         type=str, nargs="+")
     subpar.add_argument("--repo", metavar="REPO", help='The repository to use',
                         type=str, action="append", default=[])
-    subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [qcow2]',
+    subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [guest-image]',
                         action="append", type=str, default=[])
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
                         default=DEFAULT_KOJIHUB_URL)

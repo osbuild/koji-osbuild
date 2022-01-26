@@ -143,7 +143,7 @@ koji --server=http://localhost:8080/kojihub \
 	 f33-candidate \
 	 x86_64 \
 	 --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/33/Everything/$arch/os/' \
-	 --image-type qcow2 \
+	 --image-type guest-image \
 	 --release 1
 ```
 
