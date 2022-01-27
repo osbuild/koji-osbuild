@@ -10,6 +10,10 @@ relaxations, like maximum line length (120). A pylint config file
 [`.pylintrc`](.pylintrc) is provided. The `./run-test.sh` will lint
 the source code using this (see *Testing* below).
 
+# Contributing
+
+Please refer to the [developer guide](https://www.osbuild.org/guides/developer-guide/developer-guide.html) to learn about our workflow, code style and more.
+
 # Testing
 
 ## Unit tests
