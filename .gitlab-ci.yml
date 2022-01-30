@@ -26,8 +26,6 @@ RPM:
   parallel:
     matrix:
       - RUNNER:
-          - aws/fedora-33-x86_64
-          - aws/fedora-33-aarch64
           - aws/fedora-34-x86_64
           - aws/fedora-34-aarch64
           - aws/rhel-8.4-ga-x86_64
@@ -45,7 +43,6 @@ Testing:
   parallel:
     matrix:
       - RUNNER:
-          - aws/fedora-33-x86_64
           # https://quay.io/repository/osbuild/postgres available only for x86_64
           # - aws/fedora-33-aarch64
           - aws/fedora-34-x86_64
