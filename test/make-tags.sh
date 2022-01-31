@@ -1,18 +1,29 @@
 #!/usr/bin/sh
 set -ux
 
+. /etc/os-release
+
 KOJI_SERVER=${KOJI_SERVER:-http://localhost:8080/kojihub}
 
 KOJI="koji --server=${KOJI_SERVER} --user=kojiadmin --password=kojipass --authtype=password"
 
-$KOJI add-tag f33
-$KOJI add-tag --parent f33 f33-candidate
-$KOJI add-tag --parent f33 --arches=x86_64 f33-build
-$KOJI add-target f33-candidate f33-build f33-candidate
+ARCHES=$(uname -m)
+VERSION_MAJOR="${VERSION_ID%.*}"
 
-$KOJI add-pkg --owner kojiadmin f33-candidate Fedora-Cloud
-$KOJI add-pkg --owner kojiadmin f33-candidate RHEL-Cloud
+TAG_NAME="${ID}${VERSION_MAJOR}"  # fedora35 or rhel8
+TAG_BUILD="${TAG_NAME}-build"
+TAG_CANDIDATE="${TAG_NAME}-candidate"
 
-$KOJI add-pkg --owner kojiadmin f33-candidate Fedora-IoT
+echo "Tag configuration: ${TAG_NAME}, ${TAG_BUILD}, ${TAG_CANDIDATE}, ${ARCHES}"
 
-$KOJI regen-repo f33-build
+$KOJI add-tag "${TAG_NAME}"
+$KOJI add-tag --parent "${TAG_NAME}" "${TAG_CANDIDATE}"
+$KOJI add-tag --parent "${TAG_NAME}" --arches="${ARCHES}" "${TAG_BUILD}"
+$KOJI add-target "${TAG_CANDIDATE}" "${TAG_BUILD}" "${TAG_CANDIDATE}"
+
+$KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" fedora-guest
+$KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" rhel-guest
+
+$KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" fedora-iot
+
+$KOJI regen-repo "${TAG_BUILD}"
