@@ -134,6 +134,7 @@ Requires:       koji
 Requires:       krb5-workstation
 Requires:       openssl
 Requires:       osbuild-composer >= 22
+Requires:       osbuild-composer-tests
 Requires:       podman
 Requires:       podman-plugins
 

@@ -1,6 +1,11 @@
 [koji]
-allowed_domains = ["client.osbuild.local", "localhost", "::1"]
 ca = "/etc/osbuild-composer/ca-crt.pem"
+enable_tls = true
+enable_mtls = false
+enable_jwt = true
+jwt_keys_url = "https://localhost:8081/certs"
+jwt_ca_file = "/etc/osbuild-composer/ca-crt.pem"
+jwt_acl_file = ""
 
 [koji.servers.localhost.kerberos]
 principal = "osbuild-krb@LOCAL"
