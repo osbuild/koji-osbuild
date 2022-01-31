@@ -4,22 +4,30 @@
 
 
 import functools
+import platform
 import unittest
+import string
 import subprocess
 
 
-F33_REPO = "http://download.fedoraproject.org/pub/fedora/linux/releases/33/Everything/$arch/os"
+REPOS = {
+    "fedora": [
+        "http://download.fedoraproject.org/pub/fedora/linux/releases/$release/Everything/$arch/os"
+    ],
+    "rhel": [
+        "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/x86_64/os/",
+        "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/x86_64/os/",
+    ]
+}
 
-RHEL_REPOS = [
-    "http://download.devel.redhat.com/released/RHEL-8/8.2.0/BaseOS/x86_64/os/",
-    "http://download.devel.redhat.com/released/RHEL-8/8.2.0/AppStream/x86_64/os/",
-]
 
 def koji_command(*args, _input=None, _globals=None, **kwargs):
     args = list(args) + [f'--{k}={v}' for k, v in kwargs.items()]
     if _globals:
         args = [f'--{k}={v}' for k, v in _globals.items()] + args
-    return subprocess.run(["koji"] + args,
+    cmd = ["koji"] + args
+    print(cmd)
+    return subprocess.run(cmd,
                           encoding="utf-8",
                           stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT,
@@ -39,16 +47,6 @@ def parse_os_release():
             k, v = line.split("=", 1)
             info[k] = v.strip('"')
     return info
-
-
-def is_fedora():
-    info = parse_os_release()
-    return info["ID"].lower() == "fedora"
-
-
-def is_rhel():
-    info = parse_os_release()
-    return info["ID"].lower() == "rhel"
 
 
 class TestIntegration(unittest.TestCase):
@@ -77,35 +75,37 @@ class TestIntegration(unittest.TestCase):
                    "\n error: " + res.stdout)
             self.fail(msg)
 
-    @unittest.skipUnless(is_fedora(), "no cross builds")
-    def test_compose_fedora(self):
-        """Successful Fedora compose"""
-        # Simple test of a successful compose of F33
-        # Needs the f33-candidate tag be setup properly
-
-        res = self.koji("Fedora-Cloud",
-                        "33",
-                        "fedora-33",
-                        "f33-candidate",
-                        "x86_64",
-                        "--wait",
-                        repo=F33_REPO)
-        self.check_res(res)
-
-    @unittest.skipUnless(is_rhel(), "no cross builds")
-    def test_compose_rhel(self):
-        """Successful RHEL compose"""
+    def test_compose(self):
+        """Successful compose"""
         # Simple test of a successful compose of RHEL
 
-        repos = []
-        for repo in RHEL_REPOS:
-            repos += ["--repo", repo]
+        info = parse_os_release()
 
-        res = self.koji("RHEL-Cloud",
-                        "8",
-                        "rhel-8",
-                        "f33-candidate",
-                        "x86_64",
+        name = info["ID"]  # 'fedora' or 'rhel'
+        version = info["VERSION_ID"]  # <major> or <major>.<minor>
+        major = version.split(".")[0]
+
+        distro = f"{name}-{major}"
+        tag = f"{name}{major}-candidate"  # fedora<major> or rhel<major>
+        arch = platform.machine()
+
+        release = version
+        if name.lower() == "rhel":
+            release += ".0"
+
+        repos = []
+        for repo in REPOS[name]:
+            tpl = string.Template(repo)
+            url = tpl.safe_substitute({"release": release})
+            repos += ["--repo", url]
+
+        package = f"{name.lower()}-guest"
+
+        res = self.koji(package,
+                        major,
+                        distro,
+                        tag,
+                        arch,
                         "--wait",
                         *repos)
         self.check_res(res)
@@ -113,9 +113,17 @@ class TestIntegration(unittest.TestCase):
     def test_unknown_tag_check(self):
         """Unknown Tag check"""
         # Check building an unknown tag fails
-        res = self.koji("Fedora-Cloud",
-                        "33",
-                        "fedora-33",
+
+        info = parse_os_release()
+
+        name = info["ID"]  # 'fedora' or 'rhel'
+        version = info["VERSION_ID"]  # <major> or <major>.<minor>
+        major = version.split(".")[0]
+        distro = f"{name}-{major}"
+
+        res = self.koji("fedora-guest",
+                        major,
+                        distro,
                         "UNKNOWNTAG",
-                        "x86_64")
+                        platform.machine())
         self.check_fail(res)
