@@ -29,6 +29,9 @@ sudo /usr/libexec/koji-osbuild-tests/make-certs.sh /usr/share/koji-osbuild-tests
 greenprint "Starting osbuild-composer's socket"
 sudo systemctl enable --now osbuild-composer-api.socket
 
+greenprint "Starting mock OpenID server"
+sudo /usr/libexec/koji-osbuild-tests/run-openid.sh start
+
 greenprint "Building containers"
 sudo /usr/libexec/koji-osbuild-tests/build-container.sh /usr/share/koji-osbuild-tests
 
@@ -58,6 +61,9 @@ sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild
 
 greenprint "Stopping containers"
 sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop
+
+greenprint "Stopping mock OpenID server"
+sudo /usr/libexec/koji-osbuild-tests/run-openid.sh stop
 
 greenprint "Removing generated CA cert"
 sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
