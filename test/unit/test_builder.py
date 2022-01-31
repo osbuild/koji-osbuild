@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 import urllib.parse
 import uuid
 import unittest.mock
@@ -21,7 +22,7 @@ from plugintest import PluginTest
 API_BASE = "api/composer-koji/v1/"
 
 
-class MockComposer:
+class MockComposer:  # pylint: disable=too-many-instance-attributes
     def __init__(self, url, *, architectures=None):
         self.url = urllib.parse.urljoin(url, API_BASE)
         self.architectures = architectures or ["x86_64"]
@@ -30,6 +31,8 @@ class MockComposer:
         self.build_id = 1
         self.status = "success"
         self.routes = {}
+        self.oauth = None
+        self.oauth_check_delay = 0
 
     def httpretty_regsiter(self):
         httpretty.register_uri(
@@ -44,6 +47,10 @@ class MockComposer:
         return build_id
 
     def compose_create(self, request, _uri, response_headers):
+        check = self.oauth_check(request, response_headers)
+        if check:
+            return check
+
         content_type = request.headers.get("Content-Type")
         if content_type != "application/json":
             return [400, response_headers, "Bad Request"]
@@ -95,7 +102,11 @@ class MockComposer:
 
         return [201, response_headers, json.dumps(compose)]
 
-    def compose_status(self, _request, uri, response_headers):
+    def compose_status(self, request, uri, response_headers):
+        check = self.oauth_check(request, response_headers)
+        if check:
+            return check
+
         target = os.path.basename(uri)
         compose = self.composes.get(target)
         if not compose:
@@ -112,7 +123,10 @@ class MockComposer:
         }
         return [200, response_headers, json.dumps(result)]
 
-    def compose_logs(self, _request, uri, response_headers):
+    def compose_logs(self, request, uri, response_headers):
+        check = self.oauth_check(request, response_headers)
+        if check:
+            return check
         route = self.routes.get("logs")
         if route and route["status"] != 200:
             return [route["status"], response_headers, "Internal error"]
@@ -132,8 +146,11 @@ class MockComposer:
         }
         return [200, response_headers, json.dumps(result)]
 
+    def compose_manifests(self, request, uri, response_headers):
+        check = self.oauth_check(request, response_headers)
+        if check:
+            return check
 
-    def compose_manifests(self, _request, uri, response_headers):
         route = self.routes.get("manifests")
         if route and route["status"] != 200:
             return [route["status"], response_headers, "Internal error"]
@@ -148,6 +165,73 @@ class MockComposer:
             {"sources": {}, "pipeline": {}} for _ in ireqs
         ]
         return [200, response_headers, json.dumps(result)]
+
+    def oauth_acquire_token(self, req, _uri, response_headers):
+
+        data = urllib.parse.parse_qs(req.body.decode("utf-8"))
+
+        grant_type = data.get("grant_type", [])
+        if len(grant_type) != 1 or grant_type[0] != "client_credentials":
+            return [400, response_headers, "Invalid grant type"]
+
+        client_id = data.get("client_id", [])
+        if len(client_id) != 1 or client_id[0] != "koji-osbuild":
+            return [400, response_headers, "Invalid credentials"]
+
+        client_secret = data.get("client_secret", [])
+        if len(client_secret) != 1 or client_secret[0] != "koji-osbuild":
+            return [400, response_headers, "Invalid credentials"]
+
+        token = {
+            "access_token": str(uuid.uuid4()),
+            "expires_in": 1,
+            "token_type": "Bearer",
+            "scope": "profile email",
+        }
+
+        reply = json.dumps(token)
+        self.oauth = token
+
+        token["created_at"] = time.time()
+
+        return [200, response_headers, reply]
+
+    def oauth_check(self, request, response_headers):
+        if self.oauth is None:
+            return None
+        oauth = self.oauth
+
+        auth = request.headers.get("authorization")
+        if not auth or not auth.startswith("Bearer "):
+            return [401, response_headers, "Unauthorized"]
+
+        token = auth[7:]
+
+        if oauth.get("access_token") != token:
+            return [401, response_headers, "Unauthorized"]
+
+        if self.oauth_check_delay:
+            time.sleep(self.oauth_check_delay)
+            # Reset it so that we can actually authorize at
+            # the subsequent request
+            self.oauth_check_delay = 0
+
+        now = time.time()
+
+        if oauth["created_at"] + oauth["expires_in"] < now:
+            return [401, response_headers, "Token expired"]
+
+        return None
+
+    def oauth_activate(self, token_url: str):
+        httpretty.register_uri(
+            httpretty.POST,
+            token_url,
+            body=self.oauth_acquire_token
+        )
+
+        self.oauth = {}
+        print("OAuth active!")
 
 
 class UploadTracker:
@@ -654,3 +738,122 @@ class TestBuilderPlugin(PluginTest):
         with unittest.mock.patch.object(sys, 'argv', args):
             res = self.plugin.main()
             self.assertEqual(res, 0)
+
+    @httpretty.activate
+    def test_oauth2_fail_auth(self):
+        composer_url = self.plugin.DEFAULT_COMPOSER_URL
+        koji_url = self.plugin.DEFAULT_KOJIHUB_URL
+        token_url = "https://localhost/token"
+
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
+
+        handler = self.make_handler(config=cfg)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        # initialize oauth
+        composer.oauth_activate(token_url)
+
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                ["x86_64"],
+                {}]
+
+        with self.assertRaises(koji.GenericError):
+            handler.handler(*args)
+
+    @httpretty.activate
+    def test_oauth2_basic(self):
+        composer_url = self.plugin.DEFAULT_COMPOSER_URL
+        koji_url = self.plugin.DEFAULT_KOJIHUB_URL
+        token_url = "https://localhost/token"
+
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+        }
+        cfg["composer:oauth"] = {
+            "client_id": "koji-osbuild",
+            "client_secret": "s3cr3t",
+            "token_url": token_url
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
+
+        handler = self.make_handler(config=cfg)
+
+        self.assertEqual(handler.composer_url, composer_url)
+        self.assertEqual(handler.koji_url, koji_url)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        # initialize oauth
+        composer.oauth_activate(token_url)
+
+        arches = ["x86_64"]
+        repos = ["http://1.repo", "https://2.repo"]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos}]
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+
+    @httpretty.activate
+    def test_oauth2_delay(self):
+        composer_url = self.plugin.DEFAULT_COMPOSER_URL
+        koji_url = self.plugin.DEFAULT_KOJIHUB_URL
+        token_url = "https://localhost/token"
+
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+        }
+        cfg["composer:oauth"] = {
+            "client_id": "koji-osbuild",
+            "client_secret": "s3cr3t",
+            "token_url": token_url
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
+
+        handler = self.make_handler(config=cfg)
+
+        self.assertEqual(handler.composer_url, composer_url)
+        self.assertEqual(handler.koji_url, koji_url)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_regsiter()
+
+        # initialize oauth
+        composer.oauth_activate(token_url)
+
+        # have the token expire during the check
+        composer.oauth_check_delay = 1.1
+
+        arches = ["x86_64"]
+        repos = ["http://1.repo", "https://2.repo"]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos}]
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
