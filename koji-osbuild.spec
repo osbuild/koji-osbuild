@@ -71,6 +71,7 @@ install -m 0755 -vd                                             %{buildroot}/%{_
 install -m 0755 -vp test/make-certs.sh                          %{buildroot}/%{_libexecdir}/%{name}-tests/
 install -m 0755 -vp test/build-container.sh                     %{buildroot}/%{_libexecdir}/%{name}-tests/
 install -m 0755 -vp test/run-koji-container.sh                  %{buildroot}/%{_libexecdir}/%{name}-tests/
+install -m 0755 -vp test/run-openid.sh                          %{buildroot}/%{_libexecdir}/%{name}-tests/
 install -m 0755 -vp test/copy-creds.sh                          %{buildroot}/%{_libexecdir}/%{name}-tests/
 install -m 0755 -vp test/run-builder.sh                         %{buildroot}/%{_libexecdir}/%{name}-tests/
 install -m 0755 -vp test/make-tags.sh                           %{buildroot}/%{_libexecdir}/%{name}-tests/
