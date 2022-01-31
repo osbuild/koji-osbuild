@@ -95,5 +95,4 @@ fi
 retry sudo dnf -y install koji-osbuild-tests
 
 # Start services.
-sudo systemctl enable --now osbuild-composer.socket
 sudo systemctl enable --now osbuild-composer-api.socket
