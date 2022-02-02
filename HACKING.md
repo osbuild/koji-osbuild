@@ -62,6 +62,19 @@ build via the koji XML RPC.
 sudo  test/copy-creds.sh
 ```
 
+### Run the mock OpenID server
+
+The koji builder plugin needs to be authorized in order to be able
+to start a compose via Composer. The default authentication scheme
+is `OAuth2`. For testing purposes we can use the mock OpenID server
+that is included in the `osbuild-composer-tests` package. A helper
+script is included to start and stop the server with the correct
+parameters.
+
+```sh
+sudo test/run-openid.sh start
+```
+
 ### Run the koji builder
 
 Run the koji builder instance can be started. Here `fg` means that
