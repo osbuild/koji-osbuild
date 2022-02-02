@@ -65,6 +65,21 @@ ssl_cert = /share/worker-crt.pem, /share/worker-key.pem
 # directory containing certificates of trusted CAs.
 ssl_verify = /share/worker-ca.pem
 
+[composer:oauth]
+# Authorization via OAuth2/SSO, as alternative to client side certs.
+# The "Client Credentials Grant" (RFC 6749 section 4.4) flow is used,
+# which requires the client id and secret to be specified as well as
+# the endpoint of where to obtain tokens.
+
+# String that uniquely identifies the client (RFC 6749, 2.2).
+client_id = koji
+
+# Secret corresponding to the client id.
+client_secret = koji
+
+# URL to the endpoint that will provide the token.
+token_url = https://localhost:8081/token
+
 [koji]
 # The URL to the koji hub XML-RPC endpoint
 server = https://koji.fedoraproject.org/kojihub
