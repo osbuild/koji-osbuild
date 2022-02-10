@@ -21,6 +21,29 @@ from plugintest import PluginTest
 
 API_BASE = "api/image-builder-composer/v2/"
 
+# https://github.com/osbuild/osbuild-composer
+# internal/cloudapi/v2/openapi.v2.yml
+# 631bd21ffeea03e7d4849f4d34430bde5a1b9db9
+# Additionally, we include the test image type
+# called `image_type`
+VALID_IMAGE_TYPES = [
+    "aws",
+    "aws-rhui",
+    "aws-ha-rhui",
+    "aws-sap-rhui",
+    "azure",
+    "edge-commit",
+    "edge-container",
+    "edge-installer",
+    "gcp",
+    "guest-image",
+    "image-installer",
+    "vsphere",
+
+    # test image type used as default
+    "image_type"
+]
+
 
 class MockComposer:  # pylint: disable=too-many-instance-attributes
     def __init__(self, url, *, architectures=None):
@@ -64,6 +87,10 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
             arch = it.get("architecture")
             if arch not in self.architectures:
                 return [400, response_headers, "Unsupported Architrecture"]
+            image_type = it.get("image_type")
+            if not image_type or image_type not in VALID_IMAGE_TYPES:
+                msg = f"Unsupported Image Type: '{image_type}'"
+                return [400, response_headers, msg]
 
         compose_id = str(uuid.uuid4())
         build_id = self.next_build_id()
