@@ -42,6 +42,14 @@ DEFAULT_CONFIG_FILES = [
 
 API_BASE = "api/image-builder-composer/v2/"
 
+# For compatibility reasons we support the image types used by the
+# koji api.
+KOJIAPI_IMAGE_TYPES = {
+    "qcow2": "guest-image",
+    "ec2": "aws-rhui",
+    "ec2-ha": "aws-ha-rhui",
+    "ec2-sap": "aws-sap-rhui",
+}
 
 # The following classes are a implementation of osbuild composer's
 # cloud API. It is based on the corresponding OpenAPI specification
@@ -497,6 +505,15 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("user repo override: %s", str(repos))
         return [Repository(r) for r in repos]
 
+    def map_koji_api_image_type(self, image_type: str) -> str:
+        mapped = KOJIAPI_IMAGE_TYPES.get(image_type)
+        if not mapped:
+            return image_type
+
+        self.logger.debug("mapped koji api image type: '%s' -> '%s'",
+                          image_type, mapped)
+        return mapped
+
     def tag_build(self, tag, build_id):
         args = [
             tag,       # tag id
@@ -552,6 +569,7 @@ class OSBuildImage(BaseTaskHandler):
             nvr.release = self.session.getNextRelease(nvr.as_dict())
 
         # Arches and image types
+        image_types = [self.map_koji_api_image_type(i) for i in image_types]
         ireqs = [ImageRequest(a, i, repos) for a in arches for i in image_types]
         self.logger.debug("Creating compose: %s (%s)\n  koji: %s\n  images: %s",
                           nvr, distro, self.koji_url,
@@ -620,6 +638,9 @@ def compose_cmd(client: Client, args):
     nvr = NVR(args.name, args.version, args.release)
     images = []
     formats = args.format or ["guest-image"]
+    formats = [
+        KOJIAPI_IMAGE_TYPES.get(f, f) for f in formats
+    ]
     repos = [Repository(url) for url in args.repo]
     for fmt in formats:
         for arch in args.arch:

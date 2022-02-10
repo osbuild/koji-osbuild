@@ -717,6 +717,26 @@ class TestBuilderPlugin(PluginTest):
             self.uploads.assert_upload("x86_64-image_type.manifest.json")
 
     @httpretty.activate
+    def test_kojiapi_image_types(self):
+        # Simulate api requests with koji api image types
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url)
+        composer.httpretty_regsiter()
+
+        for it in ("qcow2", "ec2", "ec2-ha", "ec2-sap"):
+            args = ["name", "version", "distro",
+                    [it],
+                    "fedora-candidate",
+                    composer.architectures,
+                    {"skip_tag": True}]
+
+            res = handler.handler(*args)
+            assert res, "invalid compose result"
+
+    @httpretty.activate
     def test_skip_tag(self):
         # Simulate a successful compose, where the tagging
         # should be skipped
