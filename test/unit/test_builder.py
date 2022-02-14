@@ -909,3 +909,54 @@ class TestBuilderPlugin(PluginTest):
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
+
+    @httpretty.activate
+    def test_ostree_compose(self):
+        # Check we properly handle ostree compose requests
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        arches = ["x86_64", "s390x"]
+        repos = ["http://1.repo", "https://2.repo"]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos,
+                 "ostree": {
+                     "parent": "osbuild/$arch/p",
+                     "ref": "osbuild/$arch/r",
+                     "url": "https://osbuild.org/repo"
+                 }}]
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=arches)
+        composer.httpretty_regsiter()
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+        compose_id = res["composer"]["id"]
+        compose = composer.composes.get(compose_id)
+        self.assertIsNotNone(compose)
+
+        ireqs = compose["request"]["image_requests"]
+
+        # Check we got all the requested architectures
+        ireq_arches = [i["architecture"] for i in ireqs]
+        diff = set(arches) ^ set(ireq_arches)
+        self.assertEqual(diff, set())
+
+        for ir in ireqs:
+            assert "ostree" in ir
+            ostree = ir["ostree"]
+            for key in ("parent", "ref", "url"):
+                assert key in ostree
+            assert ostree["url"] == "https://osbuild.org/repo"
+
+        ireq_parents = [i["ostree"]["parent"] for i in ireqs]
+        diff = set(f"osbuild/{a}/p" for a in arches) ^ set(ireq_parents)
+        self.assertEqual(diff, set())
+
+        ireq_refs = [i["ostree"]["ref"] for i in ireqs]
+        diff = set(f"osbuild/{a}/r" for a in arches) ^ set(ireq_refs)
+        self.assertEqual(diff, set())

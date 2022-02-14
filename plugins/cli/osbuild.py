@@ -21,6 +21,12 @@ def parse_args(argv):
 
     parser.add_option("--nowait", action="store_false", dest="wait",
                       help="Don't wait on image creation")
+    parser.add_option("--ostree-parent", type=str, dest="ostree_parent",
+                      help="The OSTree commit parent for OSTree commit image types")
+    parser.add_option("--ostree-ref", type=str, dest="ostree_ref",
+                      help="The OSTree commit ref for OSTree commit image types")
+    parser.add_option("--ostree-url", type=str, dest="ostree_url",
+                      help="URL to the OSTree repo for OSTree commit image types")
     parser.add_option("--release", help="Forcibly set the release field")
     parser.add_option("--repo", action="append",
                       help=("Specify a repo that will override the repo used to install "
@@ -81,6 +87,21 @@ def handle_osbuild_image(options, session, argv):
 
     if args.skip_tag:
         opts["skip_tag"] = True
+
+    # ostree command line parameters
+    ostree = {}
+
+    if args.ostree_parent:
+        ostree["parent"] = args.ostree_parent
+
+    if args.ostree_ref:
+        ostree["ref"] = args.ostree_ref
+
+    if args.ostree_url:
+        ostree["url"] = args.ostree_url
+
+    if ostree:
+        opts["ostree"] = ostree
 
     # Do some early checks to be able to give quick feedback
     check_target(session, target)

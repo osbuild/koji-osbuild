@@ -55,6 +55,30 @@ KOJIAPI_IMAGE_TYPES = {
 # cloud API. It is based on the corresponding OpenAPI specification
 # version '2' with integrated koji support (>= commit c81d0d0).
 
+
+class OSTreeOptions:
+    def __init__(self, data) -> None:
+        self.parent = data.get("parent")
+        self.ref = data.get("ref")
+        self.url = data.get("url")
+
+    def as_dict(self, arch: str = ""):
+        res = {}
+
+        if self.parent:
+            tmp = Template(self.parent)
+            res["parent"] = tmp.substitute(arch=arch)
+
+        if self.ref:
+            tmp = Template(self.ref)
+            res["ref"] = tmp.substitute(arch=arch)
+
+        if self.url:
+            res["url"] = self.url
+
+        return res
+
+
 class Repository:
     def __init__(self, baseurl: str, gpgkey: str = None):
         self.baseurl = baseurl
@@ -79,16 +103,21 @@ class ImageRequest:
         self.architecture = arch
         self.image_type = image_type
         self.repositories = repos
+        self.ostree: OSTreeOptions = None
 
     def as_dict(self):
         arch = self.architecture
-        return {
+        res = {
             "architecture": self.architecture,
             "image_type": self.image_type,
             "repositories": [
                 repo.as_dict(arch) for repo in self.repositories
             ]
         }
+        if self.ostree:
+            res["ostree"] = self.ostree.as_dict(self.architecture)
+
+        return res
 
 
 class NVR:
@@ -571,6 +600,15 @@ class OSBuildImage(BaseTaskHandler):
         # Arches and image types
         image_types = [self.map_koji_api_image_type(i) for i in image_types]
         ireqs = [ImageRequest(a, i, repos) for a in arches for i in image_types]
+
+        # OStree specific options
+        ostree = opts.get("ostree")
+        if ostree:
+            ostree = OSTreeOptions(ostree)
+
+        for ireq in ireqs:
+            ireq.ostree = ostree
+
         self.logger.debug("Creating compose: %s (%s)\n  koji: %s\n  images: %s",
                           nvr, distro, self.koji_url,
                           str([i.as_dict() for i in ireqs]))
