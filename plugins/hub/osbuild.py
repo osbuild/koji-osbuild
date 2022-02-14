@@ -49,11 +49,31 @@ OSBUILD_IMAGE_SCHEMA = {
             "$ref": "#/definitions/options"
         }],
     "definitions": {
-        "options":{
+        "ostree": {
+            "title": "OSTree specific options",
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "parent": {
+                    "type": "string"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "options": {
             "title": "Optional arguments",
             "type": "object",
             "additionalProperties": False,
             "properties": {
+                "ostree": {
+                    "type": "object",
+                    "$ref": "#/definitions/ostree"
+                },
                 "repo": {
                     "type": "array",
                     "description": "Repositories",
