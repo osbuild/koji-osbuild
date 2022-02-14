@@ -24,7 +24,7 @@ import time
 import urllib.parse
 
 from string import Template
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import requests
 import koji
@@ -80,10 +80,20 @@ class OSTreeOptions:
 
 
 class Repository:
-    def __init__(self, baseurl: str, gpgkey: str = None):
+    def __init__(self, baseurl: str):
         self.baseurl = baseurl
-        self.gpgkey = gpgkey
+        self.gpgkey = None
+        self.package_sets: List[str] = None
         self.rhsm = False
+
+    @classmethod
+    def from_data(cls, data: Union[str, Dict]) -> "Repository":
+        if isinstance(data, str):
+            return cls(data)
+        baseurl = data["baseurl"]
+        repo = cls(baseurl)
+        repo.package_sets = data.get("package_sets")
+        return repo
 
     def as_dict(self, arch: str = ""):
         tmp = Template(self.baseurl)
@@ -95,6 +105,8 @@ class Repository:
         if self.gpgkey:
             res["gpg_key"] = self.gpgkey
             res["check_gpg"] = True
+        if self.package_sets:
+            res["package_sets"] = self.package_sets
         return res
 
 
@@ -532,7 +544,7 @@ class OSBuildImage(BaseTaskHandler):
 
     def make_repos_for_user(self, repos):
         self.logger.debug("user repo override: %s", str(repos))
-        return [Repository(r) for r in repos]
+        return [Repository.from_data(r) for r in repos]
 
     def map_koji_api_image_type(self, image_type: str) -> str:
         mapped = KOJIAPI_IMAGE_TYPES.get(image_type)

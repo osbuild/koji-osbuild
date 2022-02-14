@@ -6,11 +6,38 @@ is provided by the koji osbuild plugin for the koji hub.
 """
 
 
+import optparse  # pylint: disable=deprecated-module
 from pprint import pprint
 
 import koji
 import koji_cli.lib as kl
 from koji.plugin import export_cli
+
+
+def parse_repo(_option, _opt, value, parser):
+    repo = parser.values.repo
+    if repo and isinstance(repo[0], dict):
+        repo.append({"baseurl": value})
+        return
+
+    if not repo:
+        parser.values.repo = repo = []
+    repo.append(value)
+
+
+def parse_repo_package_set(_option, opt, value, parser):
+    if not parser.values.repo:
+        raise optparse.OptionValueError(f"Need '--repo' for {opt}")
+
+    repo = parser.values.repo.pop()
+    if not isinstance(repo, dict):
+        repo = {
+            "baseurl": repo
+        }
+    ps = repo.get("package_sets", [])
+    vals = set(map(lambda x: x.strip(), value.split(";")))
+    repo["package_sets"] = list(sorted(set(ps).union(vals)))
+    parser.values.repo.append(repo)
 
 
 def parse_args(argv):
@@ -28,10 +55,15 @@ def parse_args(argv):
     parser.add_option("--ostree-url", type=str, dest="ostree_url",
                       help="URL to the OSTree repo for OSTree commit image types")
     parser.add_option("--release", help="Forcibly set the release field")
-    parser.add_option("--repo", action="append",
+    parser.add_option("--repo", action="callback", callback=parse_repo, nargs=1, type=str,
                       help=("Specify a repo that will override the repo used to install "
                             "RPMs in the image. May be used multiple times. The "
                             "build tag repo associated with the target is the default."))
+    parser.add_option("--repo-package-sets", dest="repo", nargs=1, type=str,
+                      action="callback", callback=parse_repo_package_set,
+                      help=("Specify the package sets for the last repository. "
+                            "Individual set items are separated by ';'. "
+                            "Maybe be used multiple times"))
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: guest-image]',
                       type=str, action="append", default=[])

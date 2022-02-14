@@ -2,6 +2,8 @@
 # koji hub plugin unit tests
 #
 
+#pylint: disable=too-many-lines
+
 import configparser
 import json
 import os
@@ -960,3 +962,52 @@ class TestBuilderPlugin(PluginTest):
         ireq_refs = [i["ostree"]["ref"] for i in ireqs]
         diff = set(f"osbuild/{a}/r" for a in arches) ^ set(ireq_refs)
         self.assertEqual(diff, set())
+
+    @httpretty.activate
+    def test_compose_repo_complex(self):
+        # Check we properly handle ostree compose requests
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        arches = ["x86_64", "s390x"]
+        repos = [
+            {"baseurl": "https://first.repo/$arch",
+             "package_sets": ["a", "b", "c", "d"]},
+            {"baseurl": "https://second.repo/$arch",
+             "package_sets": ["alpha"]},
+            {"baseurl": "https://third.repo/$arch"}
+        ]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos}]
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=arches)
+        composer.httpretty_regsiter()
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+        compose_id = res["composer"]["id"]
+        compose = composer.composes.get(compose_id)
+        self.assertIsNotNone(compose)
+
+        ireqs = compose["request"]["image_requests"]
+
+        # Check we got all the requested architectures
+        ireq_arches = [i["architecture"] for i in ireqs]
+        diff = set(arches) ^ set(ireq_arches)
+        self.assertEqual(diff, set())
+
+        for ir in ireqs:
+            arch = ir["architecture"]
+            repos = ir["repositories"]
+            assert len(repos) == 3
+
+            for r in repos:
+                baseurl = r["baseurl"]
+                assert baseurl.endswith(arch)
+                if baseurl.startswith("https://first.repo"):
+                    ps = r.get("package_sets")
+                    assert ps and ps == ["a", "b", "c", "d"]

@@ -182,6 +182,65 @@ class TestCliPlugin(PluginTest):
         r = self.plugin.handle_osbuild_image(options, session, argv)
         self.assertEqual(r, 0)
 
+    def test_repo_package_sets(self):
+        # Check we properly handle ostree specific options
+
+        argv = [
+            # the required positional arguments
+            "name", "version", "distro", "target", "arch1",
+            # optional keyword arguments
+            "--repo", "https://first.repo",
+            "--repo-package-sets", "a; b; c",
+            "--repo-package-sets", "d",
+            "--repo", "https://second.repo",
+            "--repo-package-sets", "alpha",
+            "--repo", "https://third.repo",  # NB: no `--repo-package-set`
+            "--release", "20200202.n2",
+        ]
+
+        expected_args = ["name", "version", "distro",
+                         ['guest-image'],  # the default image type
+                         "target",
+                         ['arch1']]
+
+        expected_opts = {
+            "release": "20200202.n2",
+            "repo": [
+                {"baseurl": "https://first.repo",
+                 "package_sets": ["a", "b", "c", "d"]},
+                {"baseurl": "https://second.repo",
+                 "package_sets": ["alpha"]},
+                {"baseurl": "https://third.repo"}
+            ],
+        }
+
+        task_result = {"compose_id": "42", "build_id": 23}
+        task_id = 1
+        koji_lib = self.mock_koji_lib()
+
+        options = self.mock_options()
+        session = flexmock()
+
+        self.mock_session_add_valid_tag(session)
+
+        session.should_receive("osbuildImage") \
+               .with_args(*expected_args, opts=expected_opts) \
+               .and_return(task_id) \
+               .once()
+
+        session.should_receive("logout") \
+               .with_args() \
+               .once()
+
+        session.should_receive("getTaskResult") \
+               .with_args(task_id) \
+               .and_return(task_result) \
+               .once()
+
+        setattr(self.plugin, "kl", koji_lib)
+        r = self.plugin.handle_osbuild_image(options, session, argv)
+        self.assertEqual(r, 0)
+
     def test_target_check(self):
         # unknown build target
         session = flexmock()
