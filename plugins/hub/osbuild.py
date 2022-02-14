@@ -49,6 +49,23 @@ OSBUILD_IMAGE_SCHEMA = {
             "$ref": "#/definitions/options"
         }],
     "definitions": {
+        "repo": {
+            "title": "Repository options",
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "baseurl": {
+                    "type": "string"
+                },
+                "package_sets": {
+                    "type": "array",
+                    "description": "Repositories",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "ostree": {
             "title": "OSTree specific options",
             "type": "object",
@@ -78,7 +95,10 @@ OSBUILD_IMAGE_SCHEMA = {
                     "type": "array",
                     "description": "Repositories",
                     "items": {
-                        "type": "string"
+                        "oneOf": [
+                            {"type": "string"},
+                            {"$ref": "#/definitions/repo"}
+                        ]
                     }
                 },
                 "release": {

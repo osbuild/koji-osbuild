@@ -12,11 +12,13 @@ import subprocess
 
 REPOS = {
     "fedora": [
-        "http://download.fedoraproject.org/pub/fedora/linux/releases/$release/Everything/$arch/os"
+        {"url": "http://download.fedoraproject.org/pub/fedora/linux/releases/$release/Everything/$arch/os"}
     ],
     "rhel": [
-        "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/x86_64/os/",
-        "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/x86_64/os/",
+        {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/x86_64/os/",
+         "package_sets": "blueprint; build; packages"},
+        {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/x86_64/os/",
+         "package_sets": "blueprint; build; packages"},
     ]
 }
 
@@ -98,9 +100,13 @@ class TestIntegration(unittest.TestCase):
 
         repos = []
         for repo in REPOS[name]:
-            tpl = string.Template(repo)
+            baseurl = repo["url"]
+            package_sets = repo.get("package_sets")
+            tpl = string.Template(baseurl)
             url = tpl.safe_substitute({"release": release})
             repos += ["--repo", url]
+            if package_sets:
+                repos += ["--repo-package-sets", package_sets]
 
         package = f"{name.lower()}-guest"
 
