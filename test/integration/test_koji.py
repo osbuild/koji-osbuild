@@ -83,9 +83,12 @@ class TestIntegration(unittest.TestCase):
 
         name = info["ID"]  # 'fedora' or 'rhel'
         version = info["VERSION_ID"]  # <major> or <major>.<minor>
-        major = version.split(".")[0]
 
-        distro = f"{name}-{major}"
+        comps = version.split(".")
+        major = comps[0]
+        minor = comps[1] if len(comps) > 1 else ""
+
+        distro = f"{name}-{major}{minor}"
         tag = f"{name}{major}-candidate"  # fedora<major> or rhel<major>
         arch = platform.machine()
 
