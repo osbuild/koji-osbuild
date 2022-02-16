@@ -137,10 +137,10 @@ koji --server=http://localhost:8080/kojihub \
 	 --password=kojipass \
 	 --authtype=password \
 	 osbuild-image \
-	 Fedora-Cloud \
+	 fedora-guest \
 	 33 \
 	 fedora-33 \
-	 f33-candidate \
+	 fedora33-candidate \
 	 x86_64 \
 	 --repo 'http://download.fedoraproject.org/pub/fedora/linux/releases/33/Everything/$arch/os/' \
 	 --image-type guest-image \
