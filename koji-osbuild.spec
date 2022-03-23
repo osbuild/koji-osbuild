@@ -1,3 +1,7 @@
+# Do not build with tests by default
+# Pass --with tests to rpmbuild to override
+%bcond_with tests
+
 %global         forgeurl https://github.com/osbuild/koji-osbuild
 
 Name:           koji-osbuild
@@ -63,6 +67,8 @@ install -d %{buildroot}%{python3_sitelib}/koji_cli_plugins
 install -p -m 0644 plugins/cli/osbuild.py %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
 %py_byte_compile %{__python3} %{buildroot}%{python3_sitelib}/koji_cli_plugins/osbuild.py
 
+
+%if %{with tests}
 # Tests
 install -m 0755 -vd                                             %{buildroot}/%{_libexecdir}/tests/%{name}
 install -m 0755 -vp test/integration.sh                         %{buildroot}/%{_libexecdir}/tests/%{name}/
@@ -107,6 +113,8 @@ install -m 0755 -vp test/container/hub/web.conf                 %{buildroot}/%{_
 install -m 0755 -vd                                             %{buildroot}/%{_datadir}/%{name}-tests/container/hub/plugin
 install -m 0755 -vp test/container/hub/plugin/osbuild.py        %{buildroot}/%{_datadir}/%{name}-tests/container/hub/
 
+%endif
+
 %files
 %license LICENSE
 %doc README.md
@@ -122,6 +130,8 @@ install -m 0755 -vp test/container/hub/plugin/osbuild.py        %{buildroot}/%{_
 %files cli
 %{python3_sitelib}/koji_cli_plugins/osbuild.py
 %{python3_sitelib}/koji_cli_plugins/__pycache__/osbuild.*
+
+%if %{with tests}
 
 %package tests
 Summary:        Integration tests for koji-osbuild
@@ -150,6 +160,8 @@ Integration tests for koji-osbuild. To be run on a dedicated system.
 %{_libexecdir}/tests/%{name}
 %{_libexecdir}/%{name}-tests
 %{_datadir}/%{name}-tests
+
+%endif
 
 
 %changelog

@@ -76,6 +76,7 @@ sudo mock -v -r "$MOCK_CONFIG" --buildsrpm \
 greenprint "🎁 Building RPMs"
 sudo mock -v -r $MOCK_CONFIG \
   --define "commit ${GIT_SHA}" \
+  --with=tests \
   --resultdir $REPO_DIR \
   srpm/*.src.rpm
 
