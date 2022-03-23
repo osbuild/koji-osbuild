@@ -148,11 +148,6 @@ Requires:       osbuild-composer-tests
 Requires:       podman
 Requires:       podman-plugins
 
-# See comment in test/integration.sh
-%if 0%{?fedora}
-Requires:       podman-plugins
-%endif
-
 %description tests
 Integration tests for koji-osbuild. To be run on a dedicated system.
 
