@@ -213,7 +213,7 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
             return [400, response_headers, "Invalid credentials"]
 
         client_secret = data.get("client_secret", [])
-        if len(client_secret) != 1 or client_secret[0] != "koji-osbuild":
+        if len(client_secret) != 1 or client_secret[0] != "s3cr3t":
             return [400, response_headers, "Invalid credentials"]
 
         token = {
