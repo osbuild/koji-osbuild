@@ -298,7 +298,7 @@ class OAuth2(requests.auth.AuthBase):
         data = {
             "grant_type": "client_credentials",
             "client_id": self.id,
-            "client_secret": self.id
+            "client_secret": self.secret
         }
 
         res = http.post(self.token_url, data=data)
