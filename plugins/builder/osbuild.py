@@ -103,7 +103,7 @@ class Repository:
             "rhsm": self.rhsm
         }
         if self.gpgkey:
-            res["gpg_key"] = self.gpgkey
+            res["gpgkey"] = self.gpgkey
             res["check_gpg"] = True
         if self.package_sets:
             res["package_sets"] = self.package_sets
