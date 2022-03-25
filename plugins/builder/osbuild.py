@@ -83,7 +83,7 @@ class Repository:
     def __init__(self, baseurl: str):
         self.baseurl = baseurl
         self.gpgkey = None
-        self.package_sets: List[str] = None
+        self.package_sets: Optional[List[str]] = None
         self.rhsm = False
 
     @classmethod
@@ -115,7 +115,7 @@ class ImageRequest:
         self.architecture = arch
         self.image_type = image_type
         self.repositories = repos
-        self.ostree: OSTreeOptions = None
+        self.ostree: Optional[OSTreeOptions] = None
 
     def as_dict(self):
         arch = self.architecture
@@ -488,7 +488,7 @@ class OSBuildImage(BaseTaskHandler):
                                 3,  # retries
                                 self.logger)
 
-    def attach_logs(self, compose_id: str, ireqs: ImageRequest):
+    def attach_logs(self, compose_id: str, ireqs: List[ImageRequest]):
         self.logger.debug("Fetching logs")
 
         try:
@@ -509,7 +509,7 @@ class OSBuildImage(BaseTaskHandler):
             self.logger.debug("Uploading logs: %s", name)
             self.upload_json(log, name)
 
-    def attach_manifests(self, compose_id: str, ireqs: ImageRequest):
+    def attach_manifests(self, compose_id: str, ireqs: List[ImageRequest]):
         self.logger.debug("Fetching manifests")
 
         try:
