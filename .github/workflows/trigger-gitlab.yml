@@ -37,7 +37,7 @@ jobs:
     if: needs.pr-info.outputs.allowed_user == 'true'
     runs-on: ubuntu-latest
     env:
-      SCHUTZBOT_SSH_KEY: ${{ secrets.SCHUTZBOT_SSH_KEY }}
+      IMAGEBUILDER_BOT_GITLAB_SSH_KEY: ${{ secrets.IMAGEBUILDER_BOT_GITLAB_SSH_KEY }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v3
@@ -49,11 +49,11 @@ jobs:
       - name: Push to gitlab
         run: |
           mkdir -p ~/.ssh
-          echo "${SCHUTZBOT_SSH_KEY}" > ~/.ssh/id_rsa
+          echo "${IMAGEBUILDER_BOT_GITLAB_SSH_KEY}" > ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
           touch ~/.ssh/known_hosts
           ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
-          git remote add ci git@gitlab.com:osbuild/ci/koji-osbuild.git
+          git remote add ci git@gitlab.com:redhat/services/products/image-builder/ci/koji-osbuild.git
           if [ ${{ github.event.pull_request.number }} ]; then
             git checkout -b PR-${{ github.event.pull_request.number }}
           fi
