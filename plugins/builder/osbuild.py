@@ -469,6 +469,16 @@ class OSBuildImage(BaseTaskHandler):
             self.client.http.verify = val
             self.logger.debug("ssl verify: %s", val)
 
+        proxy = composer.get("proxy")
+        if proxy:
+            # route both http and https requests through the proxy
+            proxies = {
+                "http": proxy,
+                "https": proxy
+            }
+            self.client.http.proxies.update(proxies)
+            self.logger.debug("proxy: %s", proxy)
+
         if "composer:oauth" in cfg:
             oa = cfg["composer:oauth"]
             client_id, client_secret = oa["client_id"], oa["client_secret"]

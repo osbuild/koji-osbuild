@@ -65,6 +65,11 @@ ssl_cert = /share/worker-crt.pem, /share/worker-key.pem
 # directory containing certificates of trusted CAs.
 ssl_verify = /share/worker-ca.pem
 
+# URI of proxy that's used for all composer requests including requests to
+# an OAuth server if OAuth is enabled. Note that this proxy isn't used
+# to route any requests for Koji hub.
+proxy = http://squid.example.com:3128
+
 [composer:oauth]
 # Authorization via OAuth2/SSO, as alternative to client side certs.
 # The "Client Credentials Grant" (RFC 6749 section 4.4) flow is used,

@@ -7,6 +7,7 @@
 import configparser
 import json
 import os
+import re
 import sys
 import tempfile
 import time
@@ -14,6 +15,7 @@ import urllib.parse
 import uuid
 import unittest.mock
 from flexmock import flexmock
+import requests
 
 import koji
 import httpretty
@@ -45,6 +47,36 @@ VALID_IMAGE_TYPES = [
     # test image type used as default
     "image_type"
 ]
+
+# Simple HTTP proxy that counts requests that go through it.
+# Definitely not production ready and standards complaint but it does the job.
+# It does not support proxying HTTPS because httpretty cannot handle HTTP tunnelling.
+class MockProxy:
+    call_count = 0
+
+    def register(self, uri):
+        methods = [
+            httpretty.GET,
+            httpretty.PUT,
+            httpretty.POST,
+            httpretty.DELETE,
+            httpretty.HEAD,
+            httpretty.PATCH,
+            httpretty.OPTIONS,
+            httpretty.CONNECT
+        ]
+        for m in methods:
+            httpretty.register_uri(
+                m,
+                re.compile(uri + "/.*"),
+                body=self.handle
+            )
+
+    def handle(self, request, _uri, response_headers):
+        self.call_count += 1
+        r = requests.request(request.method, request.path, headers=request.headers, data=request.body)
+        response_headers.update(r.headers)
+        return [r.status_code, r.headers, r.text]
 
 
 class MockComposer:  # pylint: disable=too-many-instance-attributes
@@ -359,7 +391,7 @@ class MockHost:
 
 
 @PluginTest.load_plugin("builder")
-class TestBuilderPlugin(PluginTest):
+class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
 
     def setUp(self):
         super().setUp()
@@ -866,6 +898,88 @@ class TestBuilderPlugin(PluginTest):
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
+
+    @httpretty.activate
+    def test_proxy_http(self):
+        # we need to use http because our proxy only supports proxying http requests
+        composer_url = "http://localhost"
+        koji_url = self.plugin.DEFAULT_KOJIHUB_URL
+        # same here with http
+        token_url = "http://localhost/token"
+        proxy_url = "http://proxy.example.com"
+
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+            "proxy": proxy_url,
+        }
+        cfg["composer:oauth"] = {
+            "client_id": "koji-osbuild",
+            "client_secret": "s3cr3t",
+            "token_url": token_url
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
+
+        handler = self.make_handler(config=cfg)
+
+        self.assertEqual(handler.composer_url, composer_url)
+        self.assertEqual(handler.koji_url, koji_url)
+
+        url = "http://localhost"
+        composer = MockComposer(url, architectures=["x86_64"])
+        composer.httpretty_register()
+
+        proxy = MockProxy()
+        proxy.register(proxy_url)
+
+        # initialize oauth
+        composer.oauth_activate(token_url)
+
+        arches = ["x86_64"]
+        repos = ["http://1.repo", "https://2.repo"]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos}]
+
+        res = handler.handler(*args)
+
+        # check that there are 5 proxy calls:
+        # - oauth call
+        # - compose create
+        # - compose status
+        # - compose manifest
+        # - compose logs
+        assert proxy.call_count == 5, "invalid proxy call count"
+        assert res, "invalid compose result"
+
+    def test_proxy_https(self):
+        composer_url = self.plugin.DEFAULT_COMPOSER_URL
+        koji_url = self.plugin.DEFAULT_KOJIHUB_URL
+        proxy_url = "proxy.example.com"
+        token_url = "https://localhost/token"
+
+        cfg = configparser.ConfigParser()
+        cfg["composer"] = {
+            "server": composer_url,
+            "proxy": proxy_url,
+        }
+        cfg["composer:oauth"] = {
+            "client_id": "koji-osbuild",
+            "client_secret": "s3cr3t",
+            "token_url": token_url
+        }
+        cfg["koji"] = {
+            "server": koji_url
+        }
+
+        handler = self.make_handler(config=cfg)
+
+        self.assertEqual(handler.client.http.proxies["http"], proxy_url)
+        self.assertEqual(handler.client.http.proxies["https"], proxy_url)
 
     @httpretty.activate
     def test_oauth2_delay(self):
