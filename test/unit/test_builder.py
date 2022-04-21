@@ -59,7 +59,7 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
         self.oauth = None
         self.oauth_check_delay = 0
 
-    def httpretty_regsiter(self):
+    def httpretty_register(self):
         httpretty.register_uri(
             httpretty.POST,
             urllib.parse.urljoin(self.url, "compose"),
@@ -579,7 +579,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["s390x"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         with self.assertRaises(koji.GenericError):
             handler.handler(*args)
@@ -602,7 +602,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=arches)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
@@ -648,7 +648,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         composer.status = "failure"
 
@@ -670,7 +670,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         args = ["name", "version", "distro",
                 ["image_type"],
@@ -698,7 +698,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         args = ["name", "version", "distro",
                 ["image_type"],
@@ -726,7 +726,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         for it in ("qcow2", "ec2", "ec2-ha", "ec2-sap"):
             args = ["name", "version", "distro",
@@ -747,7 +747,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         args = ["name", "version", "distro",
                 ["image_type"],
@@ -769,7 +769,7 @@ class TestBuilderPlugin(PluginTest):
         # for the osbuild-composer API
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         certs = [
             "test/data/example-crt.pem",
@@ -811,7 +811,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         # initialize oauth
         composer.oauth_activate(token_url)
@@ -851,7 +851,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         # initialize oauth
         composer.oauth_activate(token_url)
@@ -893,7 +893,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         # initialize oauth
         composer.oauth_activate(token_url)
@@ -933,7 +933,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=arches)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
@@ -985,7 +985,7 @@ class TestBuilderPlugin(PluginTest):
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=arches)
-        composer.httpretty_regsiter()
+        composer.httpretty_register()
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
