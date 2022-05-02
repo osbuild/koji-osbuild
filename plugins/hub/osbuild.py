@@ -87,6 +87,10 @@ OSBUILD_IMAGE_SCHEMA = {
             "type": "object",
             "additionalProperties": False,
             "properties": {
+                "customizations": {
+                    "type": "object",
+                    "additionalProperties": True
+                },
                 "ostree": {
                     "type": "object",
                     "$ref": "#/definitions/ostree"

@@ -168,15 +168,19 @@ class ComposeRequest:
         self.distribution = distro
         self.image_requests = ireqs
         self.koji = koji
+        self.customizations: Optional[dict] = None
 
     def as_dict(self):
-        return {
+        res = {
             "distribution": self.distribution,
             "koji": self.koji.as_dict(),
             "image_requests": [
                 img.as_dict() for img in self.image_requests
             ]
         }
+        if self.customizations:
+            res["customizations"] = self.customizations
+        return res
 
 
 class ImageStatus(enum.Enum):
@@ -640,6 +644,9 @@ class OSBuildImage(BaseTaskHandler):
         # Setup done, create the compose request and send it off
         kojidata = ComposeRequest.Koji(self.koji_url, self.id, nvr)
         request = ComposeRequest(distro, ireqs, kojidata)
+
+        # Additional customizations are passed through
+        request.customizations = opts.get("customizations")
 
         self.upload_json(request.as_dict(), "compose-request")
 

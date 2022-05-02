@@ -5,6 +5,10 @@
 
 import contextlib
 import io
+import json
+import os
+import tempfile
+
 import koji
 import koji_cli.lib as kl
 from flexmock import flexmock
@@ -124,6 +128,68 @@ class TestCliPlugin(PluginTest):
         setattr(self.plugin, "kl", koji_lib)
         r = self.plugin.handle_osbuild_image(options, session, argv)
         self.assertEqual(r, 0)
+
+    def test_customizations_options(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+
+            customizations = {
+                "packages": [
+                    "emacs"
+                ]
+            }
+
+            path = os.path.join(tmpdir, "customizations.json")
+
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(customizations, f)
+
+            argv = [
+                # the required positional arguments
+                "name", "version", "distro", "target", "arch1",
+                # optional keyword arguments
+                "--repo", "https://first.repo",
+                "--repo", "https://second.repo",
+                "--release", "20200202.n2",
+                "--customizations", path
+            ]
+
+            expected_args = ["name", "version", "distro",
+                             ['guest-image'],  # the default image type
+                             "target",
+                             ['arch1']]
+
+            expected_opts = {
+                "release": "20200202.n2",
+                "repo": ["https://first.repo", "https://second.repo"],
+                "customizations": customizations
+            }
+
+            task_result = {"compose_id": "42", "build_id": 23}
+            task_id = 1
+            koji_lib = self.mock_koji_lib()
+
+            options = self.mock_options()
+            session = flexmock()
+
+            self.mock_session_add_valid_tag(session)
+
+            session.should_receive("osbuildImage") \
+                .with_args(*expected_args, opts=expected_opts) \
+                .and_return(task_id) \
+                .once()
+
+            session.should_receive("logout") \
+                .with_args() \
+                .once()
+
+            session.should_receive("getTaskResult") \
+                .with_args(task_id) \
+                .and_return(task_result) \
+                .once()
+
+            setattr(self.plugin, "kl", koji_lib)
+            r = self.plugin.handle_osbuild_image(options, session, argv)
+            self.assertEqual(r, 0)
 
     def test_ostree_options(self):
         # Check we properly handle ostree specific options

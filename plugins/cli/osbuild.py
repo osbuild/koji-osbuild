@@ -6,6 +6,7 @@ is provided by the koji osbuild plugin for the koji hub.
 """
 
 
+import json
 import optparse  # pylint: disable=deprecated-module
 from pprint import pprint
 
@@ -46,6 +47,8 @@ def parse_args(argv):
 
     parser = kl.OptionParser(usage=kl.get_usage_str(usage))
 
+    parser.add_option("--customizations", type=str, default=None, dest="customizations",
+                      help="Additional customizations to pass to Composer (json file)")
     parser.add_option("--nowait", action="store_false", dest="wait",
                       help="Don't wait on image creation")
     parser.add_option("--ostree-parent", type=str, dest="ostree_parent",
@@ -98,6 +101,7 @@ def check_target(session, name):
                                 target['dest_tag_name'])
 
 
+# pylint: disable=too-many-branches
 @export_cli
 def handle_osbuild_image(options, session, argv):
     "[build] Build images via osbuild"
@@ -134,6 +138,11 @@ def handle_osbuild_image(options, session, argv):
 
     if ostree:
         opts["ostree"] = ostree
+
+    # customizations handling
+    if args.customizations:
+        with open(args.customizations, "r", encoding="utf-8") as f:
+            opts["customizations"] = json.load(f)
 
     # Do some early checks to be able to give quick feedback
     check_target(session, target)

@@ -1027,6 +1027,49 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         assert res, "invalid compose result"
 
     @httpretty.activate
+    def test_customizations_compose(self):
+        # Check we properly handle compose requests with customizations
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        customizations = {
+            "packages": [
+                "emacs"
+            ]
+        }
+
+        arches = ["x86_64", "s390x"]
+        repos = ["http://1.repo", "https://2.repo"]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "fedora-candidate",
+                arches,
+                {"repo": repos,
+                 "customizations": customizations
+                 }]
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=arches)
+        composer.httpretty_register()
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+        compose_id = res["composer"]["id"]
+        compose = composer.composes.get(compose_id)
+        self.assertIsNotNone(compose)
+
+        ireqs = compose["request"]["image_requests"]
+
+        # Check we got all the requested architectures
+        ireq_arches = [i["architecture"] for i in ireqs]
+        diff = set(arches) ^ set(ireq_arches)
+        self.assertEqual(diff, set())
+
+        # Check we actually got the customizations
+        self.assertEqual(compose["request"].get("customizations"),
+                         customizations)
+
+    @httpretty.activate
     def test_ostree_compose(self):
         # Check we properly handle ostree compose requests
         session = self.mock_session()
