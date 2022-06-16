@@ -26,10 +26,10 @@ RPM:
   parallel:
     matrix:
       - RUNNER:
-          - aws/fedora-34-x86_64
-          - aws/fedora-34-aarch64
-          - aws/rhel-8.5-ga-x86_64
-          - aws/rhel-8.5-ga-aarch64
+          - aws/fedora-36-x86_64
+          - aws/fedora-36-aarch64
+          - aws/rhel-8.6-ga-x86_64
+          - aws/rhel-8.6-ga-aarch64
 
 Testing:
   stage: test
@@ -45,10 +45,10 @@ Testing:
       - RUNNER:
           # https://quay.io/repository/osbuild/postgres available only for x86_64
           # - aws/fedora-33-aarch64
-          - aws/fedora-34-x86_64
+          - aws/fedora-36-x86_64
           # - aws/fedora-34-aarch64
       - RUNNER:
-          - aws/rhel-8.5-ga-x86_64
+          - aws/rhel-8.6-ga-x86_64
           # - aws/rhel-8.4-ga-aarch64
         INTERNAL_NETWORK: ["true"]
 

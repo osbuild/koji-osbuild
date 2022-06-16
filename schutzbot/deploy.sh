@@ -20,8 +20,8 @@ function retry {
 
 # Variables for where to find osbuild-composer RPMs to test against
 DNF_REPO_BASEURL=http://osbuild-composer-repos.s3-website.us-east-2.amazonaws.com
-OSBUILD_COMMIT=bb30ffa0629e16ecff103aaaeb7e931f3f8ff79e             # release 46
-OSBUILD_COMPOSER_COMMIT=346486cd3f06856efee5e982553e28fb387558e6    # commit that contains repo package sets
+OSBUILD_COMMIT=527be5081c21a313afb0c0cdeb4c3edadcf2225c             # rpmbuild: add fedora-36
+OSBUILD_COMPOSER_COMMIT=8fef39c4cfa4aeca1f9f5e427fb8bbfd0e4abcbc    # rpbuild: add fedora-36
 
 # Get OS details.
 source /etc/os-release
