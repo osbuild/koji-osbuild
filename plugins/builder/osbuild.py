@@ -524,7 +524,7 @@ class OSBuildImage(BaseTaskHandler):
 
         ilogs = zip(logs.image_logs, ireqs)
         for log, ireq in ilogs:
-            name = "%s-%s.log" % (ireq.architecture, ireq.image_type)
+            name = f"{ireq.architecture}-{ireq.image_type}.log"
             self.logger.debug("Uploading logs: %s", name)
             self.upload_json(log, name)
 
@@ -539,7 +539,7 @@ class OSBuildImage(BaseTaskHandler):
 
         imanifests = zip(manifests, ireqs)
         for manifest, ireq in imanifests:
-            name = "%s-%s.manifest" % (ireq.architecture, ireq.image_type)
+            name = f"{ireq.architecture}-{ireq.image_type}.manifest"
             self.logger.debug("Uploading manifest: %s", name)
             self.upload_json(manifest, name)
 

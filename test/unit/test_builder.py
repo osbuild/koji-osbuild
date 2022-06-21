@@ -478,7 +478,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
 
         with tempfile.TemporaryDirectory() as tmp:
             cfgfile = os.path.abspath(os.path.join(tmp, "ko.cfg"))
-            with open(cfgfile, 'w') as f:
+            with open(cfgfile, 'w', encoding="utf-8") as f:
                 config.write(f)
 
             self.plugin.DEFAULT_CONFIG_FILES = [cfgfile]

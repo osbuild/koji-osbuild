@@ -93,12 +93,11 @@ def check_target(session, name):
 
     target = session.getBuildTarget(name)
     if not target:
-        raise koji.GenericError("Unknown build target: %s" % name)
+        raise koji.GenericError(f"Unknown build target: {name}")
 
     tag = session.getTag(target['dest_tag'])
     if not tag:
-        raise koji.GenericError("Unknown destination tag: %s" %
-                                target['dest_tag_name'])
+        raise koji.GenericError(f"Unknown destination tag: {target['dest_tag_name']}")
 
 
 # pylint: disable=too-many-branches
@@ -161,8 +160,8 @@ def handle_osbuild_image(options, session, argv):
     task_id = session.osbuildImage(name, version, distro, image_types, target, arch, opts=opts)
 
     if not options.quiet:
-        print("Created task: %s" % task_id)
-        print("Task info: %s/taskinfo?taskID=%s" % (options.weburl, task_id))
+        print(f"Created task: {task_id}")
+        print(f"Task info: {options.weburl}/taskinfo?taskID={task_id}")
 
     # pylint: disable=protected-access
     if (args.wait is None and kl._running_in_bg()) or args.wait is False:
