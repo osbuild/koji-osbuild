@@ -39,7 +39,7 @@ def koji_command(*args, _input=None, _globals=None, **kwargs):
 
 def parse_os_release():
     info = {}
-    with open("/etc/os-release") as f:
+    with open("/etc/os-release", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
