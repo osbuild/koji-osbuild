@@ -3,7 +3,7 @@ ca = "/etc/osbuild-composer/ca-crt.pem"
 enable_tls = true
 enable_mtls = false
 enable_jwt = true
-jwt_keys_url = "https://localhost:8081/certs"
+jwt_keys_urls = ["https://localhost:8081/certs"]
 jwt_ca_file = "/etc/osbuild-composer/ca-crt.pem"
 jwt_acl_file = ""
 
