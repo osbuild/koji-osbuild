@@ -6,6 +6,7 @@ enable_jwt = true
 jwt_keys_urls = ["https://localhost:8081/certs"]
 jwt_ca_file = "/etc/osbuild-composer/ca-crt.pem"
 jwt_acl_file = ""
+jwt_tenant_provider_fields = ["typ"]
 
 [koji.servers.localhost.kerberos]
 principal = "osbuild-krb@LOCAL"
@@ -14,3 +15,4 @@ keytab = "/etc/osbuild-composer/client.keytab"
 [worker]
 allowed_domains = ["localhost", "client.osbuild.local"]
 ca = "/etc/osbuild-composer/ca-crt.pem"
+jwt_tenant_provider_fields = ["typ"]
