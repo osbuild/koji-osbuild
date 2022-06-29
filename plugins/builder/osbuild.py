@@ -272,13 +272,13 @@ class OAuth2(requests.auth.AuthBase):
     """
 
     class Token:
-        def __init__(self, data):
+        def __init__(self, data, created):
             self.data = data["access_token"]
             self.type = data["token_type"]
             self.expires_in = int(data["expires_in"])
             self.scope = data.get("scope")
 
-            self.created = time.time()
+            self.created = created
 
         @property
         def expired(self) -> bool:
@@ -299,6 +299,11 @@ class OAuth2(requests.auth.AuthBase):
         return not self.token or self.token.expired
 
     def fetch_token(self, http: requests.Session):
+        # Set token creation time here. If we set it after the request was
+        # fulfilled, it would be offsetted by the time it took the token to
+        # get from the server here, which can result into us refreshing
+        # the token late.
+        token_created = time.time()
         data = {
             "grant_type": "client_credentials",
             "client_id": self.id,
@@ -312,7 +317,7 @@ class OAuth2(requests.auth.AuthBase):
             raise koji.GenericError(msg) from None
 
         token_data = res.json()
-        self.token = self.Token(token_data)
+        self.token = self.Token(token_data, token_created)
 
     def __call__(self, r: requests.Request):
         """Called by requests to obtain authorization"""
