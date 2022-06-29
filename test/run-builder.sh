@@ -22,7 +22,12 @@ else
 fi
 
 builder_start() {
-  GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].plugins[0].ipam.ranges[0][0].gateway")
+  source /etc/os-release
+  if [[ $ID == rhel ]]; then
+    GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].subnets[0].gateway")
+  else
+    GATEWAY_IP=$(${CONTAINER_RUNTIME} network inspect org.osbuild.koji | jq -r ".[0].plugins[0].ipam.ranges[0][0].gateway")
+  fi
   echo "Gateway IP is $GATEWAY_IP"
 
   # maybe copy the 'builder' plugin to the share dir
