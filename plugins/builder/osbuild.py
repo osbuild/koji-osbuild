@@ -352,9 +352,9 @@ class Client:
         oauth = OAuth2(client_id, secret, token_url)
         self.http.auth = oauth
 
-    def oauth_check(self) -> bool:
+    def oauth_check(self, force_new_token: bool = False) -> bool:
         auth = self.http.auth
-        if auth and auth.token_expired:
+        if auth and (auth.token_expired or force_new_token):
             auth.fetch_token(self.http)
             return True
 
@@ -365,7 +365,13 @@ class Client:
         self.oauth_check()
         res = self.http.request(method, url, json=js)
 
-        if res.status_code == 401 and self.oauth_check():
+        # If 401 is returned, check if oauth is enabled. If it is, get
+        # a new access token and then retry the request.
+        # This is needed because even though we always send the request when
+        # the token is still usable, it might arrive to the server when it's
+        # already invalid. This retrying mechanism serves as the last resort
+        # attempt to get the request through.
+        if res.status_code == 401 and self.oauth_check(True):
             res = self.http.request(method, url, json=js)
 
         return res
