@@ -300,6 +300,46 @@ class MockComposer:  # pylint: disable=too-many-instance-attributes
         print("OAuth active!")
 
 
+# MockComposerStatus is a simple class for mocking just the GET /composer/{id}
+# route of composer. In comparison with MockComposer, it can also mock the
+# route being flaky. The current implementation fails every other request with
+# error 500 which nicely simulates the fact the networking doesn't always work
+# 100% reliably.
+class MockComposerStatus:
+    calls = 0
+
+    def __init__(self, compose_id, calls_until_success=10):
+        self.calls_until_success = calls_until_success
+        self.compose_id = compose_id
+
+    def compose_status(self, _request, _uri, response_headers):
+        self.calls += 1
+        if self.calls % 2 == 0:
+            return [500, response_headers, "I'm flaky!"]
+
+        status = "success" if self.calls > 10 else "pending"
+
+        result = {
+            "status": status,
+            "koji_status": {
+                "build_id": 42,
+            },
+            "image_statuses": [
+                {
+                    "status": status
+                }
+            ]
+        }
+
+        return [200, response_headers, json.dumps(result)]
+
+    def httpretty_register(self):
+        httpretty.register_uri(
+            httpretty.GET,
+            urllib.parse.urljoin(f"http://localhost/{API_BASE}", f"composes/{self.compose_id}"),
+            body=self.compose_status
+        )
+
 class UploadTracker:
     """Mock koji file uploading and keep track of uploaded files
 
@@ -1168,3 +1208,12 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 if baseurl.startswith("https://first.repo"):
                     ps = r.get("package_sets")
                     assert ps and ps == ["a", "b", "c", "d"]
+
+    @httpretty.activate
+    def test_compose_status_retry(self):
+        compose_id = "43e57e63-ab32-4a8d-854d-3bbc117fdce3"
+
+        MockComposerStatus(compose_id).httpretty_register()
+
+        client = self.plugin.Client("http://localhost")
+        client.wait_for_compose(compose_id, sleep_time=0.1)
