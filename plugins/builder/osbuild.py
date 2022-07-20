@@ -29,6 +29,7 @@ from typing import Dict, List, Optional, Union
 import requests
 import koji
 
+from requests.adapters import HTTPAdapter, Retry
 from koji.daemon import fast_incremental_upload
 from koji.tasks import BaseTaskHandler
 
@@ -335,6 +336,14 @@ class Client:
         self.server = url
         self.url = urllib.parse.urljoin(url, API_BASE)
         self.http = requests.Session()
+
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[500, 502, 503, 504],
+                        raise_on_status=False
+                        )
+
+        self.http.mount(self.server, HTTPAdapter(max_retries=retries))
 
     @staticmethod
     def parse_certs(string):
