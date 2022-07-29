@@ -15,7 +15,7 @@ server_start() {
   -a ":${SERVER_PORT}" \
   -expires 10 &
 
-  until curl --output /dev/null --silent --fail "https://localhost:${SERVER_PORT}/token"; do
+  until curl --data "grant_type=refresh_token" --output /dev/null --silent --fail "https://localhost:${SERVER_PORT}/token"; do
     sleep 0.5
   done
 

@@ -31,6 +31,8 @@ mkdir -p /etc/osbuild-worker
 cp ${TEST_DATA}/osbuild-worker.toml \
    /etc/osbuild-worker/
 
+echo "koji" > /etc/osbuild-worker/oauth-secret
+
 echo "Copying system kerberos configuration"
 cp ${TEST_DATA}/krb5.local.conf \
    /etc/krb5.conf.d/local

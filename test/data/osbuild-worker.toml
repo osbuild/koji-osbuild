@@ -1,3 +1,8 @@
+[authentication]
+oauth_url = "https://localhost:8081/token"
+client_id = "koji"
+client_secret = "/etc/osbuild-worker/oauth-secret"
+
 [koji.localhost.kerberos]
 principal = "osbuild-krb@LOCAL"
 keytab = "/etc/osbuild-worker/client.keytab"
