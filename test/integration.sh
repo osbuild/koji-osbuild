@@ -26,12 +26,6 @@ sudo dnf -y \
 greenprint "Creating composer SSL certificates"
 sudo /usr/libexec/koji-osbuild-tests/make-certs.sh /usr/share/koji-osbuild-tests
 
-greenprint "Starting osbuild-composer's socket"
-sudo systemctl enable --now osbuild-composer-api.socket
-
-greenprint "Starting mock OpenID server"
-sudo /usr/libexec/koji-osbuild-tests/run-openid.sh start
-
 greenprint "Building containers"
 sudo /usr/libexec/koji-osbuild-tests/build-container.sh /usr/share/koji-osbuild-tests
 
@@ -41,11 +35,26 @@ sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh start
 greenprint "Print logs"
 sudo podman logs org.osbuild.koji.koji
 
-greenprint "Copying credentials and certificates"
-sudo /usr/libexec/koji-osbuild-tests/copy-creds.sh /usr/share/koji-osbuild-tests
-
 greenprint "Testing Koji hub API access"
 koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
+
+greenprint "Copying credentials, certificates and configuration files"
+sudo /usr/libexec/koji-osbuild-tests/copy-creds.sh /usr/share/koji-osbuild-tests
+
+greenprint "Starting mock OpenID server"
+sudo /usr/libexec/koji-osbuild-tests/run-openid.sh start
+
+greenprint "Starting osbuild-composer's Cloud API socket and a remote worker"
+# Start services.
+sudo systemctl stop 'osbuild*'
+# make sure that the local worker is not running
+sudo systemctl mask osbuild-worker@1.service
+# enable remote worker API
+sudo systemctl start osbuild-remote-worker.socket
+# enable Cloud API
+sudo systemctl start osbuild-composer-api.socket
+# start a remote worker
+sudo systemctl start osbuild-remote-worker@localhost:8700.service
 
 greenprint "Starting koji builder"
 sudo /usr/libexec/koji-osbuild-tests/run-builder.sh start /usr/share/koji-osbuild-tests

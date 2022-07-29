@@ -20,8 +20,8 @@ function retry {
 
 # Variables for where to find osbuild-composer RPMs to test against
 DNF_REPO_BASEURL=http://osbuild-composer-repos.s3-website.us-east-2.amazonaws.com
-OSBUILD_COMMIT=bb30ffa0629e16ecff103aaaeb7e931f3f8ff79e             # release 46
-OSBUILD_COMPOSER_COMMIT=346486cd3f06856efee5e982553e28fb387558e6    # commit that contains repo package sets
+OSBUILD_COMMIT=376cbffd136bc4ba86fc7c63697fa5b88fe3acef             # release 62
+OSBUILD_COMPOSER_COMMIT=2d13050ba84a2bb30d9dd980639ee78354fe90f3    # release 59-dev (includes mock openid server fix)
 
 # Get OS details.
 source /etc/os-release
@@ -93,6 +93,3 @@ fi
 
 # Installing koji-osbuild-tests package
 retry sudo dnf -y install koji-osbuild-tests
-
-# Start services.
-sudo systemctl enable --now osbuild-composer-api.socket
