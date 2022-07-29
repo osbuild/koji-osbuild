@@ -1199,6 +1199,9 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
 
         for ir in ireqs:
             arch = ir["architecture"]
+            # Piggyback on this test case to test that no upload_options
+            # are set, if they were not provided in the args.
+            self.assertIsNone(ir.get("upload_options"))
             repos = ir["repositories"]
             assert len(repos) == 3
 
@@ -1208,6 +1211,44 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 if baseurl.startswith("https://first.repo"):
                     ps = r.get("package_sets")
                     assert ps and ps == ["a", "b", "c", "d"]
+
+    @httpretty.activate
+    def test_compose_upload_options_global(self):
+        # Check we properly handle compose requests with global upload options
+        session = self.mock_session()
+        handler = self.make_handler(session=session)
+
+        arches = ["x86_64", "aarch64"]
+        upload_options = {
+            "region": "us-east-1",
+            "share_with_accounts": ["123456789"]
+        }
+        args = ["name", "version", "distro",
+                "image_type",
+                "fedora-candidate",
+                arches,
+                {"upload_options": upload_options}]
+
+        url = self.plugin.DEFAULT_COMPOSER_URL
+        composer = MockComposer(url, architectures=arches)
+        composer.httpretty_register()
+
+        res = handler.handler(*args)
+        assert res, "invalid compose result"
+        compose_id = res["composer"]["id"]
+        compose = composer.composes.get(compose_id)
+        self.assertIsNotNone(compose)
+
+        ireqs = compose["request"]["image_requests"]
+
+        # Check we got all the requested architectures
+        ireq_arches = [i["architecture"] for i in ireqs]
+        diff = set(arches) ^ set(ireq_arches)
+        self.assertEqual(diff, set())
+
+        for ir in ireqs:
+            uo = ir["upload_options"]
+            self.assertEqual(uo, upload_options)
 
     @httpretty.activate
     def test_compose_status_retry(self):

@@ -49,6 +49,8 @@ def parse_args(argv):
 
     parser.add_option("--customizations", type=str, default=None, dest="customizations",
                       help="Additional customizations to pass to Composer (json file)")
+    parser.add_option("--upload-options", type=str, default=None, dest="upload_options",
+                      help="Cloud target upload options (json file)")
     parser.add_option("--nowait", action="store_false", dest="wait",
                       help="Don't wait on image creation")
     parser.add_option("--ostree-parent", type=str, dest="ostree_parent",
@@ -139,6 +141,11 @@ def handle_osbuild_image(options, session, argv):
     if args.customizations:
         with open(args.customizations, "r", encoding="utf-8") as f:
             opts["customizations"] = json.load(f)
+
+    # cloud upload options handling
+    if args.upload_options:
+        with open(args.upload_options, "r", encoding="utf-8") as f:
+            opts["upload_options"] = json.load(f)
 
     # Do some early checks to be able to give quick feedback
     check_target(session, target)

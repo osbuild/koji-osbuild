@@ -116,6 +116,7 @@ class ImageRequest:
         self.image_type = image_type
         self.repositories = repos
         self.ostree: Optional[OSTreeOptions] = None
+        self.upload_options: Optional[Dict] = None
 
     def as_dict(self):
         arch = self.architecture
@@ -128,6 +129,8 @@ class ImageRequest:
         }
         if self.ostree:
             res["ostree"] = self.ostree.as_dict(self.architecture)
+        if self.upload_options:
+            res["upload_options"] = self.upload_options
 
         return res
 
@@ -687,6 +690,12 @@ class OSBuildImage(BaseTaskHandler):
 
         for ireq in ireqs:
             ireq.ostree = ostree
+
+        # Cloud upload options
+        upload_options = opts.get("upload_options")
+        if upload_options:
+            for ireq in ireqs:
+                ireq.upload_options = upload_options
 
         self.logger.debug("Creating compose: %s (%s)\n  koji: %s\n  images: %s",
                           nvr, distro, self.koji_url,
