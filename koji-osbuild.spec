@@ -143,10 +143,11 @@ Requires:       jq
 Requires:       koji
 Requires:       krb5-workstation
 Requires:       openssl
-Requires:       osbuild-composer >= 22
+Requires:       osbuild-composer >= 58
 Requires:       osbuild-composer-tests
 Requires:       podman
 Requires:       podman-plugins
+Requires:       python3-boto3
 
 %description tests
 Integration tests for koji-osbuild. To be run on a dedicated system.
