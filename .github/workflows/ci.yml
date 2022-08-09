@@ -10,16 +10,23 @@ on:
 
 jobs:
   pylint:
-    name: Source code linting
+    name: "🐍 Lint"
     runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:latest
     steps:
-    - name: "Clone Repository"
+
+    - name: Install test dependencies
+      run: dnf -y install python3-flexmock python3-httpretty python3-jsonschema python3-koji python3-pylint python3-requests
+
+    - name: Check out code
       uses: actions/checkout@v3
-    - name: "Run pylint"
-      uses: osbuild/koji-osbuild/test@main
       with:
-        run: |
-          pylint plugins/**/*.py test/**/*.py
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Analysing the code with pylint
+      run: |
+        python3 -m pylint plugins/**/*.py test/**/*.py
 
   unit:
     name: Unit tests
