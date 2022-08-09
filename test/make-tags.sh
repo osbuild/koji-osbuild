@@ -26,4 +26,6 @@ $KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" rhel-guest
 
 $KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" fedora-iot
 
+$KOJI add-pkg --owner kojiadmin "${TAG_CANDIDATE}" aws
+
 $KOJI regen-repo "${TAG_BUILD}"

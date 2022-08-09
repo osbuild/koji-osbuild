@@ -17,7 +17,7 @@ jobs:
     steps:
 
     - name: Install test dependencies
-      run: dnf -y install python3-flexmock python3-httpretty python3-jsonschema python3-koji python3-pylint python3-requests
+      run: dnf -y install python3-boto3 python3-flexmock python3-httpretty python3-jsonschema python3-koji python3-pylint python3-requests
 
     - name: Check out code
       uses: actions/checkout@v3

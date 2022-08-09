@@ -39,7 +39,7 @@ greenprint "Testing Koji hub API access"
 koji --server=http://localhost:8080/kojihub --user=osbuild --password=osbuildpass --authtype=password hello
 
 greenprint "Copying credentials, certificates and configuration files"
-sudo /usr/libexec/koji-osbuild-tests/copy-creds.sh /usr/share/koji-osbuild-tests
+sudo -E /usr/libexec/koji-osbuild-tests/copy-creds.sh /usr/share/koji-osbuild-tests
 
 greenprint "Starting mock OpenID server"
 sudo /usr/libexec/koji-osbuild-tests/run-openid.sh start
@@ -63,6 +63,9 @@ greenprint "Creating Koji tag infrastructure"
 /usr/libexec/koji-osbuild-tests/make-tags.sh
 
 greenprint "Running integration tests"
+# export environment variables for the Boto3 client to work out of the box
+AWS_ACCESS_KEY_ID="${V2_AWS_ACCESS_KEY_ID:-}" \
+AWS_SECRET_ACCESS_KEY="${V2_AWS_SECRET_ACCESS_KEY:-}" \
 python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
 
 greenprint "Stopping koji builder"
