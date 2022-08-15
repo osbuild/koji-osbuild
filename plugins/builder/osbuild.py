@@ -16,7 +16,6 @@ alone client for composer's API.
 
 
 import configparser
-import enum
 import io
 import json
 import sys
@@ -184,13 +183,47 @@ class ComposeRequest:
         return res
 
 
-class ImageStatus(enum.Enum):
-    SUCCESS = "success"
-    FAILURE = "failure"
-    PENDING = "pending"
-    BUILDING = "building"
-    UPLOADING = "uploading"
-    REGISTERING = 'registering'
+class ComposeStatusError:
+    def __init__(self, error_id: int, reason: str, details: Optional[Dict]):
+        self.error_id = error_id
+        self.reason = reason
+        self.details = details
+
+    def as_dict(self):
+        data = {
+            "id": self.error_id,
+            "reason": self.reason
+        }
+        if self.details:
+            data["details"] = self.details
+        return data
+
+
+class ImageStatus:
+    def __init__(self, status: str, upload_status: Optional[Dict], error: Optional[ComposeStatusError]) -> None:
+        self.status = status
+        self.upload_status = upload_status
+        self.error = error
+
+    def as_dict(self) -> Dict:
+        data = {
+            "status": self.status
+        }
+        if self.upload_status:
+            data["upload_status"] = self.upload_status
+        if self.error:
+            data["error"] = self.error.as_dict()
+        return data
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> "ImageStatus":
+        status = data["status"]
+        upload_status = data.get("upload_status")
+        error = data.get("error")
+        if error:
+            error_id = error.pop("id")
+            error = ComposeStatusError(error_id=error_id, **error)
+        return cls(status, upload_status, error)
 
 
 class ComposeStatus:
@@ -212,7 +245,7 @@ class ComposeStatus:
         koji_task_id = koji_status.get("task_id")
         koji_build_id = koji_status.get("build_id")
         images = [
-            ImageStatus(s["status"].lower()) for s in data["image_statuses"]
+            ImageStatus.from_dict(s) for s in data["image_statuses"]
         ]
         return cls(status, images, koji_task_id, koji_build_id)
 
@@ -221,7 +254,7 @@ class ComposeStatus:
             "status": self.status,
             "koji_task_id": self.koji_task_id,
             "image_statuses": [
-                {"status": status.value} for status in self.images
+                img.as_dict() for img in self.images
             ]
         }
 
