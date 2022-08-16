@@ -28,9 +28,8 @@ OSBUILD_IMAGE_SCHEMA = {
             "description": "Distribution"
         },
         {
-            "type": "array",
-            "description": "Image Types",
-            "minItems": 1
+            "type": "string",
+            "description": "Image Type",
         },
         {
             "type": "string",
@@ -120,10 +119,10 @@ OSBUILD_IMAGE_SCHEMA = {
 
 
 @koji.plugin.export
-def osbuildImage(name, version, distro, image_types, target, arches, opts=None, priority=None):
+def osbuildImage(name, version, distro, image_type, target, arches, opts=None, priority=None):
     """Create an image via osbuild"""
     context.session.assertPerm("image")
-    args = [name, version, distro, image_types, target, arches, opts]
+    args = [name, version, distro, image_type, target, arches, opts]
     task = {"channel": "image"}
 
     try:

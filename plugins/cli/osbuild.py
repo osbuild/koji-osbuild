@@ -69,7 +69,7 @@ def parse_args(argv):
                             "Maybe be used multiple times"))
     parser.add_option("--image-type", metavar="TYPE",
                       help='Request an image-type [default: guest-image]',
-                      type=str, action="append", default=[])
+                      type=str, default="guest-image")
     parser.add_option("--skip-tag", action="store_true",
                       help="Do not attempt to tag package")
     parser.add_option("--wait", action="store_true",
@@ -107,10 +107,7 @@ def handle_osbuild_image(options, session, argv):
     args = parse_args(argv)
 
     name, version, arch, target = args.name, args.version, args.arch, args.target
-    distro, image_types = args.distro, args.image_type
-
-    if not image_types:
-        image_types = ["guest-image"]
+    distro, image_type = args.distro, args.image_type
 
     opts = {}
 
@@ -152,12 +149,12 @@ def handle_osbuild_image(options, session, argv):
         print("distro:", distro)
         print("arches:", ", ".join(arch))
         print("target:", target)
-        print("image types ", str(image_types))
+        print("image type:", image_type)
         pprint(opts)
 
     kl.activate_session(session, options)
 
-    task_id = session.osbuildImage(name, version, distro, image_types, target, arch, opts=opts)
+    task_id = session.osbuildImage(name, version, distro, image_type, target, arch, opts=opts)
 
     if not options.quiet:
         print(f"Created task: {task_id}")
