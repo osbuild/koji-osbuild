@@ -46,7 +46,7 @@ class TestHubPlugin(PluginTest):
                 "release": "1.2.3",
                 "skip_tag": True}
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "target",
                 ["arches"],
                 opts]
@@ -66,7 +66,7 @@ class TestHubPlugin(PluginTest):
 
         opts = {}
         args = ["name", "version", "distro",
-                "image_type",  # image type not an array
+                ["image_type"],  # image type not an array
                 "target",
                 ["arches"],
                 opts]

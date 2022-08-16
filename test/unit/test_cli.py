@@ -92,7 +92,7 @@ class TestCliPlugin(PluginTest):
         ]
 
         expected_args = ["name", "version", "distro",
-                         ['guest-image'],  # the default image type
+                         'guest-image',  # the default image type
                          "target",
                          ['arch1']]
 
@@ -154,7 +154,7 @@ class TestCliPlugin(PluginTest):
             ]
 
             expected_args = ["name", "version", "distro",
-                             ['guest-image'],  # the default image type
+                             'guest-image',  # the default image type
                              "target",
                              ['arch1']]
 
@@ -207,7 +207,7 @@ class TestCliPlugin(PluginTest):
         ]
 
         expected_args = ["name", "version", "distro",
-                         ['guest-image'],  # the default image type
+                         'guest-image',  # the default image type
                          "target",
                          ['arch1']]
 
@@ -265,7 +265,7 @@ class TestCliPlugin(PluginTest):
         ]
 
         expected_args = ["name", "version", "distro",
-                         ['guest-image'],  # the default image type
+                         'guest-image',  # the default image type
                          "target",
                          ['arch1']]
 

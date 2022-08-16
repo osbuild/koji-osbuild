@@ -644,7 +644,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         handler = self.make_handler()
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 ["x86_64"],
                 {}]
@@ -667,7 +667,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64", "s390x"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos}]
@@ -713,7 +713,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         handler = self.make_handler(session=session)
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 ["x86_64"],
                 {}]
@@ -745,7 +745,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         composer.httpretty_register()
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 composer.architectures,
                 {}]
@@ -773,7 +773,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         composer.httpretty_register()
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 composer.architectures,
                 {}]
@@ -802,7 +802,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
 
         for it in ("qcow2", "ec2", "ec2-ha", "ec2-sap"):
             args = ["name", "version", "distro",
-                    [it],
+                    it,
                     "fedora-candidate",
                     composer.architectures,
                     {"skip_tag": True}]
@@ -822,7 +822,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         composer.httpretty_register()
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 composer.architectures,
                 {"skip_tag": True}]
@@ -889,7 +889,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         composer.oauth_activate(token_url)
 
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 ["x86_64"],
                 {}]
@@ -931,7 +931,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos}]
@@ -980,7 +980,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos}]
@@ -1058,7 +1058,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos}]
@@ -1081,7 +1081,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64", "s390x"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos,
@@ -1118,7 +1118,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         arches = ["x86_64", "s390x"]
         repos = ["http://1.repo", "https://2.repo"]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos,
@@ -1175,7 +1175,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
             {"baseurl": "https://third.repo/$arch"}
         ]
         args = ["name", "version", "distro",
-                ["image_type"],
+                "image_type",
                 "fedora-candidate",
                 arches,
                 {"repo": repos}]

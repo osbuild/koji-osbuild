@@ -642,7 +642,7 @@ class OSBuildImage(BaseTaskHandler):
         self.upload_json(status.as_dict(), "compose-status")
 
     # pylint: disable=arguments-differ
-    def handler(self, name, version, distro, image_types, target, arches, opts):
+    def handler(self, name, version, distro, image_type, target, arches, opts):
         """Main entry point for the task"""
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
@@ -676,9 +676,9 @@ class OSBuildImage(BaseTaskHandler):
         if not nvr.release:
             nvr.release = self.session.getNextRelease(nvr.as_dict())
 
-        # Arches and image types
-        image_types = [self.map_koji_api_image_type(i) for i in image_types]
-        ireqs = [ImageRequest(a, i, repos) for a in arches for i in image_types]
+        # Arches and image type
+        image_type = self.map_koji_api_image_type(image_type)
+        ireqs = [ImageRequest(a, image_type, repos) for a in arches]
 
         # OStree specific options
         ostree = opts.get("ostree")
@@ -757,15 +757,13 @@ def show_compose(cs):
 def compose_cmd(client: Client, args):
     nvr = NVR(args.name, args.version, args.release)
     images = []
-    formats = args.format or ["guest-image"]
-    formats = [
-        KOJIAPI_IMAGE_TYPES.get(f, f) for f in formats
-    ]
+    image_type = args.format
+    image_type = KOJIAPI_IMAGE_TYPES.get(image_type, image_type)
     repos = [Repository(url) for url in args.repo]
-    for fmt in formats:
-        for arch in args.arch:
-            ireq = ImageRequest(arch, fmt, repos)
-            images.append(ireq)
+
+    for arch in args.arch:
+        ireq = ImageRequest(arch, image_type, repos)
+        images.append(ireq)
 
     kojidata = ComposeRequest.Koji(args.koji, 0, nvr)
     request = ComposeRequest(args.distro, images, kojidata)
@@ -820,7 +818,7 @@ def main():
     subpar.add_argument("--repo", metavar="REPO", help='The repository to use',
                         type=str, action="append", default=[])
     subpar.add_argument("--format", metavar="FORMAT", help='Request the image format [guest-image]',
-                        action="append", type=str, default=[])
+                        type=str, default="guest-image")
     subpar.add_argument("--koji", metavar="URL", help='The koji url',
                         default=DEFAULT_KOJIHUB_URL)
     subpar.set_defaults(cmd='compose')
