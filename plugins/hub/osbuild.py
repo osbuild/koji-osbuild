@@ -28,8 +28,21 @@ OSBUILD_IMAGE_SCHEMA = {
             "description": "Distribution"
         },
         {
-            "type": "string",
-            "description": "Image Type",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "description": "Image Type"
+                },
+                {
+                    "type": "array",
+                    "description": "Image Types (this option is deprecated)",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
         },
         {
             "type": "string",
@@ -223,6 +236,12 @@ def osbuildImage(name, version, distro, image_type, target, arches, opts=None, p
         jsonschema.validate(args, OSBUILD_IMAGE_SCHEMA)
     except jsonschema.exceptions.ValidationError as err:
         raise koji.ParameterError(str(err)) from None
+
+    # Support array for backwards compatibility
+    # This check must be done after the schema validation
+    if isinstance(image_type, list):
+        image_type = image_type[0]
+        args = [name, version, distro, image_type, target, arches, opts]
 
     if priority and priority < 0 and not context.session.hasPerm('admin'):
         raise koji.ActionNotAllowed('only admins may create high-priority tasks')
