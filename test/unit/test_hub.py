@@ -60,13 +60,41 @@ class TestHubPlugin(PluginTest):
 
         self.plugin.osbuildImage(*args, {})
 
+    def test_image_types_array(self):
+        context = self.mock_koji_context()
+
+        opts = {"repo": ["repo1", "repo2"],
+                "release": "1.2.3",
+                "skip_tag": True}
+        make_task_args = [
+            "name", "version", "distro",
+            "image_type",
+            "target",
+            ["arches"],
+            opts
+        ]
+        args = ["name", "version", "distro",
+                ["image_type"],
+                "target",
+                ["arches"],
+                opts]
+
+        task = {"channel": "image"}
+
+        kojihub = self.mock_kojihub(make_task_args, task)
+
+        setattr(self.plugin, "context", context)
+        setattr(self.plugin, "kojihub", kojihub)
+
+        self.plugin.osbuildImage(*args, {})
+
     def test_input_validation(self):
         context = self.mock_koji_context()
         setattr(self.plugin, "context", context)
 
         opts = {}
         args = ["name", "version", "distro",
-                ["image_type"],  # image type not an array
+                ["image_type", "image_type2"],  # only a single image type is allowed
                 "target",
                 ["arches"],
                 opts]
