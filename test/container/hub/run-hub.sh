@@ -3,7 +3,7 @@ set -eux
 
 if ls /share/rpms/*.rpm 1> /dev/null 2>&1; then
    echo "Using RPMs"
-   rpm -i /share/rpms/koji-osbuild-?-1.*.rpm \
+   rpm -i /share/rpms/koji-osbuild-[[:digit:]]*-1.*.rpm \
           /share/rpms/koji-osbuild-hub-*.rpm
 else
   echo "Using local plugin"
