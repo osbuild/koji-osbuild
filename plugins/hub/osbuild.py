@@ -172,7 +172,7 @@ OSBUILD_IMAGE_SCHEMA = {
         "AzureUploadOptions": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["tenant_id", "subscription_id", "resource_group", "location"],
+            "required": ["tenant_id", "subscription_id", "resource_group"],
             "properties": {
                 "tenant_id": {
                     "type": "string"
