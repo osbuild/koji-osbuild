@@ -188,7 +188,7 @@ class ComposeRequest:
 
 
 class ComposeStatusError:
-    def __init__(self, error_id: int, reason: str, details: Optional[Dict]):
+    def __init__(self, error_id: int, reason: str, details: Optional[Dict]=None):
         self.error_id = error_id
         self.reason = reason
         self.details = details
