@@ -194,7 +194,7 @@ OSBUILD_IMAGE_SCHEMA = {
         "GCPUploadOptions": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["region", "bucket"],
+            "required": ["region"],
             "properties": {
                 "region": {
                     "type": "string"
