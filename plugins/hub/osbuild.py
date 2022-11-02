@@ -112,7 +112,9 @@ OSBUILD_IMAGE_SCHEMA = {
                     "$ref": "#/definitions/ostree"
                 },
                 "upload_options": {
-                    "oneOf": [
+                    # this should be really 'oneOf', but the minimal required
+                    # properties in AWSEC2 and GCP options overlap.
+                    "anyOf": [
                         {"$ref": "#/definitions/AWSEC2UploadOptions"},
                         {"$ref": "#/definitions/AWSS3UploadOptions"},
                         {"$ref": "#/definitions/GCPUploadOptions"},
