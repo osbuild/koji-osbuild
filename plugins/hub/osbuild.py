@@ -1,5 +1,6 @@
 """Koji osbuild integration for Koji Hub"""
 import sys
+import logging
 import jsonschema
 
 import koji
@@ -7,6 +8,9 @@ from koji.context import context
 
 sys.path.insert(0, "/usr/share/koji-hub/")
 import kojihub  # pylint: disable=import-error, wrong-import-position
+
+
+logger = logging.getLogger('koji.plugin.osbuild')
 
 
 OSBUILD_IMAGE_SCHEMA = {
@@ -232,6 +236,8 @@ def osbuildImage(name, version, distro, image_type, target, arches, opts=None, p
     args = [name, version, distro, image_type, target, arches, opts]
     task = {"channel": "image"}
 
+    logger.info("Create osbuildImage task")
+
     try:
         jsonschema.validate(args, OSBUILD_IMAGE_SCHEMA)
     except jsonschema.exceptions.ValidationError as err:
@@ -246,4 +252,10 @@ def osbuildImage(name, version, distro, image_type, target, arches, opts=None, p
     if priority and priority < 0 and not context.session.hasPerm('admin'):
         raise koji.ActionNotAllowed('only admins may create high-priority tasks')
 
-    return kojihub.make_task('osbuildImage', args, **task)
+    # If task_id is returned from Koji Hub we assume
+    # that the task has been added to the database
+    task_id = kojihub.make_task('osbuildImage', args, **task)
+    if task_id:
+        logger.info("osbuildImage task %i added to database", task_id)
+
+    return task_id
