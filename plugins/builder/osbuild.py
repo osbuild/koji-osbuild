@@ -20,6 +20,7 @@ import io
 import json
 import sys
 import time
+import logging
 import urllib.parse
 
 from string import Template
@@ -508,6 +509,7 @@ class OSBuildImage(BaseTaskHandler):
         self.composer_url = cfg["composer"]["server"]
         self.koji_url = cfg["koji"]["server"]
         self.client = Client(self.composer_url)
+        self.logger = logging.getLogger('koji.plugin.osbuild')
 
         self.logger.debug("composer: %s", self.composer_url)
         self.logger.debug("koji: %s", self.composer_url)
@@ -650,7 +652,7 @@ class OSBuildImage(BaseTaskHandler):
         self.logger.debug("Building image via osbuild %s, %s, %s, %s",
                           name, str(arches), str(target), str(opts))
 
-        self.logger.debug("Task id: %s", str(self.id))
+        self.logger.info("Task id: %s", str(self.id))
 
         target_info = self.session.getBuildTarget(target, strict=True)
         if not target_info:
