@@ -717,7 +717,7 @@ class OSBuildImage(BaseTaskHandler):
         cid = client.compose_create(request)
         self.logger.info("Compose id: %s", cid)
 
-        self.logger.debug("Waiting for comose to finish")
+        self.logger.debug("Waiting for compose to finish")
         status = client.wait_for_compose(cid, callback=self.on_status_update)
 
         self.logger.debug("Compose finished: %s", str(status.as_dict()))
