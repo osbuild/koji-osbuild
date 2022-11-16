@@ -13,7 +13,7 @@ jobs:
     name: "🐍 Lint"
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:latest
+      image: registry.fedoraproject.org/fedora:36
     steps:
 
     - name: Install test dependencies
