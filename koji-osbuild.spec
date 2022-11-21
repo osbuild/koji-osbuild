@@ -5,7 +5,7 @@
 %global         forgeurl https://github.com/osbuild/koji-osbuild
 
 Name:           koji-osbuild
-Version:        11
+Version:        12
 Release:        1%{?dist}
 Summary:        Koji integration for osbuild composer
 
