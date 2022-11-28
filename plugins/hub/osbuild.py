@@ -69,6 +69,7 @@ OSBUILD_IMAGE_SCHEMA = {
             "title": "Repository options",
             "type": "object",
             "additionalProperties": False,
+            "required": ["baseurl"],
             "properties": {
                 "baseurl": {
                     "type": "string"
