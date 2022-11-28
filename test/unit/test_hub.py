@@ -13,7 +13,7 @@ from plugintest import PluginTest
 class TestHubPlugin(PluginTest):
 
     @staticmethod
-    def mock_koji_context(*, admin=False):
+    def mock_koji_context(*, times=1, admin=False):
         session = flexmock()
         session.should_receive("hasPerm") \
                .with_args("admin") \
@@ -21,7 +21,7 @@ class TestHubPlugin(PluginTest):
 
         session.should_receive("assertPerm") \
                .with_args("image") \
-               .once()
+               .times(times)
 
         context = flexmock(session=session)
         return context
@@ -42,43 +42,20 @@ class TestHubPlugin(PluginTest):
     def test_basic(self):
         context = self.mock_koji_context()
 
-        opts = {"repo": ["repo1", "repo2"],
-                "release": "1.2.3",
-                "skip_tag": True}
-        args = ["name", "version", "distro",
-                "image_type",
-                "target",
-                ["arches"],
-                opts]
-
-        task = {"channel": "image"}
-
-        kojihub = self.mock_kojihub(args, task)
-
-        setattr(self.plugin, "context", context)
-        setattr(self.plugin, "kojihub", kojihub)
-
-        self.plugin.osbuildImage(*args, {})
-
-    def test_image_types_array(self):
-        context = self.mock_koji_context()
-
-        opts = {"repo": ["repo1", "repo2"],
-                "release": "1.2.3",
-                "skip_tag": True}
-        make_task_args = [
-            "name", "version", "distro",
+        opts = {
+            "repo": ["repo1", "repo2"],
+            "release": "1.2.3",
+            "skip_tag": True
+        }
+        args = [
+            "name",
+            "version",
+            "distro",
             "image_type",
             "target",
-            ["arches"],
-            opts
+            ["arches"]
         ]
-        args = ["name", "version", "distro",
-                ["image_type"],
-                "target",
-                ["arches"],
-                opts]
-
+        make_task_args = args + [opts]
         task = {"channel": "image"}
 
         kojihub = self.mock_kojihub(make_task_args, task)
@@ -86,18 +63,61 @@ class TestHubPlugin(PluginTest):
         setattr(self.plugin, "context", context)
         setattr(self.plugin, "kojihub", kojihub)
 
-        self.plugin.osbuildImage(*args, {})
+        self.plugin.osbuildImage(*args, opts)
+
+    def test_image_types_array(self):
+        context = self.mock_koji_context()
+
+        opts = {
+            "repo": ["repo1", "repo2"],
+            "release": "1.2.3",
+            "skip_tag": True
+        }
+        args = [
+            "name",
+            "version",
+            "distro",
+            ["image_type"],
+            "target",
+            ["arches"]
+        ]
+        make_task_args = [
+            "name",
+            "version",
+            "distro",
+            "image_type",
+            "target",
+            ["arches"]
+        ] + [opts]
+        task = {"channel": "image"}
+
+        kojihub = self.mock_kojihub(make_task_args, task)
+
+        setattr(self.plugin, "context", context)
+        setattr(self.plugin, "kojihub", kojihub)
+
+        self.plugin.osbuildImage(*args, opts)
 
     def test_input_validation(self):
-        context = self.mock_koji_context()
+        test_cases = [
+            # only a single image type is allowed
+            {
+                "args": [
+                    "name",
+                    "version",
+                    "distro",
+                    ["image_type", "image_type2"],
+                    "target",
+                    ["arches"]
+                ],
+                "opts": {}
+            }
+        ]
+
+        context = self.mock_koji_context(times=len(test_cases))
         setattr(self.plugin, "context", context)
 
-        opts = {}
-        args = ["name", "version", "distro",
-                ["image_type", "image_type2"],  # only a single image type is allowed
-                "target",
-                ["arches"],
-                opts]
-
-        with self.assertRaises(koji.ParameterError):
-            self.plugin.osbuildImage(*args, opts)
+        for idx, test_case in enumerate(test_cases):
+            with self.subTest(idx=idx):
+                with self.assertRaises(koji.ParameterError):
+                    self.plugin.osbuildImage(*test_case["args"], test_case["opts"])
