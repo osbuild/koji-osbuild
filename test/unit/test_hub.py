@@ -111,6 +111,24 @@ class TestHubPlugin(PluginTest):
                     ["arches"]
                 ],
                 "opts": {}
+            },
+            # repo without `baseurl` is not allowed
+            {
+                "args": [
+                    "name",
+                    "version",
+                    "distro",
+                    "image_type",
+                    "target",
+                    ["arches"]
+                ],
+                "opts": {
+                    "repo": [
+                        {
+                            "package_sets": ["set1", "set2"]
+                        }
+                    ]
+                }
             }
         ]
 
