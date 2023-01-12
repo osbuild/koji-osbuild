@@ -11,7 +11,7 @@ Summary:        Koji integration for osbuild composer
 
 %forgemeta
 
-License:        ASL 2.0
+License:        Apache-2.0
 URL:            %{forgeurl}
 Source0:        %{forgesource}
 
