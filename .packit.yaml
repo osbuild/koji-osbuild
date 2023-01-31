@@ -22,12 +22,18 @@ jobs:
   metadata:
     dist_git_branches:
       - fedora-all
+      - epel-8
+      - epel-9
 - job: koji_build
   trigger: commit
   metadata:
     dist_git_branches:
       - fedora-all
+      - epel-8
+      - epel-9
 - job: bodhi_update
   trigger: commit
   dist_git_branches:
     - fedora-stable # rawhide updates are created automatically
+    - epel-8
+    - epel-9
