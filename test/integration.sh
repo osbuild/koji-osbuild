@@ -5,6 +5,22 @@ function greenprint {
     echo -e "\033[1;32m${1}\033[0m"
 }
 
+function cleanup {
+    greenprint "Stopping koji builder"
+    sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests
+
+    greenprint "Stopping containers"
+    sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop
+
+    greenprint "Stopping mock OpenID server"
+    sudo /usr/libexec/koji-osbuild-tests/run-openid.sh stop
+
+    greenprint "Removing generated CA cert"
+    sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
+    sudo update-ca-trust
+}
+trap cleanup EXIT
+
 # Get OS data.
 source /etc/os-release
 
@@ -68,15 +84,5 @@ AWS_ACCESS_KEY_ID="${V2_AWS_ACCESS_KEY_ID:-}" \
 AWS_SECRET_ACCESS_KEY="${V2_AWS_SECRET_ACCESS_KEY:-}" \
 python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
 
-greenprint "Stopping koji builder"
-sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests
-
-greenprint "Stopping containers"
-sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop
-
-greenprint "Stopping mock OpenID server"
-sudo /usr/libexec/koji-osbuild-tests/run-openid.sh stop
-
-greenprint "Removing generated CA cert"
-sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
-sudo update-ca-trust
+# cleanup() will be triggered by EXIT
+#
