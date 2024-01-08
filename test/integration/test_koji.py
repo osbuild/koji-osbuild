@@ -32,7 +32,7 @@ def koji_command_cwd(*args, cwd=None, _input=None, _globals=None, **kwargs):
     args = list(args) + [f'--{k}={v}' for k, v in kwargs.items()]
     if _globals:
         args = [f'--{k}={v}' for k, v in _globals.items()] + args
-    cmd = ["koji"] + args
+    cmd = ["koji"] + ["--debug"] + args
     logger.info("Running %s", str(cmd))
     return subprocess.run(cmd,
                           cwd=cwd,
