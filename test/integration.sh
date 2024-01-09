@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euxo pipefail
 
 function greenprint {
     echo -e "\033[1;32m${1}\033[0m"
@@ -38,6 +37,10 @@ sudo dnf -y \
      --downloaddir=/tmp/osbuild-composer-koji-test/rpms \
      download \
      "koji-osbuild*"
+
+# Trigger cleanup to refresh environment from possible failed leftovers
+cleanup
+set -euxo pipefail
 
 greenprint "Creating composer SSL certificates"
 sudo /usr/libexec/koji-osbuild-tests/make-certs.sh /usr/share/koji-osbuild-tests
