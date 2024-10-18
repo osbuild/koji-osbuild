@@ -369,13 +369,13 @@ class OAuth2(requests.auth.AuthBase):
 
 
 class Client:
-    def __init__(self, url):
+    def __init__(self, url, retries_total=15, retries_backoff_factor=0.3):
         self.server = url
         self.url = urllib.parse.urljoin(url, API_BASE)
         self.http = requests.Session()
 
-        retries = Retry(total=5,
-                        backoff_factor=0.1,
+        retries = Retry(total=retries_total,
+                        backoff_factor=retries_backoff_factor,
                         status_forcelist=[500, 502, 503, 504],
                         raise_on_status=False
                         )
@@ -508,7 +508,7 @@ class OSBuildImage(BaseTaskHandler):
 
         self.composer_url = cfg["composer"]["server"]
         self.koji_url = cfg["koji"]["server"]
-        self.client = Client(self.composer_url)
+        self.client = Client(self.composer_url, 2, 0.05)
         self.logger = logging.getLogger('koji.plugin.osbuild')
 
         self.logger.debug("composer: %s", self.composer_url)
