@@ -146,7 +146,6 @@ Requires:       openssl
 Requires:       osbuild-composer >= 58
 Requires:       osbuild-composer-tests
 Requires:       podman
-Requires:       podman-plugins
 Requires:       python3-boto3
 
 %description tests
