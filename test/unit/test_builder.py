@@ -595,7 +595,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 ["image_type"],
                 "target",
                 ["arches"],
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         with self.assertRaises(koji.BuildError):
             handler.handler(*args)
@@ -631,7 +631,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 ["image_type"],
                 "fedora-candidate",
                 ["s390x"],
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         with self.assertRaises(koji.BuildError) as err:
             handler.handler(*args)
@@ -647,7 +647,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 ["x86_64"],
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["s390x"])
@@ -716,7 +716,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 ["x86_64"],
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=["x86_64"])
@@ -748,7 +748,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 composer.architectures,
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         composer.routes["logs"] = {
             "status": 500
@@ -776,7 +776,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 composer.architectures,
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         composer.routes["manifests"] = {
             "status": 500
@@ -805,7 +805,10 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                     it,
                     "fedora-candidate",
                     composer.architectures,
-                    {"skip_tag": True}]
+                    {
+                        "repo": ["https://1.repo"],
+                        "skip_tag": True
+                    }]
 
             res = handler.handler(*args)
             assert res, "invalid compose result"
@@ -825,7 +828,10 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 composer.architectures,
-                {"skip_tag": True}]
+                {
+                    "repo": ["https://1.repo"],
+                    "skip_tag": True
+                }]
 
         res = handler.handler(*args)
         assert res, "invalid compose result"
@@ -892,7 +898,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 ["x86_64"],
-                {}]
+                {"repo": ["https://1.repo"]}]
 
         with self.assertRaises(koji.GenericError):
             handler.handler(*args)
@@ -1227,7 +1233,10 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
                 "image_type",
                 "fedora-candidate",
                 arches,
-                {"upload_options": upload_options}]
+                {
+                    "repo": ["https://1.repo"],
+                    "upload_options": upload_options
+                }]
 
         url = self.plugin.DEFAULT_COMPOSER_URL
         composer = MockComposer(url, architectures=arches)
