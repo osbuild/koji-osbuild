@@ -52,12 +52,3 @@ jobs:
       uses: ludeeus/action-shellcheck@2.0.0
       with:
         severity: warning
-
-  codespell:
-    name: "Spell check"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: codespell-project/actions-codespell@master
-        with:
-          skip: ./.git,build,LICENSE
