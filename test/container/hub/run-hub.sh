@@ -51,7 +51,7 @@ psql_cmd() {
 
 # initialize the database if it isn't initialized already
 if ! psql_cmd -c "select * from users" &>/dev/null; then
-  psql_cmd -f /usr/share/doc/koji/docs/schema.sql >/dev/null
+  psql_cmd -f /usr/share/koji/schema.sql >/dev/null
 fi
 
 # ensure /mnt/koji is owned by apache
