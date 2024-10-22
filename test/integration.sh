@@ -56,6 +56,11 @@ sudo systemctl start osbuild-composer-api.socket
 # start a remote worker
 sudo systemctl start osbuild-remote-worker@localhost:8700.service
 
+greenprint "Watching worker logs"
+WORKER_UNIT=$(sudo systemctl list-units | grep -o -E "osbuild.*worker.*\.service")
+sudo journalctl -af -n 1 -u "${WORKER_UNIT}" &
+WORKER_JOURNAL_PID=$!
+
 greenprint "Starting koji builder"
 sudo /usr/libexec/koji-osbuild-tests/run-builder.sh start /usr/share/koji-osbuild-tests
 
@@ -67,6 +72,9 @@ greenprint "Running integration tests"
 AWS_ACCESS_KEY_ID="${V2_AWS_ACCESS_KEY_ID:-}" \
 AWS_SECRET_ACCESS_KEY="${V2_AWS_SECRET_ACCESS_KEY:-}" \
 python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
+
+greenprint "Stop watching worker logs"
+sudo pkill -P ${WORKER_JOURNAL_PID}
 
 greenprint "Stopping koji builder"
 sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests
