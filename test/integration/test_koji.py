@@ -51,10 +51,8 @@ class SutInfo:
             {"url": "http://download.fedoraproject.org/pub/fedora/linux/releases/$release/Everything/$arch/os"}
         ],
         "rhel": [
-            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/$arch/os/",
-            "package_sets": "blueprint; build; packages"},
-            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/$arch/os/",
-            "package_sets": "blueprint; build; packages"},
+            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/$arch/os/"},
+            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/$arch/os/"},
         ]
     }
 
