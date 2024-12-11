@@ -2,7 +2,7 @@
 
 specfile_path: koji-osbuild.spec
 
-synced_files:
+files_to_sync:
     - koji-osbuild.spec
     - .packit.yaml
 
