@@ -112,12 +112,13 @@ class TestIntegration(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.koji_global_args = dict(
-            server="http://localhost:8080/kojihub",
-            topurl="http://localhost:8080/kojifiles",
-            user="kojiadmin",
-            password="kojipass",
-            authtype="password")
+        self.koji_global_args = {
+            "server": "http://localhost:8080/kojihub",
+            "topurl": "http://localhost:8080/kojifiles",
+            "user": "kojiadmin",
+            "password": "kojipass",
+            "authtype": "password"
+        }
         self.koji = functools.partial(koji_command,
                                       "osbuild-image",
                                       _globals=self.koji_global_args)

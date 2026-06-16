@@ -74,7 +74,7 @@ class MockProxy:
 
     def handle(self, request, _uri, response_headers):
         self.call_count += 1
-        r = requests.request(request.method, request.path, headers=request.headers, data=request.body)
+        r = requests.request(request.method, request.path, headers=request.headers, data=request.body, timeout=10)
         response_headers.update(r.headers)
         return [r.status_code, r.headers, r.text]
 
