@@ -548,7 +548,7 @@ class TestBuilderPlugin(PluginTest): # pylint: disable=too-many-public-methods
         self.assertEqual(handler.composer_url, composer_url)
         self.assertEqual(handler.koji_url, koji_url)
         session = handler.client.http
-        self.assertEqual(session.cert, certs)
+        self.assertEqual(session.cert, tuple(certs))
         self.assertEqual(session.verify, ssl_verify)
 
         # check we can handle a path in ssl_verify
