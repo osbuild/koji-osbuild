@@ -132,10 +132,9 @@ class TestHubPlugin(PluginTest):
             }
         ]
 
-        context = self.mock_koji_context(times=len(test_cases))
-        setattr(self.plugin, "context", context)
-
         for idx, test_case in enumerate(test_cases):
             with self.subTest(idx=idx):
+                context = self.mock_koji_context(times=1)
+                setattr(self.plugin, "context", context)
                 with self.assertRaises(koji.ParameterError):
                     self.plugin.osbuildImage(*test_case["args"], test_case["opts"])
