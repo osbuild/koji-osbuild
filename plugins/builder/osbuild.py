@@ -392,7 +392,7 @@ class Client:
             msg = f"Invalid cert string '{string}' ({count} certs)"
             raise ValueError(msg)
 
-        return certs
+        return tuple(certs)
 
     def oauth_init(self, client_id: str, secret: str, token_url: str):
         oauth = OAuth2(client_id, secret, token_url)
