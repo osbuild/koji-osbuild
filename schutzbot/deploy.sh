@@ -30,7 +30,7 @@ ARCH=$(uname -m)
 # Koji is only available in EPEL for RHEL.
 if [[ $ID == rhel ]] && ! rpm -q epel-release; then
     curl -Ls --retry 5 --output /tmp/epel.rpm \
-        https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%.*}.noarch.rpm"
     sudo rpm -Uvh /tmp/epel.rpm
 fi
 
