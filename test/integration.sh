@@ -17,10 +17,8 @@ fi
 
 greenprint "Fetching RPMs"
 sudo mkdir -p /tmp/osbuild-composer-koji-test/rpms
-sudo dnf -y \
-     --downloadonly \
-     --downloaddir=/tmp/osbuild-composer-koji-test/rpms \
-     download \
+sudo dnf -y download \
+     --destdir=/tmp/osbuild-composer-koji-test/rpms \
      "koji-osbuild*"
 
 greenprint "Creating composer SSL certificates"
