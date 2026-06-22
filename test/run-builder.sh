@@ -69,6 +69,16 @@ CONTAINER_FLAGS=-d
 
 if [ $1 == "start" ]; then
   builder_start
+
+  # Verify the container is still running after a brief grace period.
+  # Catches immediate crashes (e.g. SSL/auth failures in kojid) before
+  # the integration tests start waiting for tasks that will never complete.
+  sleep 5
+  if ! ${CONTAINER_RUNTIME} inspect --format '{{.State.Running}}' org.osbuild.koji.builder 2>/dev/null | grep -q true; then
+    echo "ERROR: builder container exited unexpectedly:"
+    ${CONTAINER_RUNTIME} logs org.osbuild.koji.builder
+    exit 1
+  fi
 elif [ $1 == "fg" ]; then
   CONTAINER_FLAGS="-it --rm"
   builder_start
