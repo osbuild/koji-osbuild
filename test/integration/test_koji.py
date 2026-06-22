@@ -60,8 +60,8 @@ class SutInfo:
             {"url": "http://download.fedoraproject.org/pub/fedora/linux/releases/$release/Everything/$arch/os"}
         ],
         "rhel": [
-            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/BaseOS/$arch/os/"},
-            {"url": "http://download.devel.redhat.com/released/RHEL-8/$release/AppStream/$arch/os/"},
+            {"url": "http://download.devel.redhat.com/released/RHEL-$major/$release/BaseOS/$arch/os/"},
+            {"url": "http://download.devel.redhat.com/released/RHEL-$major/$release/AppStream/$arch/os/"},
         ]
     }
 
@@ -108,6 +108,7 @@ class SutInfo:
             repo_copy = dict(repo)
             tpl = string.Template(repo_copy["url"])
             url = tpl.safe_substitute({
+                "major": self.os_version_major,
                 "release": release,
                 "arch": self.os_arch,
             })
