@@ -54,6 +54,25 @@ sudo systemctl start osbuild-composer-api.socket
 # start a remote worker
 sudo systemctl start osbuild-remote-worker@localhost:8700.service
 
+function cleanup {
+    greenprint "Stop watching worker logs"
+    sudo pkill -P ${WORKER_JOURNAL_PID:-} 2>/dev/null || true
+
+    greenprint "Stopping koji builder"
+    sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests || true
+
+    greenprint "Stopping containers"
+    sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop || true
+
+    greenprint "Stopping mock OpenID server"
+    sudo /usr/libexec/koji-osbuild-tests/run-openid.sh stop || true
+
+    greenprint "Removing generated CA cert"
+    sudo rm -f /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
+    sudo update-ca-trust || true
+}
+trap cleanup EXIT
+
 greenprint "Watching worker logs"
 WORKER_UNIT=$(sudo systemctl list-units | grep -o -E "osbuild.*worker.*\.service")
 sudo journalctl -af -n 1 -u "${WORKER_UNIT}" &
@@ -70,19 +89,3 @@ greenprint "Running integration tests"
 AWS_ACCESS_KEY_ID="${V2_AWS_ACCESS_KEY_ID:-}" \
 AWS_SECRET_ACCESS_KEY="${V2_AWS_SECRET_ACCESS_KEY:-}" \
 python3 -m unittest discover -v /usr/libexec/koji-osbuild-tests/integration/
-
-greenprint "Stop watching worker logs"
-sudo pkill -P ${WORKER_JOURNAL_PID}
-
-greenprint "Stopping koji builder"
-sudo /usr/libexec/koji-osbuild-tests/run-builder.sh stop /usr/share/koji-osbuild-tests
-
-greenprint "Stopping containers"
-sudo /usr/libexec/koji-osbuild-tests/run-koji-container.sh stop
-
-greenprint "Stopping mock OpenID server"
-sudo /usr/libexec/koji-osbuild-tests/run-openid.sh stop
-
-greenprint "Removing generated CA cert"
-sudo rm /etc/pki/ca-trust/source/anchors/osbuild-ca-crt.pem
-sudo update-ca-trust
