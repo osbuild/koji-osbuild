@@ -86,5 +86,15 @@ gpgcheck=0
 priority=5
 EOF
 
+# On RHEL 9, Podman falls back to the legacy 'cni' network backend when it
+# finds pre-existing container images in storage (e.g. embedded in the runner
+# image), but the CNI plugin packages are not installed. Force 'netavark'.
+# See https://github.com/osbuild/image-builder/pull/1365
+if [[ "$ID" == rhel ]] && [[ "${VERSION_ID%.*}" == "9" ]]; then
+  sudo mkdir -p /etc/containers/containers.conf.d
+  printf '[network]\nnetwork_backend = "netavark"\n' | \
+    sudo tee /etc/containers/containers.conf.d/netavark.conf > /dev/null
+fi
+
 # Installing koji-osbuild-tests package
 retry sudo dnf -y install koji-osbuild-tests
