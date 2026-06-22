@@ -1,8 +1,10 @@
 ARG version=latest
 
-FROM registry.access.redhat.com/ubi8/ubi:$version
+FROM registry.access.redhat.com/ubi9/ubi:$version
 
 COPY container/brew.repo /etc/yum.repos.d/
+
+RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 
 RUN dnf -y upgrade \
     && dnf -y \

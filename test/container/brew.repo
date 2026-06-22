@@ -1,10 +1,11 @@
 [brew]
 name=brew
-# This is the repository corresponding to the "brew-rhel-8-stage" tag, which contains
+# This is the repository corresponding to the "brew-rhel-9-stage" tag, which contains
 # the release engineering builds for the brew staging deployment. The 'latest' link
 # is used instead of the repo id, because repos get re-created on demand.
 # Based on information by Tomas Kopecek (thanks!)
-baseurl=http://download.eng.bos.redhat.com/brewroot/repos/brew-rhel-8-stage/latest/x86_64/
+baseurl=https://download.devel.redhat.com/brewroot/repos/brew-rhel-9-stage/latest/x86_64/
 enabled=1
 gpgcheck=0
+sslverify=0
 metadata_expire=60
