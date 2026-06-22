@@ -1,6 +1,6 @@
 ARG version=latest
 
-FROM registry.access.redhat.com/ubi8/ubi:$version
+FROM registry.access.redhat.com/ubi9/ubi:$version
 
 COPY container/brew.repo /etc/yum.repos.d/
 
