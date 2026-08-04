@@ -11,3 +11,6 @@ disable=missing-module-docstring,
     too-few-public-methods,
     too-many-arguments,
     too-many-positional-arguments
+
+[TYPECHECK]
+generated-members=context.session
